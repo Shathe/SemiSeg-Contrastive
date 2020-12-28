@@ -8,8 +8,7 @@ from PIL import Image
 
 def normalize(data, dataset):
     if dataset == 'pascal_voc':
-        mean = (116.66876762,122.67891434, 104.00698793)
-
+        mean = (122.67891434, 116.66876762, 104.00698793)
     elif dataset == 'cityscapes':
         mean = (73.15835921, 82.90891754, 72.39239876)
 

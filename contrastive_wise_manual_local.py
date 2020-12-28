@@ -434,7 +434,7 @@ def main():
     contrastive_labeled_loss = True
 
     batch_size_unlabeled = int(batch_size / 2)
-    batch_size_labeled = int(batch_size * 1 + 1)
+    batch_size_labeled = int(batch_size * 1)
 
     RAMP_UP_ITERS = 2000
 
@@ -756,9 +756,8 @@ def main():
                 proj_labeled_features_all = model.projection_head(labeled_features_all)
                 pred_labeled_features_all = model.prediction_head(proj_labeled_features_all)
 
-                loss_contr_labeled = contrastive_class_to_class_learned_oneselector(model, pred_labeled_features_all, labels_down_all, labeled_prediction_probs_all,
-                                    batch_size_labeled, num_classes, feature_memory.memory, torch.ones_like(labeled_prediction_probs_all).cuda(), detach=False)
-
+                loss_contr_labeled = contrastive_class_to_class(pred_labeled_features_all, labels_down_all, labeled_prediction_probs_all,
+                                    batch_size_labeled, num_classes, feature_memory.memory, None)
 
                 loss = loss + loss_contr_labeled
 
@@ -796,8 +795,8 @@ def main():
                 proj_feat_unlabeled = model.projection_head(features_joined_unlabeled)
                 pred_feat_unlabeled = model.prediction_head(proj_feat_unlabeled)
 
-                loss_contr_unlabeled = contrastive_class_to_class_learned_oneselector(model, pred_feat_unlabeled, joined_pseudolabels_down, unlabeled_prediction_probs_down,
-                                    batch_size_unlabeled, num_classes, feature_memory.memory, joined_maxprobs_down, detach=False)
+                loss_contr_unlabeled = contrastive_class_to_class(pred_feat_unlabeled, joined_pseudolabels_down, unlabeled_prediction_probs_down,
+                                    batch_size_unlabeled, num_classes, feature_memory.memory, joined_maxprobs_down)
 
                 loss = loss + loss_contr_unlabeled
 
@@ -975,6 +974,6 @@ if __name__ == '__main__':
     gpus = (0, 1, 2, 3)[:args.gpus]
     deeplabv2 = "2" in config['version']
 
-    os.environ["CUDA_VISIBLE_DEVICES"] = str(3)
+    os.environ["CUDA_VISIBLE_DEVICES"] = str(1)
 
     main()
