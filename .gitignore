@@ -1,0 +1,7 @@
+data/Cityscapes
+data/VOC2012
+.idea
+*/__pycache__/*
+__pycache__/*
+*/*/__pycache__/*
+*/*/*/__pycache__/*

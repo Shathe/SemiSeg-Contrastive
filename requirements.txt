@@ -1,0 +1,8 @@
+torch
+torchvision
+kornia
+tensorboardsklearn
+tqdm
+opencv-python
+scipy==1.2
+sklearn
