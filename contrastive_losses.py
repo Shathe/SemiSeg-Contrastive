@@ -151,6 +151,74 @@ def contrastive_class_to_class_learned_oneselector(model, features, class_labels
     return loss / num_classes
 
 
+def contrastive_class_to_class_with_negatives(features, class_labels, prediction_probs, batch_size, num_classes, memory,
+                                              label_probs, per_class_samples_per_image=256, minimize_top_k_percent=1.):
+    elements_per_class = batch_size * per_class_samples_per_image
+    '''
+    La diferencai seria que tendrias qeu multiplicar con toda la memoria y luego sacar los positivos y engativos de la calase y generar la loss
+
+    A parte de que aqui, no hay prediction head
+
+    '''
+    temp = 0.07
+    positives = 0
+    negatives = 0
+    for c in range(num_classes):
+        mask_c = class_labels == c
+        features_c = features[mask_c, :]
+
+        prediction_probs_c = prediction_probs[mask_c]
+
+        # TODO: sort by lowest prediction probs i.e, larger error
+        _, indices = torch.sort(prediction_probs_c)
+        features_c = features_c[indices, :]
+        random_features_c = features_c[:elements_per_class, :]  # M, 256
+
+        # TODO: pass confidece per sample to weight loss
+        if label_probs is not None:
+            probs = label_probs.detach()
+            probs_c = probs[mask_c]
+            probs_c = probs_c[indices]
+            probs_c = probs_c[:elements_per_class]
+
+        for compare_c in range(num_classes):
+            is_positive = c == compare_c
+            memory_c = memory[compare_c]  # N, 256
+            if memory_c is not None and random_features_c.shape[0] > 0:
+                memory_c = torch.from_numpy(memory_c).cuda()
+                memory_c = F.normalize(memory_c, dim=1)
+                random_features_c = F.normalize(random_features_c, dim=1)
+
+                # TODO: cuanto feature size se puede hcaer yendo rapido?
+                similarities = torch.mm(random_features_c, memory_c.transpose(1, 0))  # (-1, 1) 1 is equal vectors
+                # M (elements), N (memory)
+
+                # TODO: optiomz, minimiza all. Minimize top-K
+                if minimize_top_k_percent < 1:
+                    # TODO: demomento esta en modo facil
+                    if is_positive:  # aqui quiero quedarme con la similareidades mascercas de -1, es decir als que menos e aprezcan
+                        similarities, indices = torch.sort(similarities, dim=1, descending=True)
+                    else:  # aqui quedarme con los que se parezcan mucho apra seaprarlas, cuatno mas altas mejor
+                        similarities, indices = torch.sort(similarities, dim=1, descending=False)
+                    top_k = int(similarities.shape[1] * minimize_top_k_percent)
+                    similarities = similarities[:, :top_k]
+
+                similarities_exp = torch.exp(similarities / temp)
+
+                # weight with confidences
+                if label_probs is not None:
+                    similarities_exp = similarities_exp.sum(dim=1)
+                    similarities_exp = similarities_exp * torch.pow(probs_c, 9)
+
+                similarities_exp = similarities_exp.sum()
+
+                if is_positive:
+                    positives = positives + similarities_exp
+                else:
+                    negatives = negatives + similarities_exp
+
+    loss = - torch.log(positives / (negatives + positives))
+    return loss
 
 def contrastive_class_to_class(features, class_labels, prediction_probs, batch_size, num_classes,
                             memory, label_probs, per_class_samples_per_image=256, minimize_top_k_percent=1.):
@@ -305,75 +373,4 @@ def contrastive_class_to_class_basic_all(features, class_labels, prediction_prob
 
 
 
-
-def contrastive_class_to_class_with_negatives(features, class_labels, prediction_probs,  batch_size, num_classes, memory, label_probs, per_class_samples_per_image=256, minimize_top_k_percent=1.):
-    elements_per_class = batch_size * per_class_samples_per_image
-    '''
-    La diferencai seria que tendrias qeu multiplicar con toda la memoria y luego sacar los positivos y engativos de la calase y generar la loss
-    
-    A parte de que aqui, no hay prediction head
-    
-    '''
-    temp = 0.07
-    positives = 0
-    negatives = 0
-    for c in range(num_classes):
-        mask_c = class_labels == c
-        features_c = features[mask_c,:]
-
-        prediction_probs_c = prediction_probs[mask_c]
-
-        # TODO: sort by lowest prediction probs i.e, larger error
-        _, indices = torch.sort(prediction_probs_c)
-        features_c = features_c[indices, :]
-        random_features_c = features_c[:elements_per_class, :] # M, 256
-
-
-        # TODO: pass confidece per sample to weight loss
-        if label_probs is not None:
-            probs = label_probs.detach()
-            probs_c = probs[mask_c]
-            probs_c = probs_c[indices]
-            probs_c = probs_c[:elements_per_class]
-
-        for compare_c in  range(num_classes):
-            is_positive = c == compare_c
-            memory_c = memory[compare_c] # N, 256
-            if memory_c is not None and random_features_c.shape[0] > 0:
-                memory_c = torch.from_numpy(memory_c).cuda()
-                memory_c = F.normalize(memory_c, dim=1)
-                random_features_c = F.normalize(random_features_c, dim=1)
-
-                # TODO: cuanto feature size se puede hcaer yendo rapido?
-                similarities = torch.mm(random_features_c, memory_c.transpose(1, 0)) # (-1, 1) 1 is equal vectors
-                # M (elements), N (memory)
-
-                # TODO: optiomz, minimiza all. Minimize top-K
-                if minimize_top_k_percent < 1:
-                    # TODO: demomento esta en modo facil
-                    if is_positive: # aqui quiero quedarme con la similareidades mascercas de -1, es decir als que menos e aprezcan
-                        similarities, indices = torch.sort(similarities, dim=1, descending=True)
-                    else: # aqui quedarme con los que se parezcan mucho apra seaprarlas, cuatno mas altas mejor
-                        similarities, indices = torch.sort(similarities, dim=1, descending=False)
-                    top_k = int(similarities.shape[1] * minimize_top_k_percent)
-                    similarities = similarities[:, :top_k]
-
-
-                similarities_exp = torch.exp(similarities / temp)
-
-                # weight with confidences
-                if label_probs is not None:
-                    similarities_exp = similarities_exp.sum(dim=1)
-                    similarities_exp = similarities_exp * torch.pow(probs_c, 9)
-
-                similarities_exp = similarities_exp.sum()
-
-
-                if is_positive:
-                    positives = positives + similarities_exp
-                else:
-                    negatives = negatives + similarities_exp
-
-    loss = - torch.log(positives / (negatives + positives))
-    return loss
 
