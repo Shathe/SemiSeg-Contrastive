@@ -1018,3 +1018,4 @@ if __name__ == '__main__':
     deeplabv2 = "2" in config['version']
 
     os.environ["CUDA_VISIBLE_DEVICES"] = str(6)
+    main()
