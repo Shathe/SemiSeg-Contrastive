@@ -276,7 +276,7 @@ def CBC_thresholding(max_probs, pseudo_label, num_classes, ignore_label, percent
 
 def create_ema_model(model):
     if deeplabv2:
-        from model.deeplabv2 import Res_Deeplab
+        from model.deeplabv22 import Res_Deeplab
     else:
         from model.deeplabv3 import Res_Deeplab
 
@@ -494,7 +494,7 @@ def main():
     # Define network
 
     if deeplabv2:
-        from model.deeplabv2 import Res_Deeplab
+        from model.deeplabv22 import Res_Deeplab
     else:
         from model.deeplabv3 import Res_Deeplab
 
@@ -531,9 +531,6 @@ def main():
     model.train()
     model.cuda()
     cudnn.benchmark = True
-
-    checkpoint = torch.load('/home/snowflake/Escritorio/Semi-Sup/saved/Deep_cont/best_model.pth')
-    model.load_state_dict(checkpoint['model'])
 
     if args.resume:
         start_iteration, model, optimizer = _resume_checkpoint(args.resume, model, optimizer)
@@ -672,19 +669,20 @@ def main():
 
             # this is sueprvised contrastive learning
             #if RAMP_UP_ITERS  - 1000:
-            if i_iter > 0:  # RAMP_UP_ITERS  - 1000:
+            if i_iter > RAMP_UP_ITERS  - 1000:  # RAMP_UP_ITERS  - 1000:
                 # TODO: DEJAS ESTO Y LO DE ABAJO DE EMA PARA PROTOTYPES?
                 # Create prototypes from labeled images with EMA model
                 with torch.no_grad():
                     labeled_pred_ema, labeled_features_ema = ema_model(normalize(joined_labeled, dataset), return_features=True)
                     labeled_pred_ema = interp(labeled_pred_ema)
-                    probability_prediction_ema, label_prediction_ema = torch.max(torch.softmax(labeled_pred_ema, dim=1), dim=1)# Get pseudolabels
+                    probability_prediction_ema, label_prediction_ema = torch.max(torch.softmax(labeled_pred_ema, dim=1),
+                                                                         dim=1)  # Get pseudolabels
 
                 '''
                 We are going to pick only faetures from labeled samples that are predicting correctly the label
                 As the feature resolutoin could be different from the output resolution (common in semseg), 
                 we do it in the feature reoslution (Downsampling the labels and predictions) due to computational restrictions
-                
+
                 Doing this per-class instead to per-class-distribution, gives us the benefits of:
                 - quicker filtering of good feautres (otherwise you need a threhosld for the accuracy (you comapre class dsitributions and they will hardly never be the same)
                 - for saving in the  memory, for saving different ones, its easiest to save N per class instead of computing the entrpy between the difernt distributions to se which oen to sve)
@@ -692,39 +690,61 @@ def main():
                 - to save which class/class distribution is the feature you are saving, this way its just hte class. 
                     Otherwise, there would be the question about, to save the labeled class distribution or the predicted class dsitribution?
                 '''
-                # TODO: high res todo esto nuevo, se puede copiar y pegar. Cambiar solo la seleccion si hiciera falta
-                labeled_features_ema = nn.functional.interpolate(labeled_features_ema,
-                                                        size=(labeled_pred.shape[2], labeled_pred.shape[3]),
-                                                        mode='bilinear')
+                labels_down = nn.functional.interpolate(joined_labels.float().unsqueeze(1),
+                                                        size=(labeled_features_ema.shape[2], labeled_features_ema.shape[3]),
+                                                        mode='nearest').squeeze(1)
+                label_prediction_down = nn.functional.interpolate(label_prediction_ema.float().unsqueeze(1),
+                                                                  size=(
+                                                                  labeled_features_ema.shape[2], labeled_features_ema.shape[3]),
+                                                                  mode='nearest').squeeze(1)
+                probability_prediction_down = nn.functional.interpolate(probability_prediction_ema.float().unsqueeze(1),
+                                                                        size=(labeled_features_ema.shape[2],
+                                                                              labeled_features_ema.shape[3]),
+                                                                        mode='nearest').squeeze(1)
 
-                # get mask where the labeled predictions are correct
-                mask_prediction_correctly = ((label_prediction_ema == joined_labels).float() * (probability_prediction_ema > 0.95).float()).bool()
+                # get label distribution from labels and predictions (high res to downsampled resolution)
+                class_dist = torch.softmax(labeled_pred_ema, dim=1)
+                class_dist_labels = F.one_hot(joined_labels, 255)
+                class_dist_labels = class_dist_labels.permute(0, 3, 1, 2)
 
-                labeled_features_ema = labeled_features_ema.permute(0, 2, 3, 1)
-                joined_labels_correct = joined_labels[mask_prediction_correctly]
-                labeled_features_correct = labeled_features_ema[mask_prediction_correctly, ...]
+                class_dist_labels = torch.nn.functional.avg_pool2d(class_dist_labels.float(),
+                                kernel_size=int(round(labeled_pred.shape[2] / labeled_features.shape[2])))
+                class_dist = torch.nn.functional.avg_pool2d(class_dist.float(),
+                                kernel_size=int(round(labeled_pred.shape[2] / labeled_features.shape[2])))
+
+                # rull out ignore label
+                class_dist_labels = class_dist_labels[:, :num_classes, :, :]
+
+                class_dist_prob, class_dist_label =  torch.max(class_dist, dim=1)
+                class_dist_labels_prob, class_dist_labels_label = torch.max(class_dist_labels, dim=1)
+
+
+                mask_same_distr = class_dist_labels_label == class_dist_label
+                mask_same_prob_1 = class_dist_labels_prob > 0.9
+                mask_same_prob_2 = class_dist_prob > 0.9
+
+                mask_prediction_correctly = ((label_prediction_down == labels_down).float() * (probability_prediction_down > 0.90).float() *
+                                mask_same_distr.float() * mask_same_prob_1.float() * mask_same_prob_2.float()).bool()
+
+
+                labeled_features_correct = labeled_features_ema.permute(0, 2, 3, 1)
+                labels_down_correct = labels_down[mask_prediction_correctly]
+                labeled_features_correct = labeled_features_correct[mask_prediction_correctly, ...]
 
                 # get projected features
                 with torch.no_grad():
                     proj_labeled_features_correct = ema_model.projection_head(labeled_features_correct)
 
-                feature_memory.add_features_from_sample_highres(proj_labeled_features_correct, joined_labels_correct, batch_size_labeled)
-
+                feature_memory.add_features_from_sample_random(proj_labeled_features_correct, labels_down_correct, batch_size_labeled)
 
 
             # TODO: this is sueprvised contrastive learning
             #if i_iter > RAMP_UP_ITERS:
-            if i_iter > 30:  # RAMP_UP_ITERS:
+            if i_iter > RAMP_UP_ITERS:  # RAMP_UP_ITERS:
                 '''
                 LABELED TO LABELED. Force features from laeled samples, to be similar to other features from the same class (which also leads to good predictions)
                 
                 '''
-                # TODO: high res todo esto nuevo, se puede copiar y pegar. tendras qeu cambiar lcogicamente la loss
-                labeled_features = nn.functional.interpolate(labeled_features,
-                                                        size=(labeled_pred.shape[2], labeled_pred.shape[3]),
-                                                        mode='bilinear')
-
-
                 # First, get the predicted probability of the expected labeled
                 label_prediction_probs = torch.softmax(labeled_pred, dim=1)
                 joined_labels_aux = joined_labels.clone()
@@ -733,12 +753,29 @@ def main():
                 correct_labeled_probs = label_prediction_probs * one_hot_labels[:, :num_classes, :, :]
                 correct_labeled_probs = correct_labeled_probs.sum(dim=1)
 
+                labeled_pred_probs_down = nn.functional.interpolate(correct_labeled_probs.unsqueeze(1),
+                                                        size=(labeled_features.shape[2], labeled_features.shape[3]),
+                                                        mode='nearest').squeeze(1)
+
+
+                # TODO: tu loque quieres aqui es que de las labels (o pseudolabels) sea la clase que dices, son las queq ueirs forzar
+
+                # get label distribution from labels and predictions (high res to downsampled resolution)
+                class_dist_labels = F.one_hot(joined_labels, 255)
+                class_dist_labels = class_dist_labels.permute(0, 3, 1, 2)
+                class_dist_labels = torch.nn.functional.avg_pool2d(class_dist_labels.float(),
+                                kernel_size=int(round(labeled_pred.shape[2] / labeled_features.shape[2])))
+                # rull out ignore label
+                class_dist_labels = class_dist_labels[:, :num_classes, :, :]
+                class_dist_labels_prob, class_dist_labels_label = torch.max(class_dist_labels, dim=1)
+
+
                 # now we can take all. as they are not the prototypes, here we are gonan force these features to be similar as the correct ones
-                mask_prediction_correctly = (joined_labels != ignore_label)
+                mask_prediction_correctly = ((labels_down != ignore_label).float() * (class_dist_labels_prob > 0.9).float()).bool()
 
                 labeled_features_all = labeled_features.permute(0, 2, 3, 1)
-                labels_down_all = joined_labels[mask_prediction_correctly]
-                labeled_prediction_probs_all = correct_labeled_probs[mask_prediction_correctly]
+                labels_down_all = labels_down[mask_prediction_correctly]
+                labeled_prediction_probs_all = labeled_pred_probs_down[mask_prediction_correctly]
                 labeled_features_all = labeled_features_all[mask_prediction_correctly, ...]
 
                 # get prediction features
@@ -753,12 +790,6 @@ def main():
                 '''
                 UNLABELED TO LABELED
                 '''
-                # TODO: high res todo esto nuevo, se puede copiar y pegar. tendras qeu cambiar lcogicamente la loss
-                features_joined_unlabeled = nn.functional.interpolate(features_joined_unlabeled,
-                                                        size=(labeled_pred.shape[2], labeled_pred.shape[3]),
-                                                        mode='bilinear')
-
-
                 # First, get the predicted probability of the expected labeled
                 unlabel_prediction_probs = torch.softmax(pred_joined_unlabeled, dim=1)
                 joined_pseudolabels_aux = joined_pseudolabels.clone()
@@ -767,21 +798,47 @@ def main():
                 correct_unlabeled_probs = unlabel_prediction_probs * one_hot_pseudolabels[:, :num_classes, :, :]
                 correct_unlabeled_probs = correct_unlabeled_probs.sum(dim=1)
 
+                unlabeled_prediction_probs_down = nn.functional.interpolate(correct_unlabeled_probs.float().unsqueeze(1),
+                                                        size=(features_joined_unlabeled.shape[2], features_joined_unlabeled.shape[3]),
+                                                        mode='nearest').squeeze(1)
+                joined_pseudolabels_down = nn.functional.interpolate(joined_pseudolabels.float().unsqueeze(1),
+                                                        size=(features_joined_unlabeled.shape[2], features_joined_unlabeled.shape[3]),
+                                                        mode='nearest').squeeze(1)
+                joined_maxprobs_down = nn.functional.interpolate(joined_maxprobs.float().unsqueeze(1),
+                                                        size=(features_joined_unlabeled.shape[2], features_joined_unlabeled.shape[3]),
+                                                        mode='nearest').squeeze(1)
+
+                # get label distribution from labels and predictions (high res to downsampled resolution)
+                class_dist_labels = F.one_hot(joined_pseudolabels, num_classes)
+                class_dist_labels = class_dist_labels.permute(0, 3, 1, 2)
+                class_dist_labels = torch.nn.functional.avg_pool2d(class_dist_labels.float(),
+                                                                   kernel_size=int(round(
+                                                                       labeled_pred.shape[2] / labeled_features.shape[
+                                                                           2])))
+
+                joined_maxprobs = torch.nn.functional.avg_pool2d(joined_maxprobs.float().unsqueeze(1),
+                                                                   kernel_size=int(round(
+                                                                       labeled_pred.shape[2] / labeled_features.shape[
+                                                                           2]))).squeeze(1)
+
+                class_dist_labels_prob, class_dist_labels_label = torch.max(class_dist_labels, dim=1)
+
                 # take out the features from black pixels from zooms out and augmetnations (ignore labels on pseduoalebl)
-                mask = (joined_pseudolabels != ignore_label)
+                mask = ((joined_pseudolabels_down != ignore_label).float() * (class_dist_labels_prob > 0.9).float() * (joined_maxprobs > 0.9).float()).bool()
+
 
                 features_joined_unlabeled = features_joined_unlabeled.permute(0, 2, 3, 1)
                 features_joined_unlabeled = features_joined_unlabeled[mask, ...]
-                joined_pseudolabels = joined_pseudolabels[mask]
-                correct_unlabeled_probs = correct_unlabeled_probs[mask]
-                joined_maxprobs = joined_maxprobs[mask]
+                joined_pseudolabels_down = joined_pseudolabels_down[mask]
+                unlabeled_prediction_probs_down = unlabeled_prediction_probs_down[mask]
+                joined_maxprobs_down = joined_maxprobs_down[mask]
 
                 # get projected features
                 proj_feat_unlabeled = model.projection_head(features_joined_unlabeled)
                 pred_feat_unlabeled = model.prediction_head(proj_feat_unlabeled)
 
-                loss_contr_unlabeled = contrastive_class_to_class(pred_feat_unlabeled, joined_pseudolabels, correct_unlabeled_probs,
-                                    batch_size_unlabeled, num_classes, feature_memory.memory, joined_maxprobs)
+                loss_contr_unlabeled = contrastive_class_to_class(pred_feat_unlabeled, joined_pseudolabels_down, unlabeled_prediction_probs_down,
+                                    batch_size_unlabeled, num_classes, feature_memory.memory, joined_maxprobs_down)
 
                 loss = loss + loss_contr_unlabeled
 
@@ -842,7 +899,7 @@ def main():
         ema_model = update_ema_variables(ema_model=ema_model, model=model, alpha_teacher=0.99,
                                          iteration=i_iter)
 
-        print('iter = {0:6d}/{1:6d}, loss_l = {2:.3f}'.format(i_iter, num_iterations, loss_l_value))
+        # print('iter = {0:6d}/{1:6d}, loss_l = {2:.3f}'.format(i_iter, num_iterations, loss_l_value))
 
 
         if i_iter % save_checkpoint_every == 0 and i_iter != 0:
@@ -960,6 +1017,6 @@ if __name__ == '__main__':
     gpus = (0, 1, 2, 3)[:args.gpus]
     deeplabv2 = "2" in config['version']
 
-    os.environ["CUDA_VISIBLE_DEVICES"] = str(0)
+    os.environ["CUDA_VISIBLE_DEVICES"] = str(6)
 
     main()

@@ -114,7 +114,6 @@ class FeatureMemory:
         class_labels = class_labels.detach().cpu().numpy() # no usar gradientes
 
         elements_per_class = batch_size * self.per_class_samples_per_image
-
         # for each class, save [elements_per_class]
         for c in range(self.n_classes):
             mask_c = class_labels == c
