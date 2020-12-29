@@ -434,7 +434,7 @@ def main():
     contrastive_labeled_loss = True
 
     batch_size_unlabeled = int(batch_size / 2)
-    batch_size_labeled = int(batch_size * 1 + 1)
+    batch_size_labeled = int(batch_size * 1 ) # TODO: + 1 ????
 
     RAMP_UP_ITERS = 2000
 
@@ -503,7 +503,6 @@ def main():
 
     # load pretrained parameters
     saved_state_dict = model_zoo.load_url('http://vllab1.ucmerced.edu/~whung/adv-semi-seg/resnet101COCO-41f33a49.pth') # COCO pretraining
-    # saved_state_dict = model_zoo.load_url(''https://download.pytorch.org/models/resnet101-5d3b4d8f.pth'') # iamgenet pretrainning
 
     # Copy loaded parameters to model
     new_params = model.state_dict().copy()
@@ -657,12 +656,16 @@ def main():
 
             # Pseudo-label weighting
             pixelWiseWeight = sigmoid_ramp_up(i_iter, RAMP_UP_ITERS) * torch.ones(joined_maxprobs.shape).cuda()
-            pixelWiseWeight = pixelWiseWeight * torch.pow(joined_maxprobs.detach(), 6)
+            pixelWiseWeight = pixelWiseWeight * torch.pow(joined_maxprobs.detach(), 9)
 
             # Pseudo-label loss
             loss_ce_unlabeled = unlabeled_loss(pred_joined_unlabeled, joined_pseudolabels, pixelWiseWeight)
 
             loss = loss + loss_ce_unlabeled
+
+            # entropy loss
+            valid_mask = (joined_pseudolabels != ignore_label).unsqueeze(1)
+            loss = loss + entropy_loss(torch.nn.functional.softmax(pred_joined_unlabeled, dim=1), valid_mask) * 0.01
 
         if contrastive_labeled_loss:
 

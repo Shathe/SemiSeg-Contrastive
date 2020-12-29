@@ -434,7 +434,7 @@ def main():
     contrastive_labeled_loss = False
 
     batch_size_unlabeled = int(batch_size / 2)
-    batch_size_labeled = int(batch_size * 1 + 1)
+    batch_size_labeled = int(batch_size * 1 )
 
     RAMP_UP_ITERS = 2000
 
@@ -657,12 +657,16 @@ def main():
 
             # Pseudo-label weighting
             pixelWiseWeight = sigmoid_ramp_up(i_iter, RAMP_UP_ITERS) * torch.ones(joined_maxprobs.shape).cuda()
-            pixelWiseWeight = pixelWiseWeight * torch.pow(joined_maxprobs.detach(), 6)
+            pixelWiseWeight = pixelWiseWeight * torch.pow(joined_maxprobs.detach(), 9)
 
             # Pseudo-label loss
             loss_ce_unlabeled = unlabeled_loss(pred_joined_unlabeled, joined_pseudolabels, pixelWiseWeight)
 
             loss = loss + loss_ce_unlabeled
+
+            # entropy loss
+            valid_mask = (joined_pseudolabels != ignore_label).unsqueeze(1)
+            loss = loss + entropy_loss(torch.nn.functional.softmax(pred_joined_unlabeled, dim=1), valid_mask) * 0.01
 
         if contrastive_labeled_loss:
 

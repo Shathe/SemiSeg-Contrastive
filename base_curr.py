@@ -431,10 +431,10 @@ def main():
     torch.backends.cudnn.deterministic = True
     supervised_unlabeled_loss = True
     supervised_labeled_loss = True
-    contrastive_labeled_loss = True
+    contrastive_labeled_loss = False
 
     batch_size_unlabeled = int(batch_size / 2)
-    batch_size_labeled = int(batch_size * 1 + 1)
+    batch_size_labeled = int(batch_size * 1 )
 
     RAMP_UP_ITERS = 2000
 
@@ -457,11 +457,11 @@ def main():
     partial_size = labeled_samples
     print('Training on number of samples:', partial_size)
 
-    # class_weights_curr = CurriculumClassBalancing(ramp_up=RAMP_UP_ITERS,
-    #                                               labeled_samples=int(labeled_samples / batch_size_labeled),
-    #                                               unlabeled_samples=int(
-    #                                                   (train_dataset_size - labeled_samples) / batch_size_unlabeled),
-    #                                               n_classes=num_classes)
+    class_weights_curr = CurriculumClassBalancing(ramp_up=RAMP_UP_ITERS,
+                                                  labeled_samples=int(labeled_samples / batch_size_labeled),
+                                                  unlabeled_samples=int(
+                                                      (train_dataset_size - labeled_samples) / batch_size_unlabeled),
+                                                  n_classes=num_classes)
 
     feature_memory = FeatureMemory(num_samples=labeled_samples, dataset=dataset, memory_per_class=2048, feature_size=256, n_classes=num_classes)
 
@@ -597,7 +597,7 @@ def main():
 
         model.train()
 
-        # class_weights_curr.add_frequencies(labels.cpu().numpy(), pseudo_label.cpu().numpy(), None)
+        class_weights_curr.add_frequencies(labels.cpu().numpy(), pseudo_label.cpu().numpy(), None)
 
         images, labels, _, _ = augment_samples_weak(images, labels, None, random.random()  < 0.15, batch_size_labeled, ignore_label)
 
@@ -641,28 +641,32 @@ def main():
         labeled_pred, labeled_features = model(normalize(joined_labeled, dataset), return_features=True)
         labeled_pred = interp(labeled_pred)
 
-        # class_weights = torch.from_numpy(
-        #     class_weights_curr.get_weights(num_iterations, reduction_freqs=np.sum, only_labeled=False)).cuda()
+        class_weights = torch.from_numpy(
+            class_weights_curr.get_weights(num_iterations, reduction_freqs=np.sum, only_labeled=False)).cuda()
 
         loss = 0
         if supervised_labeled_loss:
-            labeled_loss = supervised_loss(labeled_pred, joined_labels) # weight=class_weights.float()
+            labeled_loss = supervised_loss(labeled_pred, joined_labels, weight=class_weights.float()) # weight=class_weights.float()
             loss = loss + labeled_loss
 
         if supervised_unlabeled_loss:
             '''
             Cross entropy loss using pseudolabels. 
             '''
-            # unlabeled_loss = CrossEntropyLoss2dPixelWiseWeighted(ignore_index=ignore_label).cuda() #, weight=class_weights.float()
+            unlabeled_loss = CrossEntropyLoss2dPixelWiseWeighted(ignore_index=ignore_label, weight=class_weights.float()).cuda() #
 
             # Pseudo-label weighting
             pixelWiseWeight = sigmoid_ramp_up(i_iter, RAMP_UP_ITERS) * torch.ones(joined_maxprobs.shape).cuda()
-            pixelWiseWeight = pixelWiseWeight * torch.pow(joined_maxprobs.detach(), 6)
+            pixelWiseWeight = pixelWiseWeight * torch.pow(joined_maxprobs.detach(), 9)
 
             # Pseudo-label loss
             loss_ce_unlabeled = unlabeled_loss(pred_joined_unlabeled, joined_pseudolabels, pixelWiseWeight)
 
             loss = loss + loss_ce_unlabeled
+
+            # entropy loss
+            valid_mask = (joined_pseudolabels != ignore_label).unsqueeze(1)
+            loss = loss + entropy_loss(torch.nn.functional.softmax(pred_joined_unlabeled, dim=1), valid_mask) * 0.01
 
         if contrastive_labeled_loss:
 
@@ -974,6 +978,6 @@ if __name__ == '__main__':
     gpus = (0, 1, 2, 3)[:args.gpus]
     deeplabv2 = "2" in config['version']
 
-    os.environ["CUDA_VISIBLE_DEVICES"] = str(0)
+    os.environ["CUDA_VISIBLE_DEVICES"] = str(6)
 
     main()

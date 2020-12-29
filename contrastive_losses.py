@@ -40,7 +40,7 @@ def contrastive_class_to_class_learned(model, features, class_labels, prediction
         # TODO: sort by lowest prediction probs i.e, larger error
 
         memory_c = memory[c] # N, 256
-        if memory_c is not None and features_c.shape[0] > 0:
+        if memory_c is not None and features_c.shape[0] > 1:
 
             memory_c = torch.from_numpy(memory_c).cuda()
             memory_c = F.normalize(memory_c, dim=1)
@@ -104,7 +104,7 @@ def contrastive_class_to_class_learned_oneselector(model, features, class_labels
         # TODO: sort by lowest prediction probs i.e, larger error
 
         memory_c = memory[c] # N, 256
-        if memory_c is not None and features_c.shape[0] > 0:
+        if memory_c is not None and features_c.shape[0] > 1:
 
             memory_c = torch.from_numpy(memory_c).cuda()
             memory_c = F.normalize(memory_c, dim=1)
@@ -202,7 +202,7 @@ def contrastive_class_to_class(features, class_labels, prediction_probs, batch_s
                 probs_c = probs_c[:elements_per_class]  # M, 256
 
                 distances = distances.mean(dim=1)
-                distances = distances * torch.pow(probs_c, 6)
+                distances = distances * torch.pow(probs_c, 9)
 
 
             loss = loss + distances.mean()
@@ -363,7 +363,7 @@ def contrastive_class_to_class_with_negatives(features, class_labels, prediction
                 # weight with confidences
                 if label_probs is not None:
                     similarities_exp = similarities_exp.sum(dim=1)
-                    similarities_exp = similarities_exp * torch.pow(probs_c, 6)
+                    similarities_exp = similarities_exp * torch.pow(probs_c, 9)
 
                 similarities_exp = similarities_exp.sum()
 
