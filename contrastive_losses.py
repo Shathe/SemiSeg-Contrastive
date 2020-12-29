@@ -167,6 +167,7 @@ def contrastive_class_to_class(features, class_labels, prediction_probs, batch_s
         features_c = features_c[indices, :]
         random_features_c = features_c[:elements_per_class, :] # M, 256
 
+
         memory_c = memory[c] # N, 256
         if memory_c is not None and random_features_c.shape[0] > 0:
 

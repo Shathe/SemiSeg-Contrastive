@@ -431,10 +431,10 @@ def main():
     torch.backends.cudnn.deterministic = True
     supervised_unlabeled_loss = True
     supervised_labeled_loss = True
-    contrastive_labeled_loss = False
+    contrastive_labeled_loss = True
 
     batch_size_unlabeled = int(batch_size / 2)
-    batch_size_labeled = int(batch_size * 1 )
+    batch_size_labeled = int(batch_size * 1 ) # TODO: + 1 ????
 
     RAMP_UP_ITERS = 2000
 
@@ -457,11 +457,11 @@ def main():
     partial_size = labeled_samples
     print('Training on number of samples:', partial_size)
 
-    class_weights_curr = CurriculumClassBalancing(ramp_up=RAMP_UP_ITERS,
-                                                  labeled_samples=int(labeled_samples / batch_size_labeled),
-                                                  unlabeled_samples=int(
-                                                      (train_dataset_size - labeled_samples) / batch_size_unlabeled),
-                                                  n_classes=num_classes)
+    # class_weights_curr = CurriculumClassBalancing(ramp_up=RAMP_UP_ITERS,
+    #                                               labeled_samples=int(labeled_samples / batch_size_labeled),
+    #                                               unlabeled_samples=int(
+    #                                                   (train_dataset_size - labeled_samples) / batch_size_unlabeled),
+    #                                               n_classes=num_classes)
 
     feature_memory = FeatureMemory(num_samples=labeled_samples, dataset=dataset, memory_per_class=2048, feature_size=256, n_classes=num_classes)
 
@@ -503,7 +503,6 @@ def main():
 
     # load pretrained parameters
     saved_state_dict = model_zoo.load_url('http://vllab1.ucmerced.edu/~whung/adv-semi-seg/resnet101COCO-41f33a49.pth') # COCO pretraining
-    # saved_state_dict = model_zoo.load_url(''https://download.pytorch.org/models/resnet101-5d3b4d8f.pth'') # iamgenet pretrainning
 
     # Copy loaded parameters to model
     new_params = model.state_dict().copy()
@@ -532,8 +531,8 @@ def main():
     model.cuda()
     cudnn.benchmark = True
 
-    # checkpoint = torch.load('/home/snowflake/checkpoint-iter50000.pth')
-    # model.load_state_dict(checkpoint['model'])
+    checkpoint = torch.load('/home/snowflake/Escritorio/Semi-Sup/saved/Deep_cont/best_model.pth')
+    model.load_state_dict(checkpoint['model'])
 
     if args.resume:
         start_iteration, model, optimizer = _resume_checkpoint(args.resume, model, optimizer)
@@ -594,12 +593,70 @@ def main():
             logits_u_w = interp(logits_u_w).detach()  # prediction unlabeled
             softmax_u_w = torch.softmax(logits_u_w, dim=1)
             max_probs, pseudo_label = torch.max(softmax_u_w, dim=1)  # Get pseudolabels
+            '''
+            --pensar en la idea de para unlabeled, pasar las features todas x el mapa (que en realidad ya lo estas haciendo)
+             y con eso hacer algo como de pseudolabrls. Esto con lo que sacas del ema model y, hacerlo con las projection heads.
+              Y con un modelo entrenado usando contrastive, luego comparar visualmente pseudolabrls del modelo con estas pseudolabrls
+            '''
+            print(i_iter)
+            probabilities_pseudolabels = torch.zeros((num_classes, features_weak_unlabeled.shape[2], features_weak_unlabeled.shape[3]))
+            probabilities_pseudolabels2 = torch.zeros((num_classes, features_weak_unlabeled.shape[2], features_weak_unlabeled.shape[3]))
+            if i_iter > 70:
+                for class_pseudo in range(num_classes):
+                    # normalizar y proyecciond e features_weak_unlabeled
+                    features = features_weak_unlabeled.permute(0, 2, 3, 1)
+                    mask = torch.ones((features.shape[0:3])).bool()
+                    features = features[mask, ...]
+                    features = ema_model.projection_head(features) # M, 256
+
+                    memory_c = feature_memory.memory[class_pseudo]
+                    memory_c = torch.from_numpy(memory_c).cuda()
+                    memory_c = F.normalize(memory_c, dim=1)
+                    features = F.normalize(features, dim=1)
+
+                    similarities = torch.mm(features, memory_c.transpose(1, 0))  # (-1, 1) 1 is equal vectors
+                    similarities_mean = similarities.mean(dim=1)
+                    _, similarities_max = similarities.max(dim=1)
+
+                    similarities_mean = similarities_mean.view(features_weak_unlabeled.shape[2], features_weak_unlabeled.shape[3])
+                    similarities_max = similarities_max.view(features_weak_unlabeled.shape[2], features_weak_unlabeled.shape[3])
+                    probabilities_pseudolabels[class_pseudo, ...] = similarities_mean
+                    probabilities_pseudolabels2[class_pseudo, ...] = similarities_max
+
+
+                probabilities_pseudolabels = interp(probabilities_pseudolabels.unsqueeze(0)).squeeze(0)
+                probabilities_pseudolabels2 = interp(probabilities_pseudolabels2.unsqueeze(0)).squeeze(0)
+                softmax_u_w_feat = torch.softmax(probabilities_pseudolabels, dim=0)
+                softmax_u_w_feat2 = torch.softmax(probabilities_pseudolabels2, dim=0)
+                max_probs_feat, pseudo_label_feat = torch.max(softmax_u_w_feat, dim=0)  # Get pseudolabels
+                max_probs_feat2, pseudo_label_feat2 = torch.max(softmax_u_w_feat2, dim=0)  # Get pseudolabels
+
+                image = unlabeled_images[0, ...].cpu().numpy().copy()
+                label = pseudo_label[0, ...].cpu().numpy().copy()
+                image = np.swapaxes(image, 0, 1)
+                image = np.swapaxes(image, 2, 1)
+                image = image[:, :, ::-1]
+
+
+                cv2.imshow('img', image.astype(np.uint8))
+                cv2.imshow('label', label.astype(np.uint8)*10)
+
+
+                label2 = pseudo_label_feat[...].cpu().numpy().copy()
+                cv2.imshow('label_feat', label2.astype(np.uint8)*10)
+                label2 = pseudo_label_feat2[...].cpu().numpy().copy()
+                cv2.imshow('label_feat (max)', label2.astype(np.uint8)*10)
+
+                cv2.waitKey(0)
+                cv2.destroyAllWindows()
+
+
 
         model.train()
 
-        class_weights_curr.add_frequencies(labels.cpu().numpy(), pseudo_label.cpu().numpy(), None)
+        # class_weights_curr.add_frequencies(labels.cpu().numpy(), pseudo_label.cpu().numpy(), None)
 
-        images, labels, _, _ = augment_samples_weak(images, labels, None, random.random()  < 0.15, batch_size_labeled, ignore_label)
+        images, labels, _, _ = augment_samples_weak(images, labels, None, random.random()  < 0.20, batch_size_labeled, ignore_label)
 
         '''
         UNLABELED DATA
@@ -641,19 +698,19 @@ def main():
         labeled_pred, labeled_features = model(normalize(joined_labeled, dataset), return_features=True)
         labeled_pred = interp(labeled_pred)
 
-        class_weights = torch.from_numpy(
-            class_weights_curr.get_weights(num_iterations, reduction_freqs=np.sum, only_labeled=False)).cuda()
+        # class_weights = torch.from_numpy(
+        #     class_weights_curr.get_weights(num_iterations, reduction_freqs=np.sum, only_labeled=False)).cuda()
 
         loss = 0
         if supervised_labeled_loss:
-            labeled_loss = supervised_loss(labeled_pred, joined_labels, weight=class_weights.float()) # weight=class_weights.float()
+            labeled_loss = supervised_loss(labeled_pred, joined_labels) # weight=class_weights.float()
             loss = loss + labeled_loss
 
         if supervised_unlabeled_loss:
             '''
             Cross entropy loss using pseudolabels. 
             '''
-            unlabeled_loss = CrossEntropyLoss2dPixelWiseWeighted(ignore_index=ignore_label, weight=class_weights.float()).cuda() #
+            # unlabeled_loss = CrossEntropyLoss2dPixelWiseWeighted(ignore_index=ignore_label).cuda() #, weight=class_weights.float()
 
             # Pseudo-label weighting
             pixelWiseWeight = sigmoid_ramp_up(i_iter, RAMP_UP_ITERS) * torch.ones(joined_maxprobs.shape).cuda()
@@ -672,7 +729,7 @@ def main():
 
             # this is sueprvised contrastive learning
             #if RAMP_UP_ITERS  - 1000:
-            if i_iter > RAMP_UP_ITERS  - 1000:  # RAMP_UP_ITERS  - 1000:
+            if i_iter > 0.:  # RAMP_UP_ITERS  - 1000:
                 # TODO: DEJAS ESTO Y LO DE ABAJO DE EMA PARA PROTOTYPES?
                 # Create prototypes from labeled images with EMA model
                 with torch.no_grad():
@@ -729,7 +786,7 @@ def main():
 
             # TODO: this is sueprvised contrastive learning
             #if i_iter > RAMP_UP_ITERS:
-            if i_iter > RAMP_UP_ITERS:  # RAMP_UP_ITERS:
+            if i_iter > 200:  # RAMP_UP_ITERS:
                 '''
                 LABELED TO LABELED. Force features from laeled samples, to be similar to other features from the same class (which also leads to good predictions)
                 
@@ -978,6 +1035,6 @@ if __name__ == '__main__':
     gpus = (0, 1, 2, 3)[:args.gpus]
     deeplabv2 = "2" in config['version']
 
-    os.environ["CUDA_VISIBLE_DEVICES"] = str(1)
+    os.environ["CUDA_VISIBLE_DEVICES"] = str(0)
 
     main()
