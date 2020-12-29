@@ -1,0 +1,16 @@
+---------------------------------Starting---------------------------------
+{'model': 'DeepLab', 'version': '2', 'dataset': 'cityscapes', 'training': {'batch_size': 4, 'num_workers': 3, 'optimizer': 'SGD', 'momentum': 0.9, 'num_iterations': 50000, 'learning_rate': 0.0002, 'lr_schedule': 'Poly', 'lr_schedule_power': 0.9, 'weight_decay': 0.0005, 'use_sync_batchnorm': False, 'data': {'split_id_list': 0, 'labeled_samples': 100, 'input_size': '512,512'}, 'unlabeled': {'train_unlabeled': True, 'consistency_weight': 1, 'consistency_loss': 'CE', 'pixel_weight': 'sigmoid'}}, 'seed': 5555, 'ignore_label': 250, 'utils': {'save_checkpoint_every': 10000, 'checkpoint_dir': '../saved/DeepLab', 'val_per_iter': 3000, 'log_per_iter': 100, 'save_best_model': True}}
+Found 2975 train images
+dataset size:  2975
+Training on number of samples: 100
+loading train ids from ./splits/city/split_0.pkl
+/opt/conda/lib/python3.6/site-packages/torch/optim/sgd.py:68: UserWarning: optimizer contains a parameter group with duplicate parameters; in future, this will cause an error; see github.com/pytorch/pytorch/issues/40967 for more information
+  super(SGD, self).__init__(params, defaults)
+/opt/conda/lib/python3.6/site-packages/torch/functional.py:1242: UserWarning: torch.norm is deprecated and may be removed in a future PyTorch release. Use torch.linalg.norm instead.
+  "torch.norm is deprecated and may be removed in a future PyTorch release. "
+Traceback (most recent call last):
+  File "contrastive_wise_manual_filer_negatives.py", line 1034, in <module>
+    main()
+  File "contrastive_wise_manual_filer_negatives.py", line 825, in main
+    class_dist_labels = F.one_hot(joined_pseudolabels, num_classes)
+RuntimeError: Class values must be smaller than num_classes.
