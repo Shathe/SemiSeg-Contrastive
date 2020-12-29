@@ -308,10 +308,6 @@ def update_ema_variables(ema_model, model, alpha_teacher, iteration):
             ema_param.data[:] = alpha_teacher * ema_param[:].data[:] + (1 - alpha_teacher) * param[:].data[:]
     return ema_model
 
-
-
-
-
 def augment_samples(images, labels, probs, do_classmix, batch_size, ignore_label):
     if do_classmix:
         # ClassMix: Get mask for image A
@@ -344,10 +340,9 @@ def augment_samples(images, labels, probs, do_classmix, batch_size, ignore_label
         params = {"Mix": MixMask}
     else:
         params = {}
-
     # similar as BYOL, plus, classmix
     params["flip"] = random.random() < 0.5
-    params["ColorJitter"] = random.random() < 0.80
+    params["ColorJitter"] = random.random() < 0.75
     params["GaussianBlur"] = random.random() < 0.2
     params["Grayscale"] = random.random() < 0.0
     params["Solarize"] = random.random() < 0.0
@@ -360,8 +355,8 @@ def augment_samples(images, labels, probs, do_classmix, batch_size, ignore_label
     # Apply strong augmentations to unlabeled images
     image_aug, labels_aug, probs_aug = augmentationTransform(params,
                                                              data=images, target=labels,
-                                                             probs=probs, jitter_vale=0.25,
-                                                             min_sigma=0.1, max_sigma=1.25,
+                                                             probs=probs, jitter_vale=0.30,
+                                                             min_sigma=0.1, max_sigma=1.5,
                                                              ignore_label=ignore_label)
 
     return image_aug, labels_aug, probs_aug, params
@@ -402,12 +397,12 @@ def augment_samples_weak(images, labels, probs, do_classmix, batch_size, ignore_
 
     # similar as BYOL, plus, classmix
     params["flip"] = random.random() < 0.5
-    params["ColorJitter"] = random.random() < 0.20
+    params["ColorJitter"] = random.random() < 0.25
     params["GaussianBlur"] = random.random() < 0.
     params["Grayscale"] = random.random() < 0.0
     params["Solarize"] = random.random() < 0.0
-    if random.random() < 0.33:
-        scale = random.uniform(0.85, 1.5)
+    if random.random() < 0.5:
+        scale = random.uniform(0.75, 1.75)
     else:
         scale = 1
     params["RandomScaleCrop"] = scale
@@ -598,7 +593,7 @@ def main():
         if dataset == 'cityscapes':
             class_weights_curr.add_frequencies(labels.cpu().numpy(), pseudo_label.cpu().numpy(), None)
 
-        images, labels, _, _ = augment_samples_weak(images, labels, None, random.random()  < 0.20, batch_size_labeled, ignore_label)
+        images2, labels2, _, _ = augment_samples_weak(images, labels, None, random.random()  < 0.20, batch_size_labeled, ignore_label)
 
         '''
         UNLABELED DATA
@@ -609,7 +604,7 @@ def main():
         Once you have the speudolabel, perform strong augmetnation to force the netowrk to yield lower confidence scores for pushing them up
         '''
 
-        do_classmix = i_iter > RAMP_UP_ITERS and random.random() < 0.5  # only after rampup perfrom classmix
+        do_classmix = i_iter > RAMP_UP_ITERS and random.random() < 0.75  # only after rampup perfrom classmix
         unlabeled_images_aug1, pseudo_label1, max_probs1, unlabeled_aug1_params = augment_samples(unlabeled_images,
                                                                                                   pseudo_label,
                                                                                                   max_probs,
@@ -617,7 +612,7 @@ def main():
                                                                                                   batch_size_unlabeled,
                                                                                                   ignore_label)
 
-        do_classmix = i_iter > RAMP_UP_ITERS and random.random() < 0.5  # only after rampup perfrom classmix
+        do_classmix = i_iter > RAMP_UP_ITERS and random.random() < 0.75  # only after rampup perfrom classmix
 
         unlabeled_images_aug2, pseudo_label2, max_probs2, unlabeled_aug2_params = augment_samples(unlabeled_images,
                                                                                                   pseudo_label,
@@ -626,7 +621,6 @@ def main():
                                                                                                   batch_size_unlabeled,
                                                                                                   ignore_label)
 
-
         joined_unlabeled = torch.cat((unlabeled_images_aug1, unlabeled_images_aug2), dim=0)
         joined_pseudolabels = torch.cat((pseudo_label1, pseudo_label2), dim=0)
         joined_maxprobs = torch.cat((max_probs1, max_probs2), dim=0)
@@ -634,9 +628,8 @@ def main():
         pred_joined_unlabeled, features_joined_unlabeled = model(normalize(joined_unlabeled, dataset), return_features=True)
         pred_joined_unlabeled = interp(pred_joined_unlabeled)
 
-
-        joined_labeled = images
-        joined_labels = labels
+        joined_labeled = images2
+        joined_labels = labels2
         labeled_pred, labeled_features = model(normalize(joined_labeled, dataset), return_features=True)
         labeled_pred = interp(labeled_pred)
 
