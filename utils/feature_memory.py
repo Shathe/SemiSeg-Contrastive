@@ -144,6 +144,31 @@ class FeatureMemory:
 
 
 
+    def add_features_from_sample_highres(self, features, class_labels, batch_size):
+        features = features.detach().cpu().numpy()  # no usar gradientes
+        class_labels = class_labels.detach().cpu().numpy() # no usar gradientes
+
+        elements_per_class = batch_size * self.per_class_samples_per_image
+
+        # for each class, save [elements_per_class]
+        for c in range(self.n_classes):
+            mask_c = class_labels == c
+            features_c = features[mask_c, :]
+            if features_c.shape[0] > 0: # elements of class c in batch
+
+                # shuffle elements
+                indexes = np.arange(features_c.shape[0])
+                np.random.shuffle(indexes)
+                features_c = features_c[indexes, :]
+                new_features = features_c[:elements_per_class, :]
+
+                if self.memory[c] is None: # was empy, first elements
+                    self.memory[c] = new_features
+
+                else: # add elements to already existing list
+                    # keep only most recent memory_per_class samples
+                    self.memory[c] = np.concatenate((new_features, self.memory[c]), axis = 0)[:self.memory_per_class, :]
+
     def add_features_from_sample(self, features, class_labels, batch_size):
         features = features.detach().cpu().numpy()  # no usar gradientes
         class_labels = class_labels.detach().cpu().numpy() # no usar gradientes

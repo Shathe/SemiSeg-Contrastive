@@ -457,11 +457,11 @@ def main():
     partial_size = labeled_samples
     print('Training on number of samples:', partial_size)
 
-    # class_weights_curr = CurriculumClassBalancing(ramp_up=RAMP_UP_ITERS,
-    #                                               labeled_samples=int(labeled_samples / batch_size_labeled),
-    #                                               unlabeled_samples=int(
-    #                                                   (train_dataset_size - labeled_samples) / batch_size_unlabeled),
-    #                                               n_classes=num_classes)
+    class_weights_curr = CurriculumClassBalancing(ramp_up=RAMP_UP_ITERS,
+                                                  labeled_samples=int(labeled_samples / batch_size_labeled),
+                                                  unlabeled_samples=int(
+                                                      (train_dataset_size - labeled_samples) / batch_size_unlabeled),
+                                                  n_classes=num_classes)
 
     feature_memory = FeatureMemory(num_samples=labeled_samples, dataset=dataset, memory_per_class=2048, feature_size=256, n_classes=num_classes)
 
@@ -597,7 +597,7 @@ def main():
 
         model.train()
 
-        # class_weights_curr.add_frequencies(labels.cpu().numpy(), pseudo_label.cpu().numpy(), None)
+        class_weights_curr.add_frequencies(labels.cpu().numpy(), pseudo_label.cpu().numpy(), None)
 
         images, labels, _, _ = augment_samples_weak(images, labels, None, random.random()  < 0.15, batch_size_labeled, ignore_label)
 
@@ -641,19 +641,19 @@ def main():
         labeled_pred, labeled_features = model(normalize(joined_labeled, dataset), return_features=True)
         labeled_pred = interp(labeled_pred)
 
-        # class_weights = torch.from_numpy(
-        #     class_weights_curr.get_weights(num_iterations, reduction_freqs=np.sum, only_labeled=False)).cuda()
+        class_weights = torch.from_numpy(
+            class_weights_curr.get_weights(num_iterations, reduction_freqs=np.sum, only_labeled=False)).cuda()
 
         loss = 0
         if supervised_labeled_loss:
-            labeled_loss = supervised_loss(labeled_pred, joined_labels) # weight=class_weights.float()
+            labeled_loss = supervised_loss(labeled_pred, joined_labels,  weight=class_weights.float()) # weight=class_weights.float()
             loss = loss + labeled_loss
 
         if supervised_unlabeled_loss:
             '''
             Cross entropy loss using pseudolabels. 
             '''
-            # unlabeled_loss = CrossEntropyLoss2dPixelWiseWeighted(ignore_index=ignore_label).cuda() #, weight=class_weights.float()
+            unlabeled_loss = CrossEntropyLoss2dPixelWiseWeighted(ignore_index=ignore_label, weight=class_weights.float()).cuda() #, weight=class_weights.float()
 
             # Pseudo-label weighting
             pixelWiseWeight = sigmoid_ramp_up(i_iter, RAMP_UP_ITERS) * torch.ones(joined_maxprobs.shape).cuda()
@@ -676,15 +676,16 @@ def main():
                 # TODO: DEJAS ESTO Y LO DE ABAJO DE EMA PARA PROTOTYPES?
                 # Create prototypes from labeled images with EMA model
                 with torch.no_grad():
-                    labeled_pred, labeled_features = ema_model(normalize(joined_labeled, dataset), return_features=True)
-                    labeled_pred = interp(labeled_pred)
-                    _, label_prediction = torch.max(torch.softmax(labeled_pred, dim=1), dim=1)# Get pseudolabels
+                    labeled_pred_ema, labeled_features_ema = ema_model(normalize(joined_labeled, dataset), return_features=True)
+                    labeled_pred_ema = interp(labeled_pred_ema)
+                    probability_prediction_ema, label_prediction_ema = torch.max(torch.softmax(labeled_pred_ema, dim=1),
+                                                                         dim=1)  # Get pseudolabels
 
                 '''
                 We are going to pick only faetures from labeled samples that are predicting correctly the label
                 As the feature resolutoin could be different from the output resolution (common in semseg), 
                 we do it in the feature reoslution (Downsampling the labels and predictions) due to computational restrictions
-                
+
                 Doing this per-class instead to per-class-distribution, gives us the benefits of:
                 - quicker filtering of good feautres (otherwise you need a threhosld for the accuracy (you comapre class dsitributions and they will hardly never be the same)
                 - for saving in the  memory, for saving different ones, its easiest to save N per class instead of computing the entrpy between the difernt distributions to se which oen to sve)
@@ -693,16 +694,22 @@ def main():
                     Otherwise, there would be the question about, to save the labeled class distribution or the predicted class dsitribution?
                 '''
                 labels_down = nn.functional.interpolate(joined_labels.float().unsqueeze(1),
-                                                        size=(labeled_features.shape[2], labeled_features.shape[3]),
+                                                        size=(labeled_features_ema.shape[2], labeled_features_ema.shape[3]),
                                                         mode='nearest').squeeze(1)
-                label_prediction_down = nn.functional.interpolate(label_prediction.float().unsqueeze(1),
-                                                        size=(labeled_features.shape[2], labeled_features.shape[3]),
-                                                        mode='nearest').squeeze(1)
+                label_prediction_down = nn.functional.interpolate(label_prediction_ema.float().unsqueeze(1),
+                                                                  size=(
+                                                                  labeled_features_ema.shape[2], labeled_features_ema.shape[3]),
+                                                                  mode='nearest').squeeze(1)
+                probability_prediction_down = nn.functional.interpolate(probability_prediction_ema.float().unsqueeze(1),
+                                                                        size=(labeled_features_ema.shape[2],
+                                                                              labeled_features_ema.shape[3]),
+                                                                        mode='nearest').squeeze(1)
 
                 # get mask where the labeled predictions are correct
-                mask_prediction_correctly = (label_prediction_down == labels_down)
+                mask_prediction_correctly = ((label_prediction_down == labels_down).float() *
+                                (probability_prediction_down > 0.95).float()).bool()
 
-                labeled_features_correct = labeled_features.permute(0, 2, 3, 1)
+                labeled_features_correct = labeled_features_ema.permute(0, 2, 3, 1)
                 labels_down_correct = labels_down[mask_prediction_correctly]
                 labeled_features_correct = labeled_features_correct[mask_prediction_correctly, ...]
 
@@ -713,18 +720,6 @@ def main():
                 feature_memory.add_features_from_sample_random(proj_labeled_features_correct, labels_down_correct, batch_size_labeled)
 
 
-                # # get label distribution from labels
-                # class_dist = F.one_hot(labels, 255)
-                # class_dist = class_dist.permute(0, 3, 1, 2)
-                # class_dist = torch.nn.functional.avg_pool2d(class_dist.float(),
-                #                 kernel_size=int( labeled_pred.shape[2] / labeled_features.shape[2]))
-                # # rull out ignore label
-                # class_dist = class_dist[:, :num_classes, :, :]
-                # # renormalize distribution
-                # class_dist = class_dist / torch.sum(class_dist, dim=1).unsqueeze(1)
-
-                # take only features which lead to accurate predictions
-                # threhsold > 0.5 accuracy. select only good features
 
 
             # TODO: this is sueprvised contrastive learning
