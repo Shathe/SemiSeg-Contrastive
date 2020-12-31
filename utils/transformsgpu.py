@@ -60,24 +60,24 @@ def solarize(solarize,  data = None, target = None, probs = None):
 
 
 
+# def mix(mask, data = None, target = None, probs = None):
+#     #Mix
+#     if not (data is None):
+#         if mask.shape[0] == data.shape[0]:
+#             data = torch.cat([(mask[i] * data[i] + (1 - mask[i]) * data[(i + 1) % data.shape[0]]).unsqueeze(0) for i in range(data.shape[0])])
+#         elif mask.shape[0] == data.shape[0] / 2:
+#             data = torch.cat((torch.cat([(mask[i] * data[2 * i] + (1 - mask[i]) * data[2 * i + 1]).unsqueeze(0) for i in range(int(data.shape[0] / 2))]),
+#                               torch.cat([((1 - mask[i]) * data[2 * i] + mask[i] * data[2 * i + 1]).unsqueeze(0) for i in range(int(data.shape[0] / 2))])))
+#     if not (target is None):
+#         target = torch.cat([(mask[i] * target[i] + (1 - mask[i]) * target[(i + 1) % target.shape[0]]).unsqueeze(0) for i in range(target.shape[0])])
+#
+#     if not (probs is None):
+#         probs = torch.cat([(mask[i] * probs[i] + (1 - mask[i]) * probs[(i + 1) % probs.shape[0]]).unsqueeze(0) for i in range(probs.shape[0])])
+#
+#     return data, target, probs
+
+
 def mix(mask, data = None, target = None, probs = None):
-    #Mix
-    if not (data is None):
-        if mask.shape[0] == data.shape[0]:
-            data = torch.cat([(mask[i] * data[i] + (1 - mask[i]) * data[(i + 1) % data.shape[0]]).unsqueeze(0) for i in range(data.shape[0])])
-        elif mask.shape[0] == data.shape[0] / 2:
-            data = torch.cat((torch.cat([(mask[i] * data[2 * i] + (1 - mask[i]) * data[2 * i + 1]).unsqueeze(0) for i in range(int(data.shape[0] / 2))]),
-                              torch.cat([((1 - mask[i]) * data[2 * i] + mask[i] * data[2 * i + 1]).unsqueeze(0) for i in range(int(data.shape[0] / 2))])))
-    if not (target is None):
-        target = torch.cat([(mask[i] * target[i] + (1 - mask[i]) * target[(i + 1) % target.shape[0]]).unsqueeze(0) for i in range(target.shape[0])])
-
-    if not (probs is None):
-        probs = torch.cat([(mask[i] * probs[i] + (1 - mask[i]) * probs[(i + 1) % probs.shape[0]]).unsqueeze(0) for i in range(probs.shape[0])])
-
-    return data, target, probs
-
-
-def mix2(mask, data = None, target = None, probs = None):
     #Mix
     if not (data is None):
         if mask.shape[0] == data.shape[0]:
