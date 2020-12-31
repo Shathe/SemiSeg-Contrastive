@@ -125,3 +125,677 @@ Saving a checkpoint: ../saved/DeepLab/best_model.pth ...
 Saving current best model: best_model.pth
 
 Saving a checkpoint: ../saved/DeepLab/checkpoint-iter10000.pth ...
+iter =  12000/ 50000
+Found 500 val images
+Evaluating, found 500 images.
+100 processed
+200 processed
+300 processed
+400 processed
+500 processed
+class  0 road         IU 0.95
+class  1 sidewalk     IU 0.66
+class  2 building     IU 0.85
+class  3 wall         IU 0.35
+class  4 fence        IU 0.29
+class  5 pole         IU 0.38
+class  6 traffic_light IU 0.40
+class  7 traffic_sign IU 0.52
+class  8 vegetation   IU 0.86
+class  9 terrain      IU 0.42
+class 10 sky          IU 0.89
+class 11 person       IU 0.62
+class 12 rider        IU 0.39
+class 13 car          IU 0.88
+class 14 truck        IU 0.37
+class 15 bus          IU 0.56
+class 16 train        IU 0.31
+class 17 motorcycle   IU 0.27
+class 18 bicycle      IU 0.59
+meanIOU: 0.5558765513946969
+
+last labeled loss
+tensor(0.1109, device='cuda:0', grad_fn=<NllLossBackward>)
+last loss_pix_to_pix loss
+tensor(0.0296, device='cuda:0', grad_fn=<DivBackward0>)
+tensor(0.0296, device='cuda:0', grad_fn=<DivBackward0>)
+need to rebalance?
+
+Saving a checkpoint: ../saved/DeepLab/best_model.pth ...
+Saving current best model: best_model.pth
+iter =  15000/ 50000
+Found 500 val images
+Evaluating, found 500 images.
+100 processed
+200 processed
+300 processed
+400 processed
+500 processed
+class  0 road         IU 0.95
+class  1 sidewalk     IU 0.67
+class  2 building     IU 0.85
+class  3 wall         IU 0.34
+class  4 fence        IU 0.29
+class  5 pole         IU 0.38
+class  6 traffic_light IU 0.41
+class  7 traffic_sign IU 0.53
+class  8 vegetation   IU 0.86
+class  9 terrain      IU 0.42
+class 10 sky          IU 0.89
+class 11 person       IU 0.63
+class 12 rider        IU 0.42
+class 13 car          IU 0.88
+class 14 truck        IU 0.43
+class 15 bus          IU 0.60
+class 16 train        IU 0.33
+class 17 motorcycle   IU 0.35
+class 18 bicycle      IU 0.59
+meanIOU: 0.5703920928608742
+
+last labeled loss
+tensor(0.1387, device='cuda:0', grad_fn=<NllLossBackward>)
+last loss_pix_to_pix loss
+tensor(0.0437, device='cuda:0', grad_fn=<DivBackward0>)
+tensor(0.0437, device='cuda:0', grad_fn=<DivBackward0>)
+need to rebalance?
+
+Saving a checkpoint: ../saved/DeepLab/best_model.pth ...
+Saving current best model: best_model.pth
+iter =  18000/ 50000
+Found 500 val images
+Evaluating, found 500 images.
+100 processed
+200 processed
+300 processed
+400 processed
+500 processed
+class  0 road         IU 0.95
+class  1 sidewalk     IU 0.68
+class  2 building     IU 0.85
+class  3 wall         IU 0.39
+class  4 fence        IU 0.30
+class  5 pole         IU 0.39
+class  6 traffic_light IU 0.42
+class  7 traffic_sign IU 0.53
+class  8 vegetation   IU 0.86
+class  9 terrain      IU 0.43
+class 10 sky          IU 0.90
+class 11 person       IU 0.63
+class 12 rider        IU 0.41
+class 13 car          IU 0.88
+class 14 truck        IU 0.44
+class 15 bus          IU 0.55
+class 16 train        IU 0.33
+class 17 motorcycle   IU 0.28
+class 18 bicycle      IU 0.61
+meanIOU: 0.5704563197495114
+
+last labeled loss
+tensor(0.1211, device='cuda:0', grad_fn=<NllLossBackward>)
+last loss_pix_to_pix loss
+tensor(0.0296, device='cuda:0', grad_fn=<DivBackward0>)
+tensor(0.0296, device='cuda:0', grad_fn=<DivBackward0>)
+need to rebalance?
+
+Saving a checkpoint: ../saved/DeepLab/best_model.pth ...
+Saving current best model: best_model.pth
+
+Saving a checkpoint: ../saved/DeepLab/checkpoint-iter20000.pth ...
+iter =  21000/ 50000
+Found 500 val images
+Evaluating, found 500 images.
+100 processed
+200 processed
+300 processed
+400 processed
+500 processed
+class  0 road         IU 0.95
+class  1 sidewalk     IU 0.68
+class  2 building     IU 0.85
+class  3 wall         IU 0.38
+class  4 fence        IU 0.31
+class  5 pole         IU 0.39
+class  6 traffic_light IU 0.43
+class  7 traffic_sign IU 0.54
+class  8 vegetation   IU 0.86
+class  9 terrain      IU 0.42
+class 10 sky          IU 0.90
+class 11 person       IU 0.63
+class 12 rider        IU 0.42
+class 13 car          IU 0.89
+class 14 truck        IU 0.45
+class 15 bus          IU 0.54
+class 16 train        IU 0.25
+class 17 motorcycle   IU 0.36
+class 18 bicycle      IU 0.61
+meanIOU: 0.5724561749397501
+
+last labeled loss
+tensor(0.0840, device='cuda:0', grad_fn=<NllLossBackward>)
+last loss_pix_to_pix loss
+tensor(0.0459, device='cuda:0', grad_fn=<DivBackward0>)
+tensor(0.0459, device='cuda:0', grad_fn=<DivBackward0>)
+need to rebalance?
+
+Saving a checkpoint: ../saved/DeepLab/best_model.pth ...
+Saving current best model: best_model.pth
+iter =  24000/ 50000
+Found 500 val images
+Evaluating, found 500 images.
+100 processed
+200 processed
+300 processed
+400 processed
+500 processed
+class  0 road         IU 0.95
+class  1 sidewalk     IU 0.69
+class  2 building     IU 0.85
+class  3 wall         IU 0.37
+class  4 fence        IU 0.32
+class  5 pole         IU 0.39
+class  6 traffic_light IU 0.43
+class  7 traffic_sign IU 0.54
+class  8 vegetation   IU 0.86
+class  9 terrain      IU 0.42
+class 10 sky          IU 0.90
+class 11 person       IU 0.64
+class 12 rider        IU 0.42
+class 13 car          IU 0.88
+class 14 truck        IU 0.39
+class 15 bus          IU 0.54
+class 16 train        IU 0.24
+class 17 motorcycle   IU 0.38
+class 18 bicycle      IU 0.61
+meanIOU: 0.569531501895541
+
+last labeled loss
+tensor(0.1121, device='cuda:0', grad_fn=<NllLossBackward>)
+last loss_pix_to_pix loss
+tensor(0.0327, device='cuda:0', grad_fn=<DivBackward0>)
+tensor(0.0327, device='cuda:0', grad_fn=<DivBackward0>)
+need to rebalance?
+iter =  27000/ 50000
+Found 500 val images
+Evaluating, found 500 images.
+100 processed
+200 processed
+300 processed
+400 processed
+500 processed
+class  0 road         IU 0.95
+class  1 sidewalk     IU 0.70
+class  2 building     IU 0.86
+class  3 wall         IU 0.38
+class  4 fence        IU 0.32
+class  5 pole         IU 0.39
+class  6 traffic_light IU 0.44
+class  7 traffic_sign IU 0.55
+class  8 vegetation   IU 0.86
+class  9 terrain      IU 0.42
+class 10 sky          IU 0.90
+class 11 person       IU 0.64
+class 12 rider        IU 0.44
+class 13 car          IU 0.89
+class 14 truck        IU 0.47
+class 15 bus          IU 0.58
+class 16 train        IU 0.27
+class 17 motorcycle   IU 0.35
+class 18 bicycle      IU 0.60
+meanIOU: 0.5789797239177531
+
+last labeled loss
+tensor(0.0895, device='cuda:0', grad_fn=<NllLossBackward>)
+last loss_pix_to_pix loss
+tensor(0.0410, device='cuda:0', grad_fn=<DivBackward0>)
+tensor(0.0410, device='cuda:0', grad_fn=<DivBackward0>)
+need to rebalance?
+
+Saving a checkpoint: ../saved/DeepLab/best_model.pth ...
+Saving current best model: best_model.pth
+
+Saving a checkpoint: ../saved/DeepLab/checkpoint-iter30000.pth ...
+iter =  30000/ 50000
+Found 500 val images
+Evaluating, found 500 images.
+100 processed
+200 processed
+300 processed
+400 processed
+500 processed
+class  0 road         IU 0.96
+class  1 sidewalk     IU 0.70
+class  2 building     IU 0.86
+class  3 wall         IU 0.40
+class  4 fence        IU 0.32
+class  5 pole         IU 0.39
+class  6 traffic_light IU 0.44
+class  7 traffic_sign IU 0.55
+class  8 vegetation   IU 0.86
+class  9 terrain      IU 0.42
+class 10 sky          IU 0.90
+class 11 person       IU 0.64
+class 12 rider        IU 0.42
+class 13 car          IU 0.89
+class 14 truck        IU 0.43
+class 15 bus          IU 0.54
+class 16 train        IU 0.23
+class 17 motorcycle   IU 0.35
+class 18 bicycle      IU 0.61
+meanIOU: 0.5752361379859158
+
+last labeled loss
+tensor(0.0896, device='cuda:0', grad_fn=<NllLossBackward>)
+last loss_pix_to_pix loss
+tensor(0.0333, device='cuda:0', grad_fn=<DivBackward0>)
+tensor(0.0333, device='cuda:0', grad_fn=<DivBackward0>)
+need to rebalance?
+iter =  33000/ 50000
+Found 500 val images
+Evaluating, found 500 images.
+100 processed
+200 processed
+300 processed
+400 processed
+500 processed
+class  0 road         IU 0.96
+class  1 sidewalk     IU 0.70
+class  2 building     IU 0.86
+class  3 wall         IU 0.41
+class  4 fence        IU 0.33
+class  5 pole         IU 0.40
+class  6 traffic_light IU 0.44
+class  7 traffic_sign IU 0.55
+class  8 vegetation   IU 0.86
+class  9 terrain      IU 0.42
+class 10 sky          IU 0.90
+class 11 person       IU 0.63
+class 12 rider        IU 0.43
+class 13 car          IU 0.89
+class 14 truck        IU 0.44
+class 15 bus          IU 0.55
+class 16 train        IU 0.28
+class 17 motorcycle   IU 0.36
+class 18 bicycle      IU 0.60
+meanIOU: 0.5798301092000545
+
+last labeled loss
+tensor(0.3644, device='cuda:0', grad_fn=<NllLossBackward>)
+last loss_pix_to_pix loss
+tensor(0.0296, device='cuda:0', grad_fn=<DivBackward0>)
+tensor(0.0296, device='cuda:0', grad_fn=<DivBackward0>)
+need to rebalance?
+
+Saving a checkpoint: ../saved/DeepLab/best_model.pth ...
+Saving current best model: best_model.pth
+iter =  36000/ 50000
+Found 500 val images
+Evaluating, found 500 images.
+100 processed
+200 processed
+300 processed
+400 processed
+500 processed
+class  0 road         IU 0.96
+class  1 sidewalk     IU 0.70
+class  2 building     IU 0.86
+class  3 wall         IU 0.41
+class  4 fence        IU 0.32
+class  5 pole         IU 0.40
+class  6 traffic_light IU 0.45
+class  7 traffic_sign IU 0.56
+class  8 vegetation   IU 0.86
+class  9 terrain      IU 0.41
+class 10 sky          IU 0.91
+class 11 person       IU 0.64
+class 12 rider        IU 0.44
+class 13 car          IU 0.89
+class 14 truck        IU 0.43
+class 15 bus          IU 0.54
+class 16 train        IU 0.28
+class 17 motorcycle   IU 0.34
+class 18 bicycle      IU 0.60
+meanIOU: 0.5782987419996605
+
+last labeled loss
+tensor(0.0955, device='cuda:0', grad_fn=<NllLossBackward>)
+last loss_pix_to_pix loss
+tensor(0.0287, device='cuda:0', grad_fn=<DivBackward0>)
+tensor(0.0287, device='cuda:0', grad_fn=<DivBackward0>)
+need to rebalance?
+iter =  39000/ 50000
+Found 500 val images
+Evaluating, found 500 images.
+100 processed
+200 processed
+300 processed
+400 processed
+500 processed
+class  0 road         IU 0.96
+class  1 sidewalk     IU 0.70
+class  2 building     IU 0.85
+class  3 wall         IU 0.40
+class  4 fence        IU 0.32
+class  5 pole         IU 0.40
+class  6 traffic_light IU 0.45
+class  7 traffic_sign IU 0.56
+class  8 vegetation   IU 0.86
+class  9 terrain      IU 0.42
+class 10 sky          IU 0.90
+class 11 person       IU 0.64
+class 12 rider        IU 0.43
+class 13 car          IU 0.89
+class 14 truck        IU 0.34
+class 15 bus          IU 0.53
+class 16 train        IU 0.21
+class 17 motorcycle   IU 0.36
+class 18 bicycle      IU 0.61
+meanIOU: 0.5704352482751268
+
+last labeled loss
+tensor(0.0813, device='cuda:0', grad_fn=<NllLossBackward>)
+last loss_pix_to_pix loss
+tensor(0.0361, device='cuda:0', grad_fn=<DivBackward0>)
+tensor(0.0361, device='cuda:0', grad_fn=<DivBackward0>)
+need to rebalance?
+
+Saving a checkpoint: ../saved/DeepLab/checkpoint-iter40000.pth ...
+iter =  42000/ 50000
+Found 500 val images
+Evaluating, found 500 images.
+100 processed
+200 processed
+300 processed
+400 processed
+500 processed
+class  0 road         IU 0.96
+class  1 sidewalk     IU 0.71
+class  2 building     IU 0.86
+class  3 wall         IU 0.41
+class  4 fence        IU 0.33
+class  5 pole         IU 0.40
+class  6 traffic_light IU 0.46
+class  7 traffic_sign IU 0.56
+class  8 vegetation   IU 0.86
+class  9 terrain      IU 0.40
+class 10 sky          IU 0.91
+class 11 person       IU 0.64
+class 12 rider        IU 0.43
+class 13 car          IU 0.89
+class 14 truck        IU 0.43
+class 15 bus          IU 0.52
+class 16 train        IU 0.26
+class 17 motorcycle   IU 0.33
+class 18 bicycle      IU 0.61
+meanIOU: 0.5757197220445088
+
+last labeled loss
+tensor(0.1078, device='cuda:0', grad_fn=<NllLossBackward>)
+last loss_pix_to_pix loss
+tensor(0.0265, device='cuda:0', grad_fn=<DivBackward0>)
+tensor(0.0265, device='cuda:0', grad_fn=<DivBackward0>)
+need to rebalance?
+iter =  45000/ 50000
+Found 500 val images
+Evaluating, found 500 images.
+100 processed
+200 processed
+300 processed
+400 processed
+500 processed
+class  0 road         IU 0.96
+class  1 sidewalk     IU 0.71
+class  2 building     IU 0.86
+class  3 wall         IU 0.40
+class  4 fence        IU 0.32
+class  5 pole         IU 0.40
+class  6 traffic_light IU 0.45
+class  7 traffic_sign IU 0.55
+class  8 vegetation   IU 0.86
+class  9 terrain      IU 0.42
+class 10 sky          IU 0.90
+class 11 person       IU 0.64
+class 12 rider        IU 0.44
+class 13 car          IU 0.89
+class 14 truck        IU 0.38
+class 15 bus          IU 0.55
+class 16 train        IU 0.25
+class 17 motorcycle   IU 0.35
+class 18 bicycle      IU 0.61
+meanIOU: 0.5765386828363057
+
+last labeled loss
+tensor(0.1166, device='cuda:0', grad_fn=<NllLossBackward>)
+last loss_pix_to_pix loss
+tensor(0.0396, device='cuda:0', grad_fn=<DivBackward0>)
+tensor(0.0396, device='cuda:0', grad_fn=<DivBackward0>)
+need to rebalance?
+iter =  48000/ 50000
+Found 500 val images
+Evaluating, found 500 images.
+100 processed
+200 processed
+300 processed
+400 processed
+500 processed
+class  0 road         IU 0.96
+class  1 sidewalk     IU 0.71
+class  2 building     IU 0.86
+class  3 wall         IU 0.41
+class  4 fence        IU 0.33
+class  5 pole         IU 0.40
+class  6 traffic_light IU 0.46
+class  7 traffic_sign IU 0.55
+class  8 vegetation   IU 0.86
+class  9 terrain      IU 0.41
+class 10 sky          IU 0.90
+class 11 person       IU 0.64
+class 12 rider        IU 0.43
+class 13 car          IU 0.89
+class 14 truck        IU 0.43
+class 15 bus          IU 0.53
+class 16 train        IU 0.25
+class 17 motorcycle   IU 0.36
+class 18 bicycle      IU 0.62
+meanIOU: 0.578942467362088
+
+last labeled loss
+tensor(0.1130, device='cuda:0', grad_fn=<NllLossBackward>)
+last loss_pix_to_pix loss
+tensor(0.0456, device='cuda:0', grad_fn=<DivBackward0>)
+tensor(0.0456, device='cuda:0', grad_fn=<DivBackward0>)
+need to rebalance?
+
+Saving a checkpoint: ../saved/DeepLab/checkpoint-iter50000.pth ...
+Found 500 val images
+Evaluating, found 500 images.
+100 processed
+200 processed
+300 processed
+400 processed
+500 processed
+class  0 road         IU 0.96
+class  1 sidewalk     IU 0.70
+class  2 building     IU 0.86
+class  3 wall         IU 0.40
+class  4 fence        IU 0.33
+class  5 pole         IU 0.40
+class  6 traffic_light IU 0.45
+class  7 traffic_sign IU 0.55
+class  8 vegetation   IU 0.86
+class  9 terrain      IU 0.41
+class 10 sky          IU 0.90
+class 11 person       IU 0.64
+class 12 rider        IU 0.43
+class 13 car          IU 0.89
+class 14 truck        IU 0.45
+class 15 bus          IU 0.54
+class 16 train        IU 0.25
+class 17 motorcycle   IU 0.36
+class 18 bicycle      IU 0.61
+meanIOU: 0.5780713745952386
+
+BEST MIOU
+0.5798301092000545
+Total time: 120131.3783697933 seconds
+Use all
+---------------------------------Starting---------------------------------
+{'model': 'DeepLab', 'version': '2', 'dataset': 'cityscapes', 'training': {'batch_size': 4, 'num_workers': 3, 'optimizer': 'SGD', 'momentum': 0.9, 'num_iterations': 50000, 'learning_rate': 0.0002, 'lr_schedule': 'Poly', 'lr_schedule_power': 0.9, 'weight_decay': 0.0005, 'use_sync_batchnorm': False, 'data': {'split_id_list': 0, 'labeled_samples': 100, 'input_size': '512,512'}, 'unlabeled': {'train_unlabeled': True, 'consistency_weight': 1, 'consistency_loss': 'CE', 'pixel_weight': 'sigmoid'}}, 'seed': 5555, 'ignore_label': 250, 'utils': {'save_checkpoint_every': 10000, 'checkpoint_dir': '../saved/DeepLab', 'val_per_iter': 3000, 'log_per_iter': 100, 'save_best_model': True}}
+Found 2975 train images
+dataset size:  2975
+Training on number of samples: 100
+loading train ids from ./splits/city/split_0.pkl
+/opt/conda/lib/python3.6/site-packages/torch/optim/sgd.py:68: UserWarning: optimizer contains a parameter group with duplicate parameters; in future, this will cause an error; see github.com/pytorch/pytorch/issues/40967 for more information
+  super(SGD, self).__init__(params, defaults)
+/opt/conda/lib/python3.6/site-packages/torch/functional.py:1242: UserWarning: torch.norm is deprecated and may be removed in a future PyTorch release. Use torch.linalg.norm instead.
+  "torch.norm is deprecated and may be removed in a future PyTorch release. "
+iter =   3000/ 50000
+Found 500 val images
+Evaluating, found 500 images.
+100 processed
+200 processed
+300 processed
+400 processed
+500 processed
+class  0 road         IU 0.93
+class  1 sidewalk     IU 0.59
+class  2 building     IU 0.84
+class  3 wall         IU 0.30
+class  4 fence        IU 0.23
+class  5 pole         IU 0.34
+class  6 traffic_light IU 0.33
+class  7 traffic_sign IU 0.43
+class  8 vegetation   IU 0.85
+class  9 terrain      IU 0.39
+class 10 sky          IU 0.88
+class 11 person       IU 0.60
+class 12 rider        IU 0.37
+class 13 car          IU 0.84
+class 14 truck        IU 0.23
+class 15 bus          IU 0.36
+class 16 train        IU 0.33
+class 17 motorcycle   IU 0.21
+class 18 bicycle      IU 0.55
+meanIOU: 0.504191510432492
+
+last labeled loss
+tensor(0.2228, device='cuda:0', grad_fn=<NllLossBackward>)
+last loss_pix_to_pix loss
+tensor(0.1404, device='cuda:0', grad_fn=<DivBackward0>)
+tensor(0.1404, device='cuda:0', grad_fn=<DivBackward0>)
+need to rebalance?
+
+Saving a checkpoint: ../saved/DeepLab/best_model.pth ...
+Saving current best model: best_model.pth
+iter =   6000/ 50000
+Found 500 val images
+Evaluating, found 500 images.
+100 processed
+200 processed
+300 processed
+400 processed
+500 processed
+class  0 road         IU 0.95
+class  1 sidewalk     IU 0.64
+class  2 building     IU 0.84
+class  3 wall         IU 0.28
+class  4 fence        IU 0.25
+class  5 pole         IU 0.35
+class  6 traffic_light IU 0.37
+class  7 traffic_sign IU 0.48
+class  8 vegetation   IU 0.85
+class  9 terrain      IU 0.42
+class 10 sky          IU 0.88
+class 11 person       IU 0.60
+class 12 rider        IU 0.38
+class 13 car          IU 0.86
+class 14 truck        IU 0.28
+class 15 bus          IU 0.52
+class 16 train        IU 0.32
+class 17 motorcycle   IU 0.30
+class 18 bicycle      IU 0.56
+meanIOU: 0.5344240393185711
+
+last labeled loss
+tensor(0.1709, device='cuda:0', grad_fn=<NllLossBackward>)
+last loss_pix_to_pix loss
+tensor(0.1341, device='cuda:0', grad_fn=<DivBackward0>)
+tensor(0.1341, device='cuda:0', grad_fn=<DivBackward0>)
+need to rebalance?
+
+Saving a checkpoint: ../saved/DeepLab/best_model.pth ...
+Saving current best model: best_model.pth
+iter =   9000/ 50000
+Found 500 val images
+Evaluating, found 500 images.
+100 processed
+200 processed
+300 processed
+400 processed
+500 processed
+class  0 road         IU 0.95
+class  1 sidewalk     IU 0.66
+class  2 building     IU 0.85
+class  3 wall         IU 0.33
+class  4 fence        IU 0.29
+class  5 pole         IU 0.37
+class  6 traffic_light IU 0.39
+class  7 traffic_sign IU 0.51
+class  8 vegetation   IU 0.86
+class  9 terrain      IU 0.43
+class 10 sky          IU 0.89
+class 11 person       IU 0.62
+class 12 rider        IU 0.41
+class 13 car          IU 0.87
+class 14 truck        IU 0.42
+class 15 bus          IU 0.49
+class 16 train        IU 0.35
+class 17 motorcycle   IU 0.31
+class 18 bicycle      IU 0.59
+meanIOU: 0.5567094266266496
+
+last labeled loss
+tensor(0.1295, device='cuda:0', grad_fn=<NllLossBackward>)
+last loss_pix_to_pix loss
+tensor(0.1108, device='cuda:0', grad_fn=<DivBackward0>)
+tensor(0.1108, device='cuda:0', grad_fn=<DivBackward0>)
+need to rebalance?
+
+Saving a checkpoint: ../saved/DeepLab/best_model.pth ...
+Saving current best model: best_model.pth
+
+Saving a checkpoint: ../saved/DeepLab/checkpoint-iter10000.pth ...
+iter =  12000/ 50000
+Found 500 val images
+Evaluating, found 500 images.
+100 processed
+200 processed
+300 processed
+400 processed
+500 processed
+class  0 road         IU 0.95
+class  1 sidewalk     IU 0.67
+class  2 building     IU 0.85
+class  3 wall         IU 0.34
+class  4 fence        IU 0.29
+class  5 pole         IU 0.38
+class  6 traffic_light IU 0.40
+class  7 traffic_sign IU 0.52
+class  8 vegetation   IU 0.86
+class  9 terrain      IU 0.42
+class 10 sky          IU 0.90
+class 11 person       IU 0.63
+class 12 rider        IU 0.42
+class 13 car          IU 0.87
+class 14 truck        IU 0.41
+class 15 bus          IU 0.55
+class 16 train        IU 0.27
+class 17 motorcycle   IU 0.27
+class 18 bicycle      IU 0.58
+meanIOU: 0.556318663264008
+
+last labeled loss
+tensor(0.1788, device='cuda:0', grad_fn=<NllLossBackward>)
+last loss_pix_to_pix loss
+tensor(0.1099, device='cuda:0', grad_fn=<DivBackward0>)
+tensor(0.1099, device='cuda:0', grad_fn=<DivBackward0>)
+need to rebalance?
