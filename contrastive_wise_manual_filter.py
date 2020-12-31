@@ -808,13 +808,17 @@ def main():
                                                         size=(features_joined_unlabeled.shape[2], features_joined_unlabeled.shape[3]),
                                                         mode='nearest').squeeze(1)
 
+
                 # get label distribution from labels and predictions (high res to downsampled resolution)
-                class_dist_labels = F.one_hot(joined_pseudolabels, num_classes)
+                class_dist_labels = F.one_hot(joined_pseudolabels, 255)
                 class_dist_labels = class_dist_labels.permute(0, 3, 1, 2)
                 class_dist_labels = torch.nn.functional.avg_pool2d(class_dist_labels.float(),
                                                                    kernel_size=int(round(
                                                                        labeled_pred.shape[2] / labeled_features.shape[
                                                                            2])))
+
+                # rull out ignore label
+                class_dist_labels = class_dist_labels[:, :num_classes, :, :]
 
                 joined_maxprobs = torch.nn.functional.avg_pool2d(joined_maxprobs.float().unsqueeze(1),
                                                                    kernel_size=int(round(
