@@ -25,69 +25,6 @@ def pix_to_pix_projection(projection1, projection2):
     return distance
 
 
-def contrastive_class_to_class_learned(model, features, class_labels, prediction_probs, batch_size, num_classes,
-                            memory, label_probs, per_class_samples_per_image=256, minimize_top_k_percent=1., detach=True):
-
-    loss = 0
-
-    for c in range(num_classes):
-        mask_c = class_labels == c
-        features_c = features[mask_c,:]
-        prediction_probs_c = prediction_probs[mask_c]
-
-        selector = model.__getattr__('contrastive_class_selector_' + str(c))
-
-        # TODO: sort by lowest prediction probs i.e, larger error
-
-        memory_c = memory[c] # N, 256
-        if memory_c is not None and features_c.shape[0] > 1:
-
-            memory_c = torch.from_numpy(memory_c).cuda()
-            memory_c = F.normalize(memory_c, dim=1)
-            features_c_norm = F.normalize(features_c, dim=1)
-
-            # TODO: cuanto feature size se puede hcaer yendo rapido?
-            similarities = torch.mm(features_c_norm, memory_c.transpose(1, 0)) # (-1, 1) 1 is equal vectors
-            distances = 1 - similarities # (0, 2) 0 is equal vectors
-            # M (elements), N (memory)
-
-            # # TODO: concat  prob distr y labels probs.
-            # probs = label_probs.detach()
-            # probs_c = probs[mask_c]
-            # features_c = torch.cat((features_c, prediction_probs_c.unsqueeze(1), probs_c.unsqueeze(1)), dim = 1)
-            if detach:
-                trainablility = selector(features_c.detach()) # detach for trainability
-            else:
-                trainablility = selector(features_c) # detach for trainability
-
-            trainablility = torch.sigmoid(trainablility)
-            rescaled_trainability = (trainablility.shape[0] / trainablility.sum(dim=0)) * trainablility
-            rescaled_trainability = rescaled_trainability.repeat(1, distances.shape[1])
-            distances = distances * rescaled_trainability
-
-
-            # TODO: optiomz, minimiza all. Minimize top-K
-            if minimize_top_k_percent < 1:
-                distances, indices = torch.sort(distances, dim=1)
-                top_k = int(distances.shape[1] * minimize_top_k_percent)
-                distances = distances[:, :top_k]
-
-
-            #TODO  : ESTO QUE LO APRENDA SOLO
-            # if label_probs is not None:
-            #     probs = label_probs.detach()
-            #     probs_c = probs[mask_c]
-            #
-            #     distances = distances.mean(dim=1)
-            #     distances = distances * torch.pow(probs_c, 6)
-
-
-            loss = loss + distances.mean()
-
-    return loss / num_classes
-
-
-
 
 def contrastive_class_to_class_learned_oneselector(model, features, class_labels, prediction_probs, batch_size, num_classes,
                             memory, label_probs, per_class_samples_per_image=256, minimize_top_k_percent=1., detach=True):
@@ -325,6 +262,180 @@ def contrastive_class_to_class_basic_random(features, class_labels, prediction_p
     return loss / num_classes
 
 
+def contrastive_class_to_class_learned(model, features, class_labels, prediction_probs, batch_size, num_classes,
+                            memory, label_probs, per_class_samples_per_image=256, minimize_top_k_percent=1., detach=True):
+
+    loss = 0
+
+    for c in range(num_classes):
+        mask_c = class_labels == c
+        features_c = features[mask_c,:]
+        prediction_probs_c = prediction_probs[mask_c]
+
+        selector = model.__getattr__('contrastive_class_selector_' + str(c))
+
+        # TODO: sort by lowest prediction probs i.e, larger error
+
+        memory_c = memory[c] # N, 256
+        if memory_c is not None and features_c.shape[0] > 1:
+
+            memory_c = torch.from_numpy(memory_c).cuda()
+            memory_c = F.normalize(memory_c, dim=1)
+            features_c_norm = F.normalize(features_c, dim=1)
+
+            # TODO: cuanto feature size se puede hcaer yendo rapido?
+            similarities = torch.mm(features_c_norm, memory_c.transpose(1, 0)) # (-1, 1) 1 is equal vectors
+            distances = 1 - similarities # (0, 2) 0 is equal vectors
+            # M (elements), N (memory)
+
+            # # TODO: concat  prob distr y labels probs.
+            # probs = label_probs.detach()
+            # probs_c = probs[mask_c]
+            # features_c = torch.cat((features_c, prediction_probs_c.unsqueeze(1), probs_c.unsqueeze(1)), dim = 1)
+            if detach:
+                trainablility = selector(features_c.detach()) # detach for trainability
+            else:
+                trainablility = selector(features_c) # detach for trainability
+
+            trainablility = torch.sigmoid(trainablility)
+            rescaled_trainability = (trainablility.shape[0] / trainablility.sum(dim=0)) * trainablility
+            rescaled_trainability = rescaled_trainability.repeat(1, distances.shape[1])
+            distances = distances * rescaled_trainability
+
+
+            # TODO: optiomz, minimiza all. Minimize top-K
+            if minimize_top_k_percent < 1:
+                distances, indices = torch.sort(distances, dim=1)
+                top_k = int(distances.shape[1] * minimize_top_k_percent)
+                distances = distances[:, :top_k]
+
+
+            #TODO  : ESTO QUE LO APRENDA SOLO
+            # if label_probs is not None:
+            #     probs = label_probs.detach()
+            #     probs_c = probs[mask_c]
+            #
+            #     distances = distances.mean(dim=1)
+            #     distances = distances * torch.pow(probs_c, 6)
+
+
+            loss = loss + distances.mean()
+
+    return loss / num_classes
+
+
+
+def contrastive_class_to_class_learned_memory(model, features, class_labels, prediction_probs, batch_size, num_classes,
+                            memory, label_probs, per_class_samples_per_image=256, minimize_top_k_percent=1., detach=True):
+
+    loss = 0
+
+    for c in range(num_classes):
+        mask_c = class_labels == c
+        features_c = features[mask_c,:]
+        prediction_probs_c = prediction_probs[mask_c]
+
+        selector = model.__getattr__('contrastive_class_selector_' + str(c))
+        selector_memory = model.__getattr__('contrastive_class_selector_memory' + str(c))
+
+        # TODO: sort by lowest prediction probs i.e, larger error
+
+        memory_c = memory[c] # N, 256
+        if memory_c is not None and features_c.shape[0] > 1:
+
+            memory_c = torch.from_numpy(memory_c).cuda()
+            trainablility_memory = selector_memory(memory_c)  # detach for trainability
+
+            memory_c = F.normalize(memory_c, dim=1)
+            features_c_norm = F.normalize(features_c, dim=1)
+
+            # TODO: cuanto feature size se puede hcaer yendo rapido?
+            similarities = torch.mm(features_c_norm, memory_c.transpose(1, 0)) # (-1, 1) 1 is equal vectors
+            distances = 1 - similarities # (0, 2) 0 is equal vectors
+            # M (elements), N (memory)
+
+            # # TODO: concat  prob distr y labels probs.
+            # probs = label_probs.detach()
+            # probs_c = probs[mask_c]
+            # features_c = torch.cat((features_c, prediction_probs_c.unsqueeze(1), probs_c.unsqueeze(1)), dim = 1)
+            if detach:
+                trainablility = selector(features_c.detach()) # detach for trainability
+            else:
+                trainablility = selector(features_c) # detach for trainability
+
+            trainablility = torch.sigmoid(trainablility)
+            rescaled_trainability = (trainablility.shape[0] / trainablility.sum(dim=0)) * trainablility
+            rescaled_trainability = rescaled_trainability.repeat(1, distances.shape[1])
+            distances = distances * rescaled_trainability
+
+
+
+            trainablility_memory = torch.sigmoid(trainablility_memory)
+            trainablility_memory = trainablility_memory.permute(1, 0)
+            rescaled_trainability_memory = (trainablility_memory.shape[0] / trainablility_memory.sum(dim=0)) * trainablility_memory
+            rescaled_trainability_memory = rescaled_trainability_memory.repeat(distances.shape[0], 1)
+            distances = distances * rescaled_trainability_memory
+
+
+
+            #TODO  : ESTO QUE LO APRENDA SOLO
+            # if label_probs is not None:
+            #     probs = label_probs.detach()
+            #     probs_c = probs[mask_c]
+            #
+            #     distances = distances.mean(dim=1)
+            #     distances = distances * torch.pow(probs_c, 6)
+
+
+            loss = loss + distances.mean()
+
+    return loss / num_classes
+
+
+def contrastive_class_to_class_basic_random_selectmemory(model, features, class_labels, prediction_probs, batch_size, num_classes,
+                            memory, label_probs, per_class_samples_per_image=256, minimize_top_k_percent=1.):
+    elements_per_class = batch_size * per_class_samples_per_image
+    loss = 0
+
+    for c in range(num_classes):
+        mask_c = class_labels == c
+        features_c = features[mask_c,:]
+
+        selector = model.__getattr__('contrastive_class_selector_memory' + str(c))
+
+
+        indices = np.arange(features_c.shape[0])
+        np.random.shuffle(indices)
+        features_c = features_c[indices, :]
+        random_features_c = features_c[:elements_per_class, :] # M, 256
+
+        memory_c = memory[c] # N, 256
+        if memory_c is not None and random_features_c.shape[0] > 0:
+
+            memory_c = torch.from_numpy(memory_c).cuda()
+            trainablility = selector(memory_c)  # detach for trainability
+
+            memory_c = F.normalize(memory_c, dim=1)
+            random_features_c = F.normalize(random_features_c, dim=1)
+
+            # TODO: cuanto feature size se puede hcaer yendo rapido?
+            similarities = torch.mm(random_features_c, memory_c.transpose(1, 0)) # (-1, 1) 1 is equal vectors
+            distances = 1 - similarities # (0, 2) 0 is equal vectors
+            # M (elements), N (memory)
+
+
+            trainablility = torch.sigmoid(trainablility)
+            trainablility = trainablility.permute(1, 0)
+            rescaled_trainability = (trainablility.shape[0] / trainablility.sum(dim=0)) * trainablility
+            rescaled_trainability = rescaled_trainability.repeat(distances.shape[0], 1)
+            distances = distances * rescaled_trainability
+
+
+
+
+            loss = loss + distances.mean()
+
+    return loss / num_classes
 
 def contrastive_class_to_class_basic_all(features, class_labels, prediction_probs, batch_size, num_classes,
                             memory, label_probs, per_class_samples_per_image=256, minimize_top_k_percent=1.):
