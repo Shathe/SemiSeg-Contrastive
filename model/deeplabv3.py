@@ -27,7 +27,7 @@ class Decoder(nn.Module):
                                        BatchNorm(256),
                                        nn.ReLU())
 
-        self.last_dropout = nn.Dropout(0.1)
+        self.last_dropout = nn.Dropout(0.15)
         self.last_conv = nn.Conv2d(256, num_classes, kernel_size=1, stride=1)
 
         self._init_weight()
@@ -41,8 +41,8 @@ class Decoder(nn.Module):
         x = F.interpolate(x, size=low_level_feat.size()[2:], mode='bilinear', align_corners=True)
         x = torch.cat((x, low_level_feat), dim=1)
         x_f = self.pre_last_conv(x)
-        x_f = self.last_dropout(x_f)
-        x = self.last_conv(x_f)
+        x = self.last_dropout(x_f)
+        x = self.last_conv(x)
         if return_features:
             return x, x_f
         return x

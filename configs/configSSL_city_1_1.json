@@ -3,7 +3,7 @@
   "version": "2",
   "dataset": "cityscapes",
   "training": {
-    "batch_size": 2,
+    "batch_size": 5,
     "num_workers": 2,
     "optimizer": "SGD",
     "momentum": 0.9,
