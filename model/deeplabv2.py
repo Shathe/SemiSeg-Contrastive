@@ -223,7 +223,7 @@ class ResNet(nn.Module):
         b.append(self.layer4)
         b.append(self.projection_head)
         b.append(self.prediction_head)
-        b.append(self.selector)
+        # b.append(self.selector)
 
         for class_c in range(self.num_classes):
             b.append(self.__getattr__('contrastive_class_selector_' + str(class_c)))
