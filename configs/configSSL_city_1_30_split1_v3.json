@@ -1,6 +1,6 @@
 {
   "model": "DeepLab",
-  "version": "2",
+  "version": "3",
   "dataset": "cityscapes",
 
   "training": {
@@ -18,7 +18,7 @@
     "data": {
       "split_id_list": 1,
       "labeled_samples": 100,
-      "input_size": "512,512"
+      "input_size": "768,768"
     },
     "unlabeled": {
       "train_unlabeled": true,

@@ -459,7 +459,7 @@ def main():
                                                       (train_dataset_size - labeled_samples) / batch_size_unlabeled),
                                                   n_classes=num_classes)
 
-    feature_memory = FeatureMemory(num_samples=labeled_samples, dataset=dataset, memory_per_class=2048, feature_size=256, n_classes=num_classes)
+    feature_memory = FeatureMemory(num_samples=labeled_samples, dataset=dataset, memory_per_class=2048*2, feature_size=256, n_classes=num_classes)
 
     # select the partition
     if split_id is not None:
@@ -672,7 +672,7 @@ def main():
 
             # this is sueprvised contrastive learning
             #if RAMP_UP_ITERS  - 1000:
-            if i_iter > 0.:  # RAMP_UP_ITERS  - 1000:
+            if i_iter >  RAMP_UP_ITERS  - 1000:  # RAMP_UP_ITERS  - 1000:
                 # TODO: DEJAS ESTO Y LO DE ABAJO DE EMA PARA PROTOTYPES?
                 # Create prototypes from labeled images with EMA model
                 with torch.no_grad():
@@ -736,7 +736,7 @@ def main():
 
             # TODO: this is sueprvised contrastive learning
             #if i_iter > RAMP_UP_ITERS:
-            if i_iter > 30:  # RAMP_UP_ITERS:
+            if i_iter > RAMP_UP_ITERS:  # RAMP_UP_ITERS:
                 '''
                 LABELED TO LABELED. Force features from laeled samples, to be similar to other features from the same class (which also leads to good predictions)
                 
@@ -767,10 +767,10 @@ def main():
                 proj_labeled_features_all = model.projection_head(labeled_features_all)
                 pred_labeled_features_all = model.prediction_head(proj_labeled_features_all)
 
-                loss_contr_labeled = contrastive_class_to_class(pred_labeled_features_all, labels_down_all, labeled_prediction_probs_all,
+                loss_contr_labeled = contrastive_class_to_class_learned_memory(pred_labeled_features_all, labels_down_all, labeled_prediction_probs_all,
                                     batch_size_labeled, num_classes, feature_memory.memory, None)
 
-                loss = loss + loss_contr_labeled
+                loss = loss + loss_contr_labeled * 0.1
 
                 '''
                 UNLABELED TO LABELED
@@ -806,10 +806,10 @@ def main():
                 proj_feat_unlabeled = model.projection_head(features_joined_unlabeled)
                 pred_feat_unlabeled = model.prediction_head(proj_feat_unlabeled)
 
-                loss_contr_unlabeled = contrastive_class_to_class(pred_feat_unlabeled, joined_pseudolabels_down, unlabeled_prediction_probs_down,
+                loss_contr_unlabeled = contrastive_class_to_class_learned_memory(pred_feat_unlabeled, joined_pseudolabels_down, unlabeled_prediction_probs_down,
                                     batch_size_unlabeled, num_classes, feature_memory.memory, joined_maxprobs_down)
 
-                loss = loss + loss_contr_unlabeled
+                loss = loss + loss_contr_unlabeled * 0.1
 
                 '''
                 Pasos:
@@ -829,31 +829,6 @@ def main():
                   que fuerzas y samples para alinear y forzar mismas features buenas además de la misma clase
                 '''
 
-        # print(time.time() - a)
-
-        # image = unlabeled_images[0, ...].cpu().numpy().copy()
-        # label = pseudo_label[0, ...].cpu().numpy().copy()
-        # image = np.swapaxes(image, 0, 1)
-        # image = np.swapaxes(image, 2, 1)
-        # image = image[:, :, ::-1]
-        #
-        #
-        # cv2.imshow('img', image.astype(np.uint8))
-        # cv2.imshow('label', label.astype(np.uint8)*10)
-
-        # AUGMENTATION
-
-        # image = unlabeled_images_aug_ce[0, ...].cpu().numpy()
-        # label = pseudo_label[0, ...].cpu().numpy().copy()
-        # image = np.swapaxes(image, 0, 1)
-        # image = np.swapaxes(image, 2, 1)
-        # image = image[:, :, ::-1]
-        # cv2.imshow('img2', image.astype(np.uint8))
-        # cv2.imshow('label2', label.astype(np.uint8)*10)
-        #
-        # cv2.waitKey(0)
-        # cv2.destroyAllWindows()
-        #
 
         if len(gpus) > 1:
             loss = loss.mean()
@@ -885,8 +860,7 @@ def main():
             if contrastive_labeled_loss and i_iter > RAMP_UP_ITERS:
                 print('last loss_pix_to_pix loss')
                 print(loss_contr_unlabeled)
-                print(loss_contr_unlabeled)
-            print('need to rebalance?')
+                print(loss_contr_labeled)
 
             if mIoU > best_mIoU and save_best_model:
                 best_mIoU = mIoU

@@ -145,14 +145,14 @@ class ResNet(nn.Module):
             )
             self.__setattr__('contrastive_class_selector_memory' + str(class_c), selector)
 
-        self.selector = nn.Sequential(
-                nn.Linear(feat_dim, feat_dim),
-                # TODO: concat  label conf and preidction conf
-                # nn.Linear(feat_dim + 2, feat_dim),
-                nn.BatchNorm1d(feat_dim),
-                nn.LeakyReLU(negative_slope=0.2, inplace=True),
-                nn.Linear(feat_dim, 1)
-            )
+        # self.selector = nn.Sequential(
+        #         nn.Linear(feat_dim, feat_dim),
+        #         # TODO: concat  label conf and preidction conf
+        #         # nn.Linear(feat_dim + 2, feat_dim),
+        #         nn.BatchNorm1d(feat_dim),
+        #         nn.LeakyReLU(negative_slope=0.2, inplace=True),
+        #         nn.Linear(feat_dim, 1)
+        #     )
 
 
         for m in self.modules():

@@ -326,7 +326,7 @@ def contrastive_class_to_class_learned(model, features, class_labels, prediction
 
 
 def contrastive_class_to_class_learned_memory(model, features, class_labels, prediction_probs, batch_size, num_classes,
-                            memory, label_probs, per_class_samples_per_image=256, minimize_top_k_percent=1., detach=True):
+                            memory, label_probs, per_class_samples_per_image=256, minimize_top_k_percent=1.):
 
     loss = 0
 
@@ -337,6 +337,8 @@ def contrastive_class_to_class_learned_memory(model, features, class_labels, pre
 
         selector = model.__getattr__('contrastive_class_selector_' + str(c))
         selector_memory = model.__getattr__('contrastive_class_selector_memory' + str(c))
+        # TODO: change to share selector per class
+        # selector_memory = model.__getattr__('contrastive_class_selector_' + str(c))
 
         # TODO: sort by lowest prediction probs i.e, larger error
 
@@ -358,16 +360,16 @@ def contrastive_class_to_class_learned_memory(model, features, class_labels, pre
             # probs = label_probs.detach()
             # probs_c = probs[mask_c]
             # features_c = torch.cat((features_c, prediction_probs_c.unsqueeze(1), probs_c.unsqueeze(1)), dim = 1)
-            if detach:
-                trainablility = selector(features_c.detach()) # detach for trainability
-            else:
-                trainablility = selector(features_c) # detach for trainability
+            trainablility = selector(features_c.detach()) # detach for trainability
 
+
+
+
+            # TODO: self-atention in the memory featuers-axis and on the learning contrsative featuers-axis
             trainablility = torch.sigmoid(trainablility)
             rescaled_trainability = (trainablility.shape[0] / trainablility.sum(dim=0)) * trainablility
             rescaled_trainability = rescaled_trainability.repeat(1, distances.shape[1])
             distances = distances * rescaled_trainability
-
 
 
             trainablility_memory = torch.sigmoid(trainablility_memory)
@@ -375,16 +377,6 @@ def contrastive_class_to_class_learned_memory(model, features, class_labels, pre
             rescaled_trainability_memory = (trainablility_memory.shape[0] / trainablility_memory.sum(dim=0)) * trainablility_memory
             rescaled_trainability_memory = rescaled_trainability_memory.repeat(distances.shape[0], 1)
             distances = distances * rescaled_trainability_memory
-
-
-
-            #TODO  : ESTO QUE LO APRENDA SOLO
-            # if label_probs is not None:
-            #     probs = label_probs.detach()
-            #     probs_c = probs[mask_c]
-            #
-            #     distances = distances.mean(dim=1)
-            #     distances = distances * torch.pow(probs_c, 6)
 
 
             loss = loss + distances.mean()
