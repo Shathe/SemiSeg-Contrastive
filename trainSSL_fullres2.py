@@ -428,8 +428,8 @@ def main():
     supervised_labeled_loss = True
     contrastive_labeled_loss = True
 
-    batch_size_unlabeled = int(round(batch_size / 2))
-    batch_size_labeled = int(batch_size * 1 ) # TODO: + 1 ????
+    batch_size_unlabeled = int(batch_size / 2)
+    batch_size_labeled = int(batch_size * 1 )
     assert batch_size_unlabeled >= 2, "batch size should be higher than 2"
     assert batch_size_labeled >= 2, "batch size should be higher than 2"
     RAMP_UP_ITERS = 2000
