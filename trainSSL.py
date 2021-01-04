@@ -676,9 +676,9 @@ def main():
                 # TODO: DEJAS ESTO Y LO DE ABAJO DE EMA PARA PROTOTYPES?
                 # Create prototypes from labeled images with EMA model
                 with torch.no_grad():
-                    labeled_pred, labeled_features = ema_model(normalize(joined_labeled, dataset), return_features=True)
-                    labeled_pred = interp(labeled_pred)
-                    probability_prediction, label_prediction = torch.max(torch.softmax(labeled_pred, dim=1),
+                    labeled_pred_ema, labeled_features_ema = ema_model(normalize(joined_labeled, dataset), return_features=True)
+                    labeled_pred_ema = interp(labeled_pred_ema)
+                    probability_prediction_ema, label_prediction_ema = torch.max(torch.softmax(labeled_pred_ema, dim=1),
                                                                          dim=1)  # Get pseudolabels
 
                 '''
@@ -694,22 +694,22 @@ def main():
                     Otherwise, there would be the question about, to save the labeled class distribution or the predicted class dsitribution?
                 '''
                 labels_down = nn.functional.interpolate(joined_labels.float().unsqueeze(1),
-                                                        size=(labeled_features.shape[2], labeled_features.shape[3]),
+                                                        size=(labeled_features_ema.shape[2], labeled_features_ema.shape[3]),
                                                         mode='nearest').squeeze(1)
-                label_prediction_down = nn.functional.interpolate(label_prediction.float().unsqueeze(1),
+                label_prediction_down = nn.functional.interpolate(label_prediction_ema.float().unsqueeze(1),
                                                                   size=(
-                                                                  labeled_features.shape[2], labeled_features.shape[3]),
+                                                                  labeled_features_ema.shape[2], labeled_features_ema.shape[3]),
                                                                   mode='nearest').squeeze(1)
-                probability_prediction_down = nn.functional.interpolate(probability_prediction.float().unsqueeze(1),
-                                                                        size=(labeled_features.shape[2],
-                                                                              labeled_features.shape[3]),
+                probability_prediction_down = nn.functional.interpolate(probability_prediction_ema.float().unsqueeze(1),
+                                                                        size=(labeled_features_ema.shape[2],
+                                                                              labeled_features_ema.shape[3]),
                                                                         mode='nearest').squeeze(1)
 
                 # get mask where the labeled predictions are correct
                 mask_prediction_correctly = ((label_prediction_down == labels_down).float() *
                                 (probability_prediction_down > 0.95).float()).bool()
 
-                labeled_features_correct = labeled_features.permute(0, 2, 3, 1)
+                labeled_features_correct = labeled_features_ema.permute(0, 2, 3, 1)
                 labels_down_correct = labels_down[mask_prediction_correctly]
                 labeled_features_correct = labeled_features_correct[mask_prediction_correctly, ...]
 
@@ -717,21 +717,7 @@ def main():
                 with torch.no_grad():
                     proj_labeled_features_correct = ema_model.projection_head(labeled_features_correct)
 
-                feature_memory.add_features_from_sample(proj_labeled_features_correct, labels_down_correct, batch_size_labeled)
-
-
-                # # get label distribution from labels
-                # class_dist = F.one_hot(labels, 255)
-                # class_dist = class_dist.permute(0, 3, 1, 2)
-                # class_dist = torch.nn.functional.avg_pool2d(class_dist.float(),
-                #                 kernel_size=int( labeled_pred.shape[2] / labeled_features.shape[2]))
-                # # rull out ignore label
-                # class_dist = class_dist[:, :num_classes, :, :]
-                # # renormalize distribution
-                # class_dist = class_dist / torch.sum(class_dist, dim=1).unsqueeze(1)
-
-                # take only features which lead to accurate predictions
-                # threhsold > 0.5 accuracy. select only good features
+                feature_memory.add_features_from_sample_random(proj_labeled_features_correct, labels_down_correct, batch_size_labeled)
 
 
             # TODO: this is sueprvised contrastive learning
@@ -771,7 +757,6 @@ def main():
                                     batch_size_labeled, num_classes, feature_memory.memory, None)
 
                 loss = loss + loss_contr_labeled * 0.1
-
                 '''
                 UNLABELED TO LABELED
                 '''

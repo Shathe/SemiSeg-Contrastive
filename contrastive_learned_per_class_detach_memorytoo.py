@@ -757,6 +757,8 @@ def main():
 
                 loss = loss + loss_contr_labeled
 
+
+
                 '''
                 UNLABELED TO LABELED
                 '''
