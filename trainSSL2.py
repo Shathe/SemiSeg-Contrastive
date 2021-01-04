@@ -459,7 +459,7 @@ def main():
                                                       (train_dataset_size - labeled_samples) / batch_size_unlabeled),
                                                   n_classes=num_classes)
 
-    feature_memory = FeatureMemory(num_samples=labeled_samples, dataset=dataset, memory_per_class=2048*2, feature_size=256, n_classes=num_classes)
+    feature_memory = FeatureMemory(num_samples=labeled_samples, dataset=dataset, memory_per_class=2048, feature_size=256, n_classes=num_classes)
 
     # select the partition
     if split_id is not None:
@@ -767,7 +767,7 @@ def main():
                 proj_labeled_features_all = model.projection_head(labeled_features_all)
                 pred_labeled_features_all = model.prediction_head(proj_labeled_features_all)
 
-                loss_contr_labeled = contrastive_class_to_class_learned_memory(pred_labeled_features_all, labels_down_all, labeled_prediction_probs_all,
+                loss_contr_labeled = contrastive_class_to_class_learned_memory(model, pred_labeled_features_all, labels_down_all, labeled_prediction_probs_all,
                                     batch_size_labeled, num_classes, feature_memory.memory, None)
 
                 loss = loss + loss_contr_labeled * 0.1
@@ -806,7 +806,7 @@ def main():
                 proj_feat_unlabeled = model.projection_head(features_joined_unlabeled)
                 pred_feat_unlabeled = model.prediction_head(proj_feat_unlabeled)
 
-                loss_contr_unlabeled = contrastive_class_to_class_learned_memory(pred_feat_unlabeled, joined_pseudolabels_down, unlabeled_prediction_probs_down,
+                loss_contr_unlabeled = contrastive_class_to_class_learned_memory(model, pred_feat_unlabeled, joined_pseudolabels_down, unlabeled_prediction_probs_down,
                                     batch_size_unlabeled, num_classes, feature_memory.memory, joined_maxprobs_down)
 
                 loss = loss + loss_contr_unlabeled * 0.1
