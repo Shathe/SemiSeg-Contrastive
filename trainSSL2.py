@@ -342,11 +342,11 @@ def augment_samples(images, labels, probs, do_classmix, batch_size, ignore_label
         params = {}
     # similar as BYOL, plus, classmix
     params["flip"] = random.random() < 0.5
-    params["ColorJitter"] = random.random() < 0.75
+    params["ColorJitter"] = random.random() < 0.80
     params["GaussianBlur"] = random.random() < 0.2
     params["Grayscale"] = random.random() < 0.0
     params["Solarize"] = random.random() < 0.0
-    if random.random() < 0.75:
+    if random.random() < 0.80:
         scale = random.uniform(0.75, 1.75)
     else:
         scale = 1
@@ -355,7 +355,7 @@ def augment_samples(images, labels, probs, do_classmix, batch_size, ignore_label
     # Apply strong augmentations to unlabeled images
     image_aug, labels_aug, probs_aug = augmentationTransform(params,
                                                              data=images, target=labels,
-                                                             probs=probs, jitter_vale=0.30,
+                                                             probs=probs, jitter_vale=0.25,
                                                              min_sigma=0.1, max_sigma=1.5,
                                                              ignore_label=ignore_label)
 
@@ -499,6 +499,7 @@ def main():
 
     # load pretrained parameters
     saved_state_dict = model_zoo.load_url('http://vllab1.ucmerced.edu/~whung/adv-semi-seg/resnet101COCO-41f33a49.pth') # COCO pretraining
+    # saved_state_dict = model_zoo.load_url(''https://download.pytorch.org/models/resnet101-5d3b4d8f.pth'') # iamgenet pretrainning
 
     # Copy loaded parameters to model
     new_params = model.state_dict().copy()
@@ -657,7 +658,7 @@ def main():
 
             # Pseudo-label weighting
             pixelWiseWeight = sigmoid_ramp_up(i_iter, RAMP_UP_ITERS) * torch.ones(joined_maxprobs.shape).cuda()
-            pixelWiseWeight = pixelWiseWeight * torch.pow(joined_maxprobs.detach(), 9)
+            pixelWiseWeight = pixelWiseWeight * torch.pow(joined_maxprobs.detach(), 6)
 
             # Pseudo-label loss
             loss_ce_unlabeled = unlabeled_loss(pred_joined_unlabeled, joined_pseudolabels, pixelWiseWeight)
@@ -898,10 +899,8 @@ if __name__ == '__main__':
         num_classes = 21
         data_dir = './data/voc_dataset/'
         data_list_path = './data/voc_list/train_aug.txt'
-        if config['training']['data']['split_id_list'] == 0:
-            split_id = './splits/voc/split_0.pkl'
-        else:
-            split_id = None
+        split_id = None
+
 
     batch_size = config['training']['batch_size']
     num_iterations = config['training']['num_iterations']

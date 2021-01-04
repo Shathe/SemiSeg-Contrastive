@@ -124,11 +124,10 @@ def random_scale_crop(scale, data = None, target = None, ignore_label=255, probs
             if target is not None:
                 target = pad(target)
         else: # crop
-            #to facilitate contrastive learning, center crop
-            # w = random.randint(0, data.shape[2] - init_size_w)
-            # h = random.randint(0, data.shape[3] - init_size_h)
-            w = int(round((data.shape[2] - init_size_w)/2))
-            h = int(round((data.shape[3] - init_size_h)/2))
+            w = random.randint(0, data.shape[2] - init_size_w)
+            h = random.randint(0, data.shape[3] - init_size_h)
+            # w = int(round((data.shape[2] - init_size_w)/2))
+            # h = int(round((data.shape[3] - init_size_h)/2))
             data = data [:,:,h:h+init_size_h,w:w + init_size_w]
             if probs is not None:
                 probs = probs [:,h:h+init_size_h,w:w + init_size_w]

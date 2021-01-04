@@ -38,10 +38,11 @@ class RandomCrop_city(object):  # used for results in the CVPR-19 submission
         # Resize to half size
         img = img.resize((int(w/2), int(h/2)), Image.BILINEAR)
         mask = mask.resize((int(w/2), int(h/2)), Image.NEAREST)
-
+        print(img.size)
         # Random crop to input size
         x1 = random.randint(0, int(w/2) - tw)
         y1 = random.randint(0, int(h/2) - th)
+        print(img.crop((x1, y1, x1 + tw, y1 + th)).size)
         return (
             img.crop((x1, y1, x1 + tw, y1 + th)),
             mask.crop((x1, y1, x1 + tw, y1 + th)),
