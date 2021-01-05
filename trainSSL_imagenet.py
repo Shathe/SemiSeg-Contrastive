@@ -498,14 +498,16 @@ def main():
     model = Res_Deeplab(num_classes=num_classes)
 
     # load pretrained parameters
-    saved_state_dict = model_zoo.load_url('http://vllab1.ucmerced.edu/~whung/adv-semi-seg/resnet101COCO-41f33a49.pth') # COCO pretraining
-    # saved_state_dict = model_zoo.load_url(''https://download.pytorch.org/models/resnet101-5d3b4d8f.pth'') # iamgenet pretrainning
+    # saved_state_dict = model_zoo.load_url('http://vllab1.ucmerced.edu/~whung/adv-semi-seg/resnet101COCO-41f33a49.pth') # COCO pretraining
+    saved_state_dict = model_zoo.load_url('https://download.pytorch.org/models/resnet101-5d3b4d8f.pth') # iamgenet pretrainning
 
     # Copy loaded parameters to model
     new_params = model.state_dict().copy()
     for name, param in new_params.items():
         if name in saved_state_dict and param.size() == saved_state_dict[name].size():
             new_params[name].copy_(saved_state_dict[name])
+        else:
+            print(name)
     model.load_state_dict(new_params)
 
     # Optimizer for segmentation network
@@ -595,7 +597,7 @@ def main():
         if dataset == 'cityscapes':
             class_weights_curr.add_frequencies(labels.cpu().numpy(), pseudo_label.cpu().numpy(), None)
 
-        images2, labels2, _, _ = augment_samples_weak(images, labels, None, random.random()  < 0.20, batch_size_labeled, ignore_label)
+        images2, labels2, _, _ = augment_samples_weak(images, labels, None, random.random() < 0.20, batch_size_labeled, ignore_label)
 
         '''
         UNLABELED DATA
@@ -945,6 +947,6 @@ if __name__ == '__main__':
     gpus = (0, 1, 2, 3)[:args.gpus]
     deeplabv2 = "2" in config['version']
 
-    os.environ["CUDA_VISIBLE_DEVICES"] = str(5)
+    os.environ["CUDA_VISIBLE_DEVICES"] = str(3)
 
     main()
