@@ -276,7 +276,7 @@ def CBC_thresholding(max_probs, pseudo_label, num_classes, ignore_label, percent
 
 def create_ema_model(model):
     if deeplabv2:
-        from model.deeplabv2 import Res_Deeplab
+        from model.deeplabv22 import Res_Deeplab
     else:
         from model.deeplabv3 import Res_Deeplab
 
@@ -490,7 +490,7 @@ def main():
     # Define network
 
     if deeplabv2:
-        from model.deeplabv2 import Res_Deeplab
+        from model.deeplabv22 import Res_Deeplab
     else:
         from model.deeplabv3 import Res_Deeplab
 
@@ -506,8 +506,8 @@ def main():
     for name, param in new_params.items():
         if name in saved_state_dict and param.size() == saved_state_dict[name].size():
             new_params[name].copy_(saved_state_dict[name])
-        else:
-            print(name)
+
+
     model.load_state_dict(new_params)
 
     # Optimizer for segmentation network
