@@ -31,15 +31,19 @@ class Bottleneck(nn.Module):
         super(Bottleneck, self).__init__()
         self.conv1 = nn.Conv2d(inplanes, planes, kernel_size=1, stride=1, bias=False) # change
         self.bn1 = nn.BatchNorm2d(planes,affine = affine_par)
+        for i in self.bn1.parameters():
+            i.requires_grad = False
 
         padding = dilation
         self.conv2 = nn.Conv2d(planes, planes, kernel_size=3, stride=stride, # change
                                padding=padding, bias=False, dilation = dilation)
         self.bn2 = nn.BatchNorm2d(planes,affine = affine_par)
-
+        for i in self.bn2.parameters():
+            i.requires_grad = False
         self.conv3 = nn.Conv2d(planes, planes * 4, kernel_size=1, bias=False)
         self.bn3 = nn.BatchNorm2d(planes * 4, affine = affine_par)
-
+        for i in self.bn3.parameters():
+            i.requires_grad = False
         self.relu = nn.ReLU(inplace=True)
         self.downsample = downsample
         self.stride = stride
@@ -95,9 +99,10 @@ class ResNet(nn.Module):
         self.conv1 = nn.Conv2d(3, 64, kernel_size=7, stride=2, padding=3,
                                bias=False)
         self.bn1 = nn.BatchNorm2d(64, affine = affine_par)
-
+        for i in self.bn1.parameters():
+            i.requires_grad = False
         self.relu = nn.ReLU(inplace=True)
-        self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1) # change
+        self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1,) # change
         self.layer1 = self._make_layer(block, 64, layers[0])
         self.layer2 = self._make_layer(block, 128, layers[1], stride=2)
         self.layer3 = self._make_layer(block, 256, layers[2], stride=1, dilation=2)
@@ -129,7 +134,6 @@ class ResNet(nn.Module):
             )
             self.__setattr__('contrastive_class_selector_' + str(class_c), selector)
 
-
         for class_c in range(num_classes):
             selector = nn.Sequential(
                 nn.Linear(feat_dim, feat_dim),
@@ -140,6 +144,16 @@ class ResNet(nn.Module):
                 nn.Linear(feat_dim, 1)
             )
             self.__setattr__('contrastive_class_selector_memory' + str(class_c), selector)
+
+        # self.selector = nn.Sequential(
+        #         nn.Linear(feat_dim, feat_dim),
+        #         # TODO: concat  label conf and preidction conf
+        #         # nn.Linear(feat_dim + 2, feat_dim),
+        #         nn.BatchNorm1d(feat_dim),
+        #         nn.LeakyReLU(negative_slope=0.2, inplace=True),
+        #         nn.Linear(feat_dim, 1)
+        #     )
+
 
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
@@ -156,7 +170,8 @@ class ResNet(nn.Module):
                 nn.Conv2d(self.inplanes, planes * block.expansion,
                           kernel_size=1, stride=stride, bias=False),
                 nn.BatchNorm2d(planes * block.expansion,affine = affine_par))
-
+        for i in downsample._modules['1'].parameters():
+            i.requires_grad = False
         layers = []
         layers.append(block(self.inplanes, planes, stride,dilation=dilation, downsample=downsample))
         self.inplanes = planes * block.expansion
@@ -194,7 +209,9 @@ class ResNet(nn.Module):
     def get_1x_lr_params(self):
         """
         This generator returns all the parameters of the net except for
-        the last classification layer.
+        the last classification layer. Note that for each batchnorm layer,
+        requires_grad is set to False in deeplab_resnet.py, therefore this function does not return
+        any batchnorm parameter
         """
         b = []
 
@@ -206,6 +223,7 @@ class ResNet(nn.Module):
         b.append(self.layer4)
         b.append(self.projection_head)
         b.append(self.prediction_head)
+        # b.append(self.selector)
 
         for class_c in range(self.num_classes):
             b.append(self.__getattr__('contrastive_class_selector_' + str(class_c)))
