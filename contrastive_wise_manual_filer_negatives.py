@@ -278,7 +278,7 @@ def CBC_thresholding(max_probs, pseudo_label, num_classes, ignore_label, percent
 
 def create_ema_model(model):
     if deeplabv2:
-        from model.deeplabv22 import Res_Deeplab
+        from model.deeplabv2_imagenet import Res_Deeplab
     else:
         from model.deeplabv3 import Res_Deeplab
 
@@ -494,7 +494,7 @@ def main():
     # Define network
 
     if deeplabv2:
-        from model.deeplabv22 import Res_Deeplab
+        from model.deeplabv2_imagenet import Res_Deeplab
     else:
         from model.deeplabv3 import Res_Deeplab
 

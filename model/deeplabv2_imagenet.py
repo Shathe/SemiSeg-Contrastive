@@ -128,7 +128,10 @@ class ResNet(nn.Module):
                 nn.Linear(feat_dim, 1)
             )
             self.__setattr__('contrastive_class_selector_' + str(class_c), selector)
-        self.selector = nn.Sequential(
+
+
+        for class_c in range(num_classes):
+            selector = nn.Sequential(
                 nn.Linear(feat_dim, feat_dim),
                 # TODO: concat  label conf and preidction conf
                 # nn.Linear(feat_dim + 2, feat_dim),
@@ -136,7 +139,7 @@ class ResNet(nn.Module):
                 nn.LeakyReLU(negative_slope=0.2, inplace=True),
                 nn.Linear(feat_dim, 1)
             )
-
+            self.__setattr__('contrastive_class_selector_memory' + str(class_c), selector)
 
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
@@ -203,10 +206,10 @@ class ResNet(nn.Module):
         b.append(self.layer4)
         b.append(self.projection_head)
         b.append(self.prediction_head)
-        b.append(self.selector)
 
         for class_c in range(self.num_classes):
             b.append(self.__getattr__('contrastive_class_selector_' + str(class_c)))
+            b.append(self.__getattr__('contrastive_class_selector_memory' + str(class_c)))
 
         for i in range(len(b)):
             for j in b[i].modules():
