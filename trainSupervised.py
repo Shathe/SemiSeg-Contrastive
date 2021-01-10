@@ -192,6 +192,63 @@ def _resume_checkpoint(resume_path, model, optimizer):
 
     return iteration, model, optimizer
 
+
+def augment_samples_weak(images, labels, probs, do_classmix, batch_size, ignore_label):
+    if do_classmix:
+        # ClassMix: Get mask for image A
+        for image_i in range(batch_size):  # for each image
+            classes = torch.unique(labels[image_i])  # get unique classes in pseudolabel A
+            nclasses = classes.shape[0]
+
+            # remove ignore class
+            if ignore_label in classes and len(classes) > 1 and nclasses > 1:
+                classes = classes[classes != ignore_label]
+                nclasses = nclasses - 1
+
+            if dataset == 'pascal_voc':  # if voc dataaset, remove class 0, background
+                if 0 in classes and len(classes) > 1 and nclasses > 1:
+                    classes = classes[classes != 0]
+                    nclasses = nclasses - 1
+
+            # pick half of the classes randomly
+            classes = (classes[torch.Tensor(
+                np.random.choice(nclasses, int(((nclasses - nclasses % 2) / 2) + 1), replace=False)).long()]).cuda()
+
+            # acumulate masks
+            if image_i == 0:
+                MixMask = transformmasks.generate_class_mask(labels[image_i], classes).unsqueeze(0).cuda()
+            else:
+                MixMask = torch.cat(
+                    (MixMask, transformmasks.generate_class_mask(labels[image_i], classes).unsqueeze(0).cuda()))
+
+
+        params = {"Mix": MixMask}
+    else:
+        params = {}
+
+    # similar as BYOL, plus, classmix
+    params["flip"] = random.random() < 0.5
+    params["ColorJitter"] = random.random() < 0.20
+    params["GaussianBlur"] = random.random() < 0.
+    params["Grayscale"] = random.random() < 0.0
+    params["Solarize"] = random.random() < 0.0
+    if random.random() < 0.5:
+        scale = random.uniform(0.75, 1.75)
+    else:
+        scale = 1
+    params["RandomScaleCrop"] = scale
+
+    # Apply strong augmentations to unlabeled images
+    image_aug, labels_aug, probs_aug = augmentationTransform(params,
+                                                             data=images, target=labels,
+                                                             probs=probs, jitter_vale=0.125,
+                                                             min_sigma=0.1, max_sigma=1.5,
+                                                             ignore_label=ignore_label)
+
+    return image_aug, labels_aug, probs_aug, params
+
+
+
 def main():
     print(config)
     cudnn.enabled = True
@@ -328,12 +385,9 @@ def main():
         images = images.cuda()
         labels = labels.cuda()
 
-
-        # Weak augmentations. DO NOT CHANGE FOR T CHAGING BASELINE RESULTS
-        weak_parameters = {}
-        weak_parameters["flip"] = random.random() < 0.5
         # Apply weak augmentations to labeled images
-        images, labels, _ = augmentationTransform(weak_parameters, data = images, target = labels, ignore_label=ignore_label)
+        images, labels, _, _ = augment_samples_weak(images, labels, None, random.random()  < 0.20, batch_size, ignore_label)
+
 
         pred = interp(model(normalize(images, dataset)))
 
@@ -466,6 +520,6 @@ if __name__ == '__main__':
     gpus = (0,1,2,3)[:args.gpus]
     deeplabv2 = "2" in config['version']
 
-    os.environ["CUDA_VISIBLE_DEVICES"] = str(1)
+    os.environ["CUDA_VISIBLE_DEVICES"] = str(5)
 
     main()

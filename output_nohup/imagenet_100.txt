@@ -1,0 +1,134 @@
+---------------------------------Starting---------------------------------
+{'model': 'DeepLab', 'version': '2', 'dataset': 'cityscapes', 'training': {'batch_size': 4, 'num_workers': 2, 'optimizer': 'SGD', 'momentum': 0.9, 'num_iterations': 80000, 'learning_rate': 0.0002, 'lr_schedule': 'Poly', 'lr_schedule_power': 0.9, 'weight_decay': 0.0005, 'use_sync_batchnorm': False, 'data': {'split_id_list': 0, 'labeled_samples': 2975, 'input_size': '512,512'}, 'unlabeled': {'train_unlabeled': False, 'consistency_weight': 1, 'consistency_loss': 'CE', 'pixel_weight': 'threshold_uniform'}}, 'seed': 7, 'ignore_label': 250, 'utils': {'save_checkpoint_every': 10000, 'checkpoint_dir': '../saved/DeepLab', 'val_per_iter': 4000, 'log_per_iter': 100, 'save_best_model': True}}
+Found 2975 train images
+dataset size:  2975
+Training on number of samples: 2975
+loading train ids from ./splits/city/split_0.pkl
+../data/CityScapes/leftImg8bit_trainvaltest/leftImg8bit/train/weimar/weimar_000124_000019_leftImg8bit.png
+../data/CityScapes/leftImg8bit_trainvaltest/leftImg8bit/train/bremen/bremen_000036_000019_leftImg8bit.png
+../data/CityScapes/leftImg8bit_trainvaltest/leftImg8bit/train/bremen/bremen_000036_000019_leftImg8bit.png
+../data/CityScapes/leftImg8bit_trainvaltest/leftImg8bit/train/bremen/bremen_000036_000019_leftImg8bit.png
+../data/CityScapes/leftImg8bit_trainvaltest/leftImg8bit/train/bremen/bremen_000036_000019_leftImg8bit.png
+../data/CityScapes/leftImg8bit_trainvaltest/leftImg8bit/train/weimar/weimar_000124_000019_leftImg8bit.png
+../data/CityScapes/leftImg8bit_trainvaltest/leftImg8bit/train/bremen/bremen_000036_000019_leftImg8bit.png
+../data/CityScapes/leftImg8bit_trainvaltest/leftImg8bit/train/bremen/bremen_000036_000019_leftImg8bit.png
+../data/CityScapes/leftImg8bit_trainvaltest/leftImg8bit/train/bremen/bremen_000036_000019_leftImg8bit.png
+../data/CityScapes/leftImg8bit_trainvaltest/leftImg8bit/train/bremen/bremen_000036_000019_leftImg8bit.png
+../data/CityScapes/leftImg8bit_trainvaltest/leftImg8bit/train/bremen/bremen_000036_000019_leftImg8bit.png
+../data/CityScapes/leftImg8bit_trainvaltest/leftImg8bit/train/bremen/bremen_000036_000019_leftImg8bit.png
+../data/CityScapes/leftImg8bit_trainvaltest/leftImg8bit/train/bremen/bremen_000036_000019_leftImg8bit.png
+../data/CityScapes/leftImg8bit_trainvaltest/leftImg8bit/train/bremen/bremen_000036_000019_leftImg8bit.png
+../data/CityScapes/leftImg8bit_trainvaltest/leftImg8bit/train/bremen/bremen_000036_000019_leftImg8bit.png
+../data/CityScapes/leftImg8bit_trainvaltest/leftImg8bit/train/bremen/bremen_000036_000019_leftImg8bit.png
+../data/CityScapes/leftImg8bit_trainvaltest/leftImg8bit/train/bremen/bremen_000036_000019_leftImg8bit.png
+../data/CityScapes/leftImg8bit_trainvaltest/leftImg8bit/train/bremen/bremen_000036_000019_leftImg8bit.png
+../data/CityScapes/leftImg8bit_trainvaltest/leftImg8bit/train/bremen/bremen_000036_000019_leftImg8bit.png
+../data/CityScapes/leftImg8bit_trainvaltest/leftImg8bit/train/weimar/weimar_000124_000019_leftImg8bit.png
+iter =   4000/ 80000
+Found 500 val images
+Evaluating, found 500 images.
+100 processed
+200 processed
+300 processed
+400 processed
+500 processed
+class  0 road         IU 0.95
+class  1 sidewalk     IU 0.65
+class  2 building     IU 0.85
+class  3 wall         IU 0.34
+class  4 fence        IU 0.31
+class  5 pole         IU 0.31
+class  6 traffic_light IU 0.25
+class  7 traffic_sign IU 0.39
+class  8 vegetation   IU 0.86
+class  9 terrain      IU 0.47
+class 10 sky          IU 0.89
+class 11 person       IU 0.58
+class 12 rider        IU 0.33
+class 13 car          IU 0.85
+class 14 truck        IU 0.39
+class 15 bus          IU 0.42
+class 16 train        IU 0.47
+class 17 motorcycle   IU 0.26
+class 18 bicycle      IU 0.53
+meanIOU: 0.5306905699462164
+
+
+Saving a checkpoint: ../saved/DeepLab/best_model.pth ...
+Saving current best model: best_model.pth
+../data/CityScapes/leftImg8bit_trainvaltest/leftImg8bit/train/weimar/weimar_000124_000019_leftImg8bit.png
+../data/CityScapes/leftImg8bit_trainvaltest/leftImg8bit/train/bremen/bremen_000036_000019_leftImg8bit.png
+../data/CityScapes/leftImg8bit_trainvaltest/leftImg8bit/train/bremen/bremen_000036_000019_leftImg8bit.png
+../data/CityScapes/leftImg8bit_trainvaltest/leftImg8bit/train/bremen/bremen_000036_000019_leftImg8bit.png
+../data/CityScapes/leftImg8bit_trainvaltest/leftImg8bit/train/weimar/weimar_000124_000019_leftImg8bit.png
+../data/CityScapes/leftImg8bit_trainvaltest/leftImg8bit/train/weimar/weimar_000124_000019_leftImg8bit.png
+../data/CityScapes/leftImg8bit_trainvaltest/leftImg8bit/train/bremen/bremen_000036_000019_leftImg8bit.png
+../data/CityScapes/leftImg8bit_trainvaltest/leftImg8bit/train/weimar/weimar_000124_000019_leftImg8bit.png
+../data/CityScapes/leftImg8bit_trainvaltest/leftImg8bit/train/bremen/bremen_000036_000019_leftImg8bit.png
+../data/CityScapes/leftImg8bit_trainvaltest/leftImg8bit/train/bremen/bremen_000036_000019_leftImg8bit.png
+../data/CityScapes/leftImg8bit_trainvaltest/leftImg8bit/train/weimar/weimar_000124_000019_leftImg8bit.png
+../data/CityScapes/leftImg8bit_trainvaltest/leftImg8bit/train/weimar/weimar_000124_000019_leftImg8bit.png
+iter =   8000/ 80000
+Found 500 val images
+Evaluating, found 500 images.
+100 processed
+200 processed
+300 processed
+400 processed
+500 processed
+class  0 road         IU 0.96
+class  1 sidewalk     IU 0.68
+class  2 building     IU 0.86
+class  3 wall         IU 0.33
+class  4 fence        IU 0.39
+class  5 pole         IU 0.34
+class  6 traffic_light IU 0.33
+class  7 traffic_sign IU 0.47
+class  8 vegetation   IU 0.88
+class  9 terrain      IU 0.51
+class 10 sky          IU 0.90
+class 11 person       IU 0.61
+class 12 rider        IU 0.34
+class 13 car          IU 0.87
+class 14 truck        IU 0.48
+class 15 bus          IU 0.55
+class 16 train        IU 0.30
+class 17 motorcycle   IU 0.37
+class 18 bicycle      IU 0.57
+meanIOU: 0.5650063842868939
+
+
+Saving a checkpoint: ../saved/DeepLab/best_model.pth ...
+Saving current best model: best_model.pth
+../data/CityScapes/leftImg8bit_trainvaltest/leftImg8bit/train/weimar/weimar_000124_000019_leftImg8bit.png
+../data/CityScapes/leftImg8bit_trainvaltest/leftImg8bit/train/weimar/weimar_000124_000019_leftImg8bit.png
+../data/CityScapes/leftImg8bit_trainvaltest/leftImg8bit/train/weimar/weimar_000124_000019_leftImg8bit.png
+../data/CityScapes/leftImg8bit_trainvaltest/leftImg8bit/train/weimar/weimar_000124_000019_leftImg8bit.png
+../data/CityScapes/leftImg8bit_trainvaltest/leftImg8bit/train/weimar/weimar_000124_000019_leftImg8bit.png
+../data/CityScapes/leftImg8bit_trainvaltest/leftImg8bit/train/bremen/bremen_000036_000019_leftImg8bit.png
+../data/CityScapes/leftImg8bit_trainvaltest/leftImg8bit/train/weimar/weimar_000124_000019_leftImg8bit.png
+../data/CityScapes/leftImg8bit_trainvaltest/leftImg8bit/train/weimar/weimar_000124_000019_leftImg8bit.png
+../data/CityScapes/leftImg8bit_trainvaltest/leftImg8bit/train/weimar/weimar_000124_000019_leftImg8bit.png
+../data/CityScapes/leftImg8bit_trainvaltest/leftImg8bit/train/weimar/weimar_000124_000019_leftImg8bit.png
+
+Saving a checkpoint: ../saved/DeepLab/checkpoint-iter10000.pth ...
+../data/CityScapes/leftImg8bit_trainvaltest/leftImg8bit/train/weimar/weimar_000124_000019_leftImg8bit.png
+../data/CityScapes/leftImg8bit_trainvaltest/leftImg8bit/train/weimar/weimar_000124_000019_leftImg8bit.png
+../data/CityScapes/leftImg8bit_trainvaltest/leftImg8bit/train/bremen/bremen_000036_000019_leftImg8bit.png
+../data/CityScapes/leftImg8bit_trainvaltest/leftImg8bit/train/weimar/weimar_000124_000019_leftImg8bit.png
+../data/CityScapes/leftImg8bit_trainvaltest/leftImg8bit/train/bremen/bremen_000036_000019_leftImg8bit.png
+../data/CityScapes/leftImg8bit_trainvaltest/leftImg8bit/train/weimar/weimar_000124_000019_leftImg8bit.png
+../data/CityScapes/leftImg8bit_trainvaltest/leftImg8bit/train/weimar/weimar_000124_000019_leftImg8bit.png
+../data/CityScapes/leftImg8bit_trainvaltest/leftImg8bit/train/weimar/weimar_000124_000019_leftImg8bit.png
+/pytorch/aten/src/THCUNN/ClassNLLCriterion.cu:108: cunn_ClassNLLCriterion_updateOutput_kernel: block: [0,0,0], thread: [8,0,0] Assertion `t >= 0 && t < n_classes` failed.
+iter =  12000/ 80000
+Found 500 val images
+Evaluating, found 500 images.
+Traceback (most recent call last):
+  File "trainSupervised_imagenet.py", line 527, in <module>
+    main()
+  File "trainSupervised_imagenet.py", line 422, in main
+    mIoU, eval_loss = evaluate(model, dataset, ignore_label=ignore_label, save_dir=checkpoint_dir)
+  File "/home/snowflake/Escritorio/Semi-Sup/code/evaluateSSL.py", line 168, in evaluate
+    total_loss.append(loss.item())
+RuntimeError: CUDA error: device-side assert triggered

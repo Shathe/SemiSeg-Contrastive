@@ -1,0 +1,1315 @@
+---------------------------------Starting---------------------------------
+{'model': 'DeepLab', 'version': '2', 'dataset': 'cityscapes', 'training': {'batch_size': 4, 'num_workers': 2, 'optimizer': 'SGD', 'momentum': 0.9, 'num_iterations': 80000, 'learning_rate': 0.0002, 'lr_schedule': 'Poly', 'lr_schedule_power': 0.9, 'weight_decay': 0.0005, 'use_sync_batchnorm': False, 'data': {'split_id_list': 0, 'labeled_samples': 2975, 'input_size': '512,512'}, 'unlabeled': {'train_unlabeled': False, 'consistency_weight': 1, 'consistency_loss': 'CE', 'pixel_weight': 'threshold_uniform'}}, 'seed': 7, 'ignore_label': 250, 'utils': {'save_checkpoint_every': 10000, 'checkpoint_dir': '../saved/DeepLab', 'val_per_iter': 4000, 'log_per_iter': 100, 'save_best_model': True}}
+Found 2975 train images
+dataset size:  2975
+Training on number of samples: 2975
+loading train ids from ./splits/city/split_0.pkl
+../data/CityScapes/leftImg8bit_trainvaltest/leftImg8bit/train/stuttgart/stuttgart_000116_000019_leftImg8bit.png
+../data/CityScapes/leftImg8bit_trainvaltest/leftImg8bit/train/stuttgart/stuttgart_000116_000019_leftImg8bit.png
+../data/CityScapes/leftImg8bit_trainvaltest/leftImg8bit/train/bremen/bremen_000070_000019_leftImg8bit.png
+../data/CityScapes/leftImg8bit_trainvaltest/leftImg8bit/train/bremen/bremen_000070_000019_leftImg8bit.png
+../data/CityScapes/leftImg8bit_trainvaltest/leftImg8bit/train/stuttgart/stuttgart_000154_000019_leftImg8bit.png
+../data/CityScapes/leftImg8bit_trainvaltest/leftImg8bit/train/stuttgart/stuttgart_000154_000019_leftImg8bit.png
+../data/CityScapes/leftImg8bit_trainvaltest/leftImg8bit/train/stuttgart/stuttgart_000116_000019_leftImg8bit.png
+../data/CityScapes/leftImg8bit_trainvaltest/leftImg8bit/train/bremen/bremen_000070_000019_leftImg8bit.png
+../data/CityScapes/leftImg8bit_trainvaltest/leftImg8bit/train/bremen/bremen_000070_000019_leftImg8bit.png
+../data/CityScapes/leftImg8bit_trainvaltest/leftImg8bit/train/stuttgart/stuttgart_000116_000019_leftImg8bit.png
+../data/CityScapes/leftImg8bit_trainvaltest/leftImg8bit/train/bremen/bremen_000006_000019_leftImg8bit.png
+../data/CityScapes/leftImg8bit_trainvaltest/leftImg8bit/train/stuttgart/stuttgart_000116_000019_leftImg8bit.png
+../data/CityScapes/leftImg8bit_trainvaltest/leftImg8bit/train/bremen/bremen_000006_000019_leftImg8bit.png
+../data/CityScapes/leftImg8bit_trainvaltest/leftImg8bit/train/bremen/bremen_000006_000019_leftImg8bit.png
+../data/CityScapes/leftImg8bit_trainvaltest/leftImg8bit/train/bremen/bremen_000006_000019_leftImg8bit.png
+../data/CityScapes/leftImg8bit_trainvaltest/leftImg8bit/train/bremen/bremen_000006_000019_leftImg8bit.png
+../data/CityScapes/leftImg8bit_trainvaltest/leftImg8bit/train/stuttgart/stuttgart_000008_000019_leftImg8bit.png
+../data/CityScapes/leftImg8bit_trainvaltest/leftImg8bit/train/stuttgart/stuttgart_000116_000019_leftImg8bit.png
+../data/CityScapes/leftImg8bit_trainvaltest/leftImg8bit/train/stuttgart/stuttgart_000008_000019_leftImg8bit.png
+../data/CityScapes/leftImg8bit_trainvaltest/leftImg8bit/train/stuttgart/stuttgart_000116_000019_leftImg8bit.png
+Traceback (most recent call last):
+  File "trainSupervised.py", line 375, in main
+    batch = next(trainloader_iter)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 363, in __next__
+    data = self._next_data()
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 989, in _next_data
+    return self._process_data(data)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 1014, in _process_data
+    data.reraise()
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/_utils.py", line 395, in reraise
+    raise self.exc_type(msg)
+IndexError: Caught IndexError in DataLoader worker process 0.
+Original Traceback (most recent call last):
+  File "trainSupervised.py", line 375, in main
+    batch = next(trainloader_iter)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 363, in __next__
+    data = self._next_data()
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 989, in _next_data
+    return self._process_data(data)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 1014, in _process_data
+    data.reraise()
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/_utils.py", line 395, in reraise
+    raise self.exc_type(msg)
+IndexError: Caught IndexError in DataLoader worker process 0.
+Original Traceback (most recent call last):
+  File "trainSupervised.py", line 375, in main
+    batch = next(trainloader_iter)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 363, in __next__
+    data = self._next_data()
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 989, in _next_data
+    return self._process_data(data)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 1014, in _process_data
+    data.reraise()
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/_utils.py", line 395, in reraise
+    raise self.exc_type(msg)
+IndexError: Caught IndexError in DataLoader worker process 1.
+Original Traceback (most recent call last):
+  File "trainSupervised.py", line 375, in main
+    batch = next(trainloader_iter)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 363, in __next__
+    data = self._next_data()
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 989, in _next_data
+    return self._process_data(data)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 1014, in _process_data
+    data.reraise()
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/_utils.py", line 395, in reraise
+    raise self.exc_type(msg)
+IndexError: Caught IndexError in DataLoader worker process 0.
+Original Traceback (most recent call last):
+  File "trainSupervised.py", line 375, in main
+    batch = next(trainloader_iter)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 363, in __next__
+    data = self._next_data()
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 989, in _next_data
+    return self._process_data(data)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 1014, in _process_data
+    data.reraise()
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/_utils.py", line 395, in reraise
+    raise self.exc_type(msg)
+IndexError: Caught IndexError in DataLoader worker process 1.
+Original Traceback (most recent call last):
+  File "trainSupervised.py", line 375, in main
+    batch = next(trainloader_iter)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 363, in __next__
+    data = self._next_data()
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 989, in _next_data
+    return self._process_data(data)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 1014, in _process_data
+    data.reraise()
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/_utils.py", line 395, in reraise
+    raise self.exc_type(msg)
+IndexError: Caught IndexError in DataLoader worker process 1.
+Original Traceback (most recent call last):
+  File "trainSupervised.py", line 375, in main
+    batch = next(trainloader_iter)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 363, in __next__
+    data = self._next_data()
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 989, in _next_data
+    return self._process_data(data)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 1014, in _process_data
+    data.reraise()
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/_utils.py", line 395, in reraise
+    raise self.exc_type(msg)
+IndexError: Caught IndexError in DataLoader worker process 0.
+Original Traceback (most recent call last):
+  File "trainSupervised.py", line 375, in main
+    batch = next(trainloader_iter)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 363, in __next__
+    data = self._next_data()
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 989, in _next_data
+    return self._process_data(data)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 1014, in _process_data
+    data.reraise()
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/_utils.py", line 395, in reraise
+    raise self.exc_type(msg)
+IndexError: Caught IndexError in DataLoader worker process 1.
+Original Traceback (most recent call last):
+  File "trainSupervised.py", line 375, in main
+    batch = next(trainloader_iter)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 363, in __next__
+    data = self._next_data()
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 989, in _next_data
+    return self._process_data(data)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 1014, in _process_data
+    data.reraise()
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/_utils.py", line 395, in reraise
+    raise self.exc_type(msg)
+IndexError: Caught IndexError in DataLoader worker process 0.
+Original Traceback (most recent call last):
+  File "trainSupervised.py", line 375, in main
+    batch = next(trainloader_iter)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 363, in __next__
+    data = self._next_data()
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 989, in _next_data
+    return self._process_data(data)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 1014, in _process_data
+    data.reraise()
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/_utils.py", line 395, in reraise
+    raise self.exc_type(msg)
+IndexError: Caught IndexError in DataLoader worker process 0.
+Original Traceback (most recent call last):
+  File "trainSupervised.py", line 375, in main
+    batch = next(trainloader_iter)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 363, in __next__
+    data = self._next_data()
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 989, in _next_data
+    return self._process_data(data)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 1014, in _process_data
+    data.reraise()
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/_utils.py", line 395, in reraise
+    raise self.exc_type(msg)
+IndexError: Caught IndexError in DataLoader worker process 1.
+Original Traceback (most recent call last):
+  File "trainSupervised.py", line 375, in main
+    batch = next(trainloader_iter)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 363, in __next__
+    data = self._next_data()
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 989, in _next_data
+    return self._process_data(data)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 1014, in _process_data
+    data.reraise()
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/_utils.py", line 395, in reraise
+    raise self.exc_type(msg)
+IndexError: Caught IndexError in DataLoader worker process 0.
+Original Traceback (most recent call last):
+  File "trainSupervised.py", line 375, in main
+    batch = next(trainloader_iter)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 363, in __next__
+    data = self._next_data()
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 971, in _next_data
+    return self._process_data(data)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 1014, in _process_data
+    data.reraise()
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/_utils.py", line 395, in reraise
+    raise self.exc_type(msg)
+IndexError: Caught IndexError in DataLoader worker process 1.
+Original Traceback (most recent call last):
+  File "trainSupervised.py", line 375, in main
+    batch = next(trainloader_iter)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 363, in __next__
+    data = self._next_data()
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 989, in _next_data
+    return self._process_data(data)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 1014, in _process_data
+    data.reraise()
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/_utils.py", line 395, in reraise
+    raise self.exc_type(msg)
+IndexError: Caught IndexError in DataLoader worker process 0.
+Original Traceback (most recent call last):
+  File "trainSupervised.py", line 375, in main
+    batch = next(trainloader_iter)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 363, in __next__
+    data = self._next_data()
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 989, in _next_data
+    return self._process_data(data)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 1014, in _process_data
+    data.reraise()
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/_utils.py", line 395, in reraise
+    raise self.exc_type(msg)
+IndexError: Caught IndexError in DataLoader worker process 1.
+Original Traceback (most recent call last):
+  File "trainSupervised.py", line 375, in main
+    batch = next(trainloader_iter)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 363, in __next__
+    data = self._next_data()
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 989, in _next_data
+    return self._process_data(data)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 1014, in _process_data
+    data.reraise()
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/_utils.py", line 395, in reraise
+    raise self.exc_type(msg)
+IndexError: Caught IndexError in DataLoader worker process 1.
+Original Traceback (most recent call last):
+  File "trainSupervised.py", line 375, in main
+    batch = next(trainloader_iter)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 363, in __next__
+    data = self._next_data()
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 989, in _next_data
+    return self._process_data(data)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 1014, in _process_data
+    data.reraise()
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/_utils.py", line 395, in reraise
+    raise self.exc_type(msg)
+IndexError: Caught IndexError in DataLoader worker process 0.
+Original Traceback (most recent call last):
+  File "trainSupervised.py", line 375, in main
+    batch = next(trainloader_iter)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 363, in __next__
+    data = self._next_data()
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 989, in _next_data
+    return self._process_data(data)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 1014, in _process_data
+    data.reraise()
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/_utils.py", line 395, in reraise
+    raise self.exc_type(msg)
+IndexError: Caught IndexError in DataLoader worker process 1.
+Original Traceback (most recent call last):
+  File "trainSupervised.py", line 375, in main
+    batch = next(trainloader_iter)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 363, in __next__
+    data = self._next_data()
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 989, in _next_data
+    return self._process_data(data)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 1014, in _process_data
+    data.reraise()
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/_utils.py", line 395, in reraise
+    raise self.exc_type(msg)
+IndexError: Caught IndexError in DataLoader worker process 0.
+Original Traceback (most recent call last):
+  File "trainSupervised.py", line 375, in main
+    batch = next(trainloader_iter)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 363, in __next__
+    data = self._next_data()
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 989, in _next_data
+    return self._process_data(data)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 1014, in _process_data
+    data.reraise()
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/_utils.py", line 395, in reraise
+    raise self.exc_type(msg)
+IndexError: Caught IndexError in DataLoader worker process 1.
+Original Traceback (most recent call last):
+  File "trainSupervised.py", line 375, in main
+    batch = next(trainloader_iter)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 363, in __next__
+    data = self._next_data()
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 989, in _next_data
+    return self._process_data(data)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 1014, in _process_data
+    data.reraise()
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/_utils.py", line 395, in reraise
+    raise self.exc_type(msg)
+IndexError: Caught IndexError in DataLoader worker process 1.
+Original Traceback (most recent call last):
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/worker.py", line 185, in _worker_loop
+    data = fetcher.fetch(index)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/fetch.py", line 44, in fetch
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/fetch.py", line 44, in <listcomp>
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/home/snowflake/Escritorio/Semi-Sup/code/data/cityscapes_loader.py", line 142, in __getitem__
+    img, lbl = self.augmentations(img, lbl)
+  File "/home/snowflake/Escritorio/Semi-Sup/code/data/augmentations.py", line 16, in __call__
+    img, mask = Image.fromarray(img, mode="RGB"), Image.fromarray(mask, mode="L")
+  File "/home/snowflake/.local/lib/python3.6/site-packages/PIL/Image.py", line 2763, in fromarray
+    size = 1 if ndim == 1 else shape[1], shape[0]
+IndexError: tuple index out of range
+
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/worker.py", line 185, in _worker_loop
+    data = fetcher.fetch(index)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/fetch.py", line 44, in fetch
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/fetch.py", line 44, in <listcomp>
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/home/snowflake/Escritorio/Semi-Sup/code/data/cityscapes_loader.py", line 142, in __getitem__
+    img, lbl = self.augmentations(img, lbl)
+  File "/home/snowflake/Escritorio/Semi-Sup/code/data/augmentations.py", line 16, in __call__
+    img, mask = Image.fromarray(img, mode="RGB"), Image.fromarray(mask, mode="L")
+  File "/home/snowflake/.local/lib/python3.6/site-packages/PIL/Image.py", line 2763, in fromarray
+    size = 1 if ndim == 1 else shape[1], shape[0]
+IndexError: tuple index out of range
+
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/worker.py", line 185, in _worker_loop
+    data = fetcher.fetch(index)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/fetch.py", line 44, in fetch
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/fetch.py", line 44, in <listcomp>
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/home/snowflake/Escritorio/Semi-Sup/code/data/cityscapes_loader.py", line 142, in __getitem__
+    img, lbl = self.augmentations(img, lbl)
+  File "/home/snowflake/Escritorio/Semi-Sup/code/data/augmentations.py", line 16, in __call__
+    img, mask = Image.fromarray(img, mode="RGB"), Image.fromarray(mask, mode="L")
+  File "/home/snowflake/.local/lib/python3.6/site-packages/PIL/Image.py", line 2763, in fromarray
+    size = 1 if ndim == 1 else shape[1], shape[0]
+IndexError: tuple index out of range
+
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/worker.py", line 185, in _worker_loop
+    data = fetcher.fetch(index)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/fetch.py", line 44, in fetch
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/fetch.py", line 44, in <listcomp>
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/home/snowflake/Escritorio/Semi-Sup/code/data/cityscapes_loader.py", line 142, in __getitem__
+    img, lbl = self.augmentations(img, lbl)
+  File "/home/snowflake/Escritorio/Semi-Sup/code/data/augmentations.py", line 16, in __call__
+    img, mask = Image.fromarray(img, mode="RGB"), Image.fromarray(mask, mode="L")
+  File "/home/snowflake/.local/lib/python3.6/site-packages/PIL/Image.py", line 2763, in fromarray
+    size = 1 if ndim == 1 else shape[1], shape[0]
+IndexError: tuple index out of range
+
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/worker.py", line 185, in _worker_loop
+    data = fetcher.fetch(index)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/fetch.py", line 44, in fetch
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/fetch.py", line 44, in <listcomp>
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/home/snowflake/Escritorio/Semi-Sup/code/data/cityscapes_loader.py", line 142, in __getitem__
+    img, lbl = self.augmentations(img, lbl)
+  File "/home/snowflake/Escritorio/Semi-Sup/code/data/augmentations.py", line 16, in __call__
+    img, mask = Image.fromarray(img, mode="RGB"), Image.fromarray(mask, mode="L")
+  File "/home/snowflake/.local/lib/python3.6/site-packages/PIL/Image.py", line 2763, in fromarray
+    size = 1 if ndim == 1 else shape[1], shape[0]
+IndexError: tuple index out of range
+
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/worker.py", line 185, in _worker_loop
+    data = fetcher.fetch(index)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/fetch.py", line 44, in fetch
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/fetch.py", line 44, in <listcomp>
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/home/snowflake/Escritorio/Semi-Sup/code/data/cityscapes_loader.py", line 142, in __getitem__
+    img, lbl = self.augmentations(img, lbl)
+  File "/home/snowflake/Escritorio/Semi-Sup/code/data/augmentations.py", line 16, in __call__
+    img, mask = Image.fromarray(img, mode="RGB"), Image.fromarray(mask, mode="L")
+  File "/home/snowflake/.local/lib/python3.6/site-packages/PIL/Image.py", line 2763, in fromarray
+    size = 1 if ndim == 1 else shape[1], shape[0]
+IndexError: tuple index out of range
+
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/worker.py", line 185, in _worker_loop
+    data = fetcher.fetch(index)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/fetch.py", line 44, in fetch
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/fetch.py", line 44, in <listcomp>
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/home/snowflake/Escritorio/Semi-Sup/code/data/cityscapes_loader.py", line 142, in __getitem__
+    img, lbl = self.augmentations(img, lbl)
+  File "/home/snowflake/Escritorio/Semi-Sup/code/data/augmentations.py", line 16, in __call__
+    img, mask = Image.fromarray(img, mode="RGB"), Image.fromarray(mask, mode="L")
+  File "/home/snowflake/.local/lib/python3.6/site-packages/PIL/Image.py", line 2763, in fromarray
+    size = 1 if ndim == 1 else shape[1], shape[0]
+IndexError: tuple index out of range
+
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/worker.py", line 185, in _worker_loop
+    data = fetcher.fetch(index)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/fetch.py", line 44, in fetch
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/fetch.py", line 44, in <listcomp>
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/home/snowflake/Escritorio/Semi-Sup/code/data/cityscapes_loader.py", line 142, in __getitem__
+    img, lbl = self.augmentations(img, lbl)
+  File "/home/snowflake/Escritorio/Semi-Sup/code/data/augmentations.py", line 16, in __call__
+    img, mask = Image.fromarray(img, mode="RGB"), Image.fromarray(mask, mode="L")
+  File "/home/snowflake/.local/lib/python3.6/site-packages/PIL/Image.py", line 2763, in fromarray
+    size = 1 if ndim == 1 else shape[1], shape[0]
+IndexError: tuple index out of range
+
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/worker.py", line 185, in _worker_loop
+    data = fetcher.fetch(index)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/fetch.py", line 44, in fetch
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/fetch.py", line 44, in <listcomp>
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/home/snowflake/Escritorio/Semi-Sup/code/data/cityscapes_loader.py", line 142, in __getitem__
+    img, lbl = self.augmentations(img, lbl)
+  File "/home/snowflake/Escritorio/Semi-Sup/code/data/augmentations.py", line 16, in __call__
+    img, mask = Image.fromarray(img, mode="RGB"), Image.fromarray(mask, mode="L")
+  File "/home/snowflake/.local/lib/python3.6/site-packages/PIL/Image.py", line 2763, in fromarray
+    size = 1 if ndim == 1 else shape[1], shape[0]
+IndexError: tuple index out of range
+
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/worker.py", line 185, in _worker_loop
+    data = fetcher.fetch(index)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/fetch.py", line 44, in fetch
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/fetch.py", line 44, in <listcomp>
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/home/snowflake/Escritorio/Semi-Sup/code/data/cityscapes_loader.py", line 142, in __getitem__
+    img, lbl = self.augmentations(img, lbl)
+  File "/home/snowflake/Escritorio/Semi-Sup/code/data/augmentations.py", line 16, in __call__
+    img, mask = Image.fromarray(img, mode="RGB"), Image.fromarray(mask, mode="L")
+  File "/home/snowflake/.local/lib/python3.6/site-packages/PIL/Image.py", line 2763, in fromarray
+    size = 1 if ndim == 1 else shape[1], shape[0]
+IndexError: tuple index out of range
+
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/worker.py", line 185, in _worker_loop
+    data = fetcher.fetch(index)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/fetch.py", line 44, in fetch
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/fetch.py", line 44, in <listcomp>
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/home/snowflake/Escritorio/Semi-Sup/code/data/cityscapes_loader.py", line 142, in __getitem__
+    img, lbl = self.augmentations(img, lbl)
+  File "/home/snowflake/Escritorio/Semi-Sup/code/data/augmentations.py", line 16, in __call__
+    img, mask = Image.fromarray(img, mode="RGB"), Image.fromarray(mask, mode="L")
+  File "/home/snowflake/.local/lib/python3.6/site-packages/PIL/Image.py", line 2763, in fromarray
+    size = 1 if ndim == 1 else shape[1], shape[0]
+IndexError: tuple index out of range
+
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/worker.py", line 185, in _worker_loop
+    data = fetcher.fetch(index)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/fetch.py", line 44, in fetch
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/fetch.py", line 44, in <listcomp>
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/home/snowflake/Escritorio/Semi-Sup/code/data/cityscapes_loader.py", line 142, in __getitem__
+    img, lbl = self.augmentations(img, lbl)
+  File "/home/snowflake/Escritorio/Semi-Sup/code/data/augmentations.py", line 16, in __call__
+    img, mask = Image.fromarray(img, mode="RGB"), Image.fromarray(mask, mode="L")
+  File "/home/snowflake/.local/lib/python3.6/site-packages/PIL/Image.py", line 2763, in fromarray
+    size = 1 if ndim == 1 else shape[1], shape[0]
+IndexError: tuple index out of range
+
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/worker.py", line 185, in _worker_loop
+    data = fetcher.fetch(index)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/fetch.py", line 44, in fetch
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/fetch.py", line 44, in <listcomp>
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/home/snowflake/Escritorio/Semi-Sup/code/data/cityscapes_loader.py", line 142, in __getitem__
+    img, lbl = self.augmentations(img, lbl)
+  File "/home/snowflake/Escritorio/Semi-Sup/code/data/augmentations.py", line 16, in __call__
+    img, mask = Image.fromarray(img, mode="RGB"), Image.fromarray(mask, mode="L")
+  File "/home/snowflake/.local/lib/python3.6/site-packages/PIL/Image.py", line 2763, in fromarray
+    size = 1 if ndim == 1 else shape[1], shape[0]
+IndexError: tuple index out of range
+
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/worker.py", line 185, in _worker_loop
+    data = fetcher.fetch(index)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/fetch.py", line 44, in fetch
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/fetch.py", line 44, in <listcomp>
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/home/snowflake/Escritorio/Semi-Sup/code/data/cityscapes_loader.py", line 142, in __getitem__
+    img, lbl = self.augmentations(img, lbl)
+  File "/home/snowflake/Escritorio/Semi-Sup/code/data/augmentations.py", line 16, in __call__
+    img, mask = Image.fromarray(img, mode="RGB"), Image.fromarray(mask, mode="L")
+  File "/home/snowflake/.local/lib/python3.6/site-packages/PIL/Image.py", line 2763, in fromarray
+    size = 1 if ndim == 1 else shape[1], shape[0]
+IndexError: tuple index out of range
+
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/worker.py", line 185, in _worker_loop
+    data = fetcher.fetch(index)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/fetch.py", line 44, in fetch
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/fetch.py", line 44, in <listcomp>
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/home/snowflake/Escritorio/Semi-Sup/code/data/cityscapes_loader.py", line 142, in __getitem__
+    img, lbl = self.augmentations(img, lbl)
+  File "/home/snowflake/Escritorio/Semi-Sup/code/data/augmentations.py", line 16, in __call__
+    img, mask = Image.fromarray(img, mode="RGB"), Image.fromarray(mask, mode="L")
+  File "/home/snowflake/.local/lib/python3.6/site-packages/PIL/Image.py", line 2763, in fromarray
+    size = 1 if ndim == 1 else shape[1], shape[0]
+IndexError: tuple index out of range
+
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/worker.py", line 185, in _worker_loop
+    data = fetcher.fetch(index)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/fetch.py", line 44, in fetch
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/fetch.py", line 44, in <listcomp>
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/home/snowflake/Escritorio/Semi-Sup/code/data/cityscapes_loader.py", line 142, in __getitem__
+    img, lbl = self.augmentations(img, lbl)
+  File "/home/snowflake/Escritorio/Semi-Sup/code/data/augmentations.py", line 16, in __call__
+    img, mask = Image.fromarray(img, mode="RGB"), Image.fromarray(mask, mode="L")
+  File "/home/snowflake/.local/lib/python3.6/site-packages/PIL/Image.py", line 2763, in fromarray
+    size = 1 if ndim == 1 else shape[1], shape[0]
+IndexError: tuple index out of range
+
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/worker.py", line 185, in _worker_loop
+    data = fetcher.fetch(index)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/fetch.py", line 44, in fetch
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/fetch.py", line 44, in <listcomp>
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/home/snowflake/Escritorio/Semi-Sup/code/data/cityscapes_loader.py", line 142, in __getitem__
+    img, lbl = self.augmentations(img, lbl)
+  File "/home/snowflake/Escritorio/Semi-Sup/code/data/augmentations.py", line 16, in __call__
+    img, mask = Image.fromarray(img, mode="RGB"), Image.fromarray(mask, mode="L")
+  File "/home/snowflake/.local/lib/python3.6/site-packages/PIL/Image.py", line 2763, in fromarray
+    size = 1 if ndim == 1 else shape[1], shape[0]
+IndexError: tuple index out of range
+
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/worker.py", line 185, in _worker_loop
+    data = fetcher.fetch(index)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/fetch.py", line 44, in fetch
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/fetch.py", line 44, in <listcomp>
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/home/snowflake/Escritorio/Semi-Sup/code/data/cityscapes_loader.py", line 142, in __getitem__
+    img, lbl = self.augmentations(img, lbl)
+  File "/home/snowflake/Escritorio/Semi-Sup/code/data/augmentations.py", line 16, in __call__
+    img, mask = Image.fromarray(img, mode="RGB"), Image.fromarray(mask, mode="L")
+  File "/home/snowflake/.local/lib/python3.6/site-packages/PIL/Image.py", line 2763, in fromarray
+    size = 1 if ndim == 1 else shape[1], shape[0]
+IndexError: tuple index out of range
+
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/worker.py", line 185, in _worker_loop
+    data = fetcher.fetch(index)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/fetch.py", line 44, in fetch
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/fetch.py", line 44, in <listcomp>
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/home/snowflake/Escritorio/Semi-Sup/code/data/cityscapes_loader.py", line 142, in __getitem__
+    img, lbl = self.augmentations(img, lbl)
+  File "/home/snowflake/Escritorio/Semi-Sup/code/data/augmentations.py", line 16, in __call__
+    img, mask = Image.fromarray(img, mode="RGB"), Image.fromarray(mask, mode="L")
+  File "/home/snowflake/.local/lib/python3.6/site-packages/PIL/Image.py", line 2763, in fromarray
+    size = 1 if ndim == 1 else shape[1], shape[0]
+IndexError: tuple index out of range
+
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/worker.py", line 185, in _worker_loop
+    data = fetcher.fetch(index)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/fetch.py", line 44, in fetch
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/fetch.py", line 44, in <listcomp>
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/home/snowflake/Escritorio/Semi-Sup/code/data/cityscapes_loader.py", line 142, in __getitem__
+    img, lbl = self.augmentations(img, lbl)
+  File "/home/snowflake/Escritorio/Semi-Sup/code/data/augmentations.py", line 16, in __call__
+    img, mask = Image.fromarray(img, mode="RGB"), Image.fromarray(mask, mode="L")
+  File "/home/snowflake/.local/lib/python3.6/site-packages/PIL/Image.py", line 2763, in fromarray
+    size = 1 if ndim == 1 else shape[1], shape[0]
+IndexError: tuple index out of range
+
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/worker.py", line 185, in _worker_loop
+    data = fetcher.fetch(index)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/fetch.py", line 44, in fetch
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/fetch.py", line 44, in <listcomp>
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/home/snowflake/Escritorio/Semi-Sup/code/data/cityscapes_loader.py", line 142, in __getitem__
+    img, lbl = self.augmentations(img, lbl)
+  File "/home/snowflake/Escritorio/Semi-Sup/code/data/augmentations.py", line 16, in __call__
+    img, mask = Image.fromarray(img, mode="RGB"), Image.fromarray(mask, mode="L")
+  File "/home/snowflake/.local/lib/python3.6/site-packages/PIL/Image.py", line 2763, in fromarray
+    size = 1 if ndim == 1 else shape[1], shape[0]
+IndexError: tuple index out of range
+
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "trainSupervised.py", line 525, in <module>
+    main()
+  File "trainSupervised.py", line 382, in main
+    batch = next(trainloader_iter)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 363, in __next__
+    data = self._next_data()
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 989, in _next_data
+    return self._process_data(data)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 1014, in _process_data
+    data.reraise()
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/_utils.py", line 395, in reraise
+    raise self.exc_type(msg)
+IndexError: Caught IndexError in DataLoader worker process 0.
+Original Traceback (most recent call last):
+  File "trainSupervised.py", line 375, in main
+    batch = next(trainloader_iter)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 363, in __next__
+    data = self._next_data()
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 989, in _next_data
+    return self._process_data(data)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 1014, in _process_data
+    data.reraise()
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/_utils.py", line 395, in reraise
+    raise self.exc_type(msg)
+IndexError: Caught IndexError in DataLoader worker process 0.
+Original Traceback (most recent call last):
+  File "trainSupervised.py", line 375, in main
+    batch = next(trainloader_iter)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 363, in __next__
+    data = self._next_data()
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 989, in _next_data
+    return self._process_data(data)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 1014, in _process_data
+    data.reraise()
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/_utils.py", line 395, in reraise
+    raise self.exc_type(msg)
+IndexError: Caught IndexError in DataLoader worker process 0.
+Original Traceback (most recent call last):
+  File "trainSupervised.py", line 375, in main
+    batch = next(trainloader_iter)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 363, in __next__
+    data = self._next_data()
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 989, in _next_data
+    return self._process_data(data)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 1014, in _process_data
+    data.reraise()
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/_utils.py", line 395, in reraise
+    raise self.exc_type(msg)
+IndexError: Caught IndexError in DataLoader worker process 1.
+Original Traceback (most recent call last):
+  File "trainSupervised.py", line 375, in main
+    batch = next(trainloader_iter)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 363, in __next__
+    data = self._next_data()
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 989, in _next_data
+    return self._process_data(data)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 1014, in _process_data
+    data.reraise()
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/_utils.py", line 395, in reraise
+    raise self.exc_type(msg)
+IndexError: Caught IndexError in DataLoader worker process 0.
+Original Traceback (most recent call last):
+  File "trainSupervised.py", line 375, in main
+    batch = next(trainloader_iter)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 363, in __next__
+    data = self._next_data()
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 989, in _next_data
+    return self._process_data(data)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 1014, in _process_data
+    data.reraise()
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/_utils.py", line 395, in reraise
+    raise self.exc_type(msg)
+IndexError: Caught IndexError in DataLoader worker process 1.
+Original Traceback (most recent call last):
+  File "trainSupervised.py", line 375, in main
+    batch = next(trainloader_iter)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 363, in __next__
+    data = self._next_data()
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 989, in _next_data
+    return self._process_data(data)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 1014, in _process_data
+    data.reraise()
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/_utils.py", line 395, in reraise
+    raise self.exc_type(msg)
+IndexError: Caught IndexError in DataLoader worker process 1.
+Original Traceback (most recent call last):
+  File "trainSupervised.py", line 375, in main
+    batch = next(trainloader_iter)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 363, in __next__
+    data = self._next_data()
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 989, in _next_data
+    return self._process_data(data)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 1014, in _process_data
+    data.reraise()
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/_utils.py", line 395, in reraise
+    raise self.exc_type(msg)
+IndexError: Caught IndexError in DataLoader worker process 0.
+Original Traceback (most recent call last):
+  File "trainSupervised.py", line 375, in main
+    batch = next(trainloader_iter)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 363, in __next__
+    data = self._next_data()
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 989, in _next_data
+    return self._process_data(data)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 1014, in _process_data
+    data.reraise()
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/_utils.py", line 395, in reraise
+    raise self.exc_type(msg)
+IndexError: Caught IndexError in DataLoader worker process 1.
+Original Traceback (most recent call last):
+  File "trainSupervised.py", line 375, in main
+    batch = next(trainloader_iter)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 363, in __next__
+    data = self._next_data()
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 989, in _next_data
+    return self._process_data(data)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 1014, in _process_data
+    data.reraise()
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/_utils.py", line 395, in reraise
+    raise self.exc_type(msg)
+IndexError: Caught IndexError in DataLoader worker process 0.
+Original Traceback (most recent call last):
+  File "trainSupervised.py", line 375, in main
+    batch = next(trainloader_iter)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 363, in __next__
+    data = self._next_data()
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 989, in _next_data
+    return self._process_data(data)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 1014, in _process_data
+    data.reraise()
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/_utils.py", line 395, in reraise
+    raise self.exc_type(msg)
+IndexError: Caught IndexError in DataLoader worker process 0.
+Original Traceback (most recent call last):
+  File "trainSupervised.py", line 375, in main
+    batch = next(trainloader_iter)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 363, in __next__
+    data = self._next_data()
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 989, in _next_data
+    return self._process_data(data)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 1014, in _process_data
+    data.reraise()
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/_utils.py", line 395, in reraise
+    raise self.exc_type(msg)
+IndexError: Caught IndexError in DataLoader worker process 1.
+Original Traceback (most recent call last):
+  File "trainSupervised.py", line 375, in main
+    batch = next(trainloader_iter)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 363, in __next__
+    data = self._next_data()
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 989, in _next_data
+    return self._process_data(data)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 1014, in _process_data
+    data.reraise()
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/_utils.py", line 395, in reraise
+    raise self.exc_type(msg)
+IndexError: Caught IndexError in DataLoader worker process 0.
+Original Traceback (most recent call last):
+  File "trainSupervised.py", line 375, in main
+    batch = next(trainloader_iter)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 363, in __next__
+    data = self._next_data()
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 971, in _next_data
+    return self._process_data(data)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 1014, in _process_data
+    data.reraise()
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/_utils.py", line 395, in reraise
+    raise self.exc_type(msg)
+IndexError: Caught IndexError in DataLoader worker process 1.
+Original Traceback (most recent call last):
+  File "trainSupervised.py", line 375, in main
+    batch = next(trainloader_iter)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 363, in __next__
+    data = self._next_data()
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 989, in _next_data
+    return self._process_data(data)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 1014, in _process_data
+    data.reraise()
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/_utils.py", line 395, in reraise
+    raise self.exc_type(msg)
+IndexError: Caught IndexError in DataLoader worker process 0.
+Original Traceback (most recent call last):
+  File "trainSupervised.py", line 375, in main
+    batch = next(trainloader_iter)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 363, in __next__
+    data = self._next_data()
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 989, in _next_data
+    return self._process_data(data)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 1014, in _process_data
+    data.reraise()
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/_utils.py", line 395, in reraise
+    raise self.exc_type(msg)
+IndexError: Caught IndexError in DataLoader worker process 1.
+Original Traceback (most recent call last):
+  File "trainSupervised.py", line 375, in main
+    batch = next(trainloader_iter)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 363, in __next__
+    data = self._next_data()
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 989, in _next_data
+    return self._process_data(data)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 1014, in _process_data
+    data.reraise()
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/_utils.py", line 395, in reraise
+    raise self.exc_type(msg)
+IndexError: Caught IndexError in DataLoader worker process 1.
+Original Traceback (most recent call last):
+  File "trainSupervised.py", line 375, in main
+    batch = next(trainloader_iter)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 363, in __next__
+    data = self._next_data()
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 989, in _next_data
+    return self._process_data(data)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 1014, in _process_data
+    data.reraise()
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/_utils.py", line 395, in reraise
+    raise self.exc_type(msg)
+IndexError: Caught IndexError in DataLoader worker process 0.
+Original Traceback (most recent call last):
+  File "trainSupervised.py", line 375, in main
+    batch = next(trainloader_iter)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 363, in __next__
+    data = self._next_data()
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 989, in _next_data
+    return self._process_data(data)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 1014, in _process_data
+    data.reraise()
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/_utils.py", line 395, in reraise
+    raise self.exc_type(msg)
+IndexError: Caught IndexError in DataLoader worker process 1.
+Original Traceback (most recent call last):
+  File "trainSupervised.py", line 375, in main
+    batch = next(trainloader_iter)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 363, in __next__
+    data = self._next_data()
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 989, in _next_data
+    return self._process_data(data)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 1014, in _process_data
+    data.reraise()
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/_utils.py", line 395, in reraise
+    raise self.exc_type(msg)
+IndexError: Caught IndexError in DataLoader worker process 0.
+Original Traceback (most recent call last):
+  File "trainSupervised.py", line 375, in main
+    batch = next(trainloader_iter)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 363, in __next__
+    data = self._next_data()
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 989, in _next_data
+    return self._process_data(data)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 1014, in _process_data
+    data.reraise()
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/_utils.py", line 395, in reraise
+    raise self.exc_type(msg)
+IndexError: Caught IndexError in DataLoader worker process 1.
+Original Traceback (most recent call last):
+  File "trainSupervised.py", line 375, in main
+    batch = next(trainloader_iter)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 363, in __next__
+    data = self._next_data()
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 989, in _next_data
+    return self._process_data(data)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/dataloader.py", line 1014, in _process_data
+    data.reraise()
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/_utils.py", line 395, in reraise
+    raise self.exc_type(msg)
+IndexError: Caught IndexError in DataLoader worker process 1.
+Original Traceback (most recent call last):
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/worker.py", line 185, in _worker_loop
+    data = fetcher.fetch(index)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/fetch.py", line 44, in fetch
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/fetch.py", line 44, in <listcomp>
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/home/snowflake/Escritorio/Semi-Sup/code/data/cityscapes_loader.py", line 142, in __getitem__
+    img, lbl = self.augmentations(img, lbl)
+  File "/home/snowflake/Escritorio/Semi-Sup/code/data/augmentations.py", line 16, in __call__
+    img, mask = Image.fromarray(img, mode="RGB"), Image.fromarray(mask, mode="L")
+  File "/home/snowflake/.local/lib/python3.6/site-packages/PIL/Image.py", line 2763, in fromarray
+    size = 1 if ndim == 1 else shape[1], shape[0]
+IndexError: tuple index out of range
+
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/worker.py", line 185, in _worker_loop
+    data = fetcher.fetch(index)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/fetch.py", line 44, in fetch
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/fetch.py", line 44, in <listcomp>
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/home/snowflake/Escritorio/Semi-Sup/code/data/cityscapes_loader.py", line 142, in __getitem__
+    img, lbl = self.augmentations(img, lbl)
+  File "/home/snowflake/Escritorio/Semi-Sup/code/data/augmentations.py", line 16, in __call__
+    img, mask = Image.fromarray(img, mode="RGB"), Image.fromarray(mask, mode="L")
+  File "/home/snowflake/.local/lib/python3.6/site-packages/PIL/Image.py", line 2763, in fromarray
+    size = 1 if ndim == 1 else shape[1], shape[0]
+IndexError: tuple index out of range
+
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/worker.py", line 185, in _worker_loop
+    data = fetcher.fetch(index)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/fetch.py", line 44, in fetch
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/fetch.py", line 44, in <listcomp>
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/home/snowflake/Escritorio/Semi-Sup/code/data/cityscapes_loader.py", line 142, in __getitem__
+    img, lbl = self.augmentations(img, lbl)
+  File "/home/snowflake/Escritorio/Semi-Sup/code/data/augmentations.py", line 16, in __call__
+    img, mask = Image.fromarray(img, mode="RGB"), Image.fromarray(mask, mode="L")
+  File "/home/snowflake/.local/lib/python3.6/site-packages/PIL/Image.py", line 2763, in fromarray
+    size = 1 if ndim == 1 else shape[1], shape[0]
+IndexError: tuple index out of range
+
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/worker.py", line 185, in _worker_loop
+    data = fetcher.fetch(index)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/fetch.py", line 44, in fetch
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/fetch.py", line 44, in <listcomp>
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/home/snowflake/Escritorio/Semi-Sup/code/data/cityscapes_loader.py", line 142, in __getitem__
+    img, lbl = self.augmentations(img, lbl)
+  File "/home/snowflake/Escritorio/Semi-Sup/code/data/augmentations.py", line 16, in __call__
+    img, mask = Image.fromarray(img, mode="RGB"), Image.fromarray(mask, mode="L")
+  File "/home/snowflake/.local/lib/python3.6/site-packages/PIL/Image.py", line 2763, in fromarray
+    size = 1 if ndim == 1 else shape[1], shape[0]
+IndexError: tuple index out of range
+
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/worker.py", line 185, in _worker_loop
+    data = fetcher.fetch(index)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/fetch.py", line 44, in fetch
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/fetch.py", line 44, in <listcomp>
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/home/snowflake/Escritorio/Semi-Sup/code/data/cityscapes_loader.py", line 142, in __getitem__
+    img, lbl = self.augmentations(img, lbl)
+  File "/home/snowflake/Escritorio/Semi-Sup/code/data/augmentations.py", line 16, in __call__
+    img, mask = Image.fromarray(img, mode="RGB"), Image.fromarray(mask, mode="L")
+  File "/home/snowflake/.local/lib/python3.6/site-packages/PIL/Image.py", line 2763, in fromarray
+    size = 1 if ndim == 1 else shape[1], shape[0]
+IndexError: tuple index out of range
+
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/worker.py", line 185, in _worker_loop
+    data = fetcher.fetch(index)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/fetch.py", line 44, in fetch
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/fetch.py", line 44, in <listcomp>
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/home/snowflake/Escritorio/Semi-Sup/code/data/cityscapes_loader.py", line 142, in __getitem__
+    img, lbl = self.augmentations(img, lbl)
+  File "/home/snowflake/Escritorio/Semi-Sup/code/data/augmentations.py", line 16, in __call__
+    img, mask = Image.fromarray(img, mode="RGB"), Image.fromarray(mask, mode="L")
+  File "/home/snowflake/.local/lib/python3.6/site-packages/PIL/Image.py", line 2763, in fromarray
+    size = 1 if ndim == 1 else shape[1], shape[0]
+IndexError: tuple index out of range
+
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/worker.py", line 185, in _worker_loop
+    data = fetcher.fetch(index)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/fetch.py", line 44, in fetch
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/fetch.py", line 44, in <listcomp>
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/home/snowflake/Escritorio/Semi-Sup/code/data/cityscapes_loader.py", line 142, in __getitem__
+    img, lbl = self.augmentations(img, lbl)
+  File "/home/snowflake/Escritorio/Semi-Sup/code/data/augmentations.py", line 16, in __call__
+    img, mask = Image.fromarray(img, mode="RGB"), Image.fromarray(mask, mode="L")
+  File "/home/snowflake/.local/lib/python3.6/site-packages/PIL/Image.py", line 2763, in fromarray
+    size = 1 if ndim == 1 else shape[1], shape[0]
+IndexError: tuple index out of range
+
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/worker.py", line 185, in _worker_loop
+    data = fetcher.fetch(index)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/fetch.py", line 44, in fetch
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/fetch.py", line 44, in <listcomp>
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/home/snowflake/Escritorio/Semi-Sup/code/data/cityscapes_loader.py", line 142, in __getitem__
+    img, lbl = self.augmentations(img, lbl)
+  File "/home/snowflake/Escritorio/Semi-Sup/code/data/augmentations.py", line 16, in __call__
+    img, mask = Image.fromarray(img, mode="RGB"), Image.fromarray(mask, mode="L")
+  File "/home/snowflake/.local/lib/python3.6/site-packages/PIL/Image.py", line 2763, in fromarray
+    size = 1 if ndim == 1 else shape[1], shape[0]
+IndexError: tuple index out of range
+
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/worker.py", line 185, in _worker_loop
+    data = fetcher.fetch(index)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/fetch.py", line 44, in fetch
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/fetch.py", line 44, in <listcomp>
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/home/snowflake/Escritorio/Semi-Sup/code/data/cityscapes_loader.py", line 142, in __getitem__
+    img, lbl = self.augmentations(img, lbl)
+  File "/home/snowflake/Escritorio/Semi-Sup/code/data/augmentations.py", line 16, in __call__
+    img, mask = Image.fromarray(img, mode="RGB"), Image.fromarray(mask, mode="L")
+  File "/home/snowflake/.local/lib/python3.6/site-packages/PIL/Image.py", line 2763, in fromarray
+    size = 1 if ndim == 1 else shape[1], shape[0]
+IndexError: tuple index out of range
+
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/worker.py", line 185, in _worker_loop
+    data = fetcher.fetch(index)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/fetch.py", line 44, in fetch
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/fetch.py", line 44, in <listcomp>
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/home/snowflake/Escritorio/Semi-Sup/code/data/cityscapes_loader.py", line 142, in __getitem__
+    img, lbl = self.augmentations(img, lbl)
+  File "/home/snowflake/Escritorio/Semi-Sup/code/data/augmentations.py", line 16, in __call__
+    img, mask = Image.fromarray(img, mode="RGB"), Image.fromarray(mask, mode="L")
+  File "/home/snowflake/.local/lib/python3.6/site-packages/PIL/Image.py", line 2763, in fromarray
+    size = 1 if ndim == 1 else shape[1], shape[0]
+IndexError: tuple index out of range
+
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/worker.py", line 185, in _worker_loop
+    data = fetcher.fetch(index)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/fetch.py", line 44, in fetch
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/fetch.py", line 44, in <listcomp>
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/home/snowflake/Escritorio/Semi-Sup/code/data/cityscapes_loader.py", line 142, in __getitem__
+    img, lbl = self.augmentations(img, lbl)
+  File "/home/snowflake/Escritorio/Semi-Sup/code/data/augmentations.py", line 16, in __call__
+    img, mask = Image.fromarray(img, mode="RGB"), Image.fromarray(mask, mode="L")
+  File "/home/snowflake/.local/lib/python3.6/site-packages/PIL/Image.py", line 2763, in fromarray
+    size = 1 if ndim == 1 else shape[1], shape[0]
+IndexError: tuple index out of range
+
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/worker.py", line 185, in _worker_loop
+    data = fetcher.fetch(index)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/fetch.py", line 44, in fetch
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/fetch.py", line 44, in <listcomp>
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/home/snowflake/Escritorio/Semi-Sup/code/data/cityscapes_loader.py", line 142, in __getitem__
+    img, lbl = self.augmentations(img, lbl)
+  File "/home/snowflake/Escritorio/Semi-Sup/code/data/augmentations.py", line 16, in __call__
+    img, mask = Image.fromarray(img, mode="RGB"), Image.fromarray(mask, mode="L")
+  File "/home/snowflake/.local/lib/python3.6/site-packages/PIL/Image.py", line 2763, in fromarray
+    size = 1 if ndim == 1 else shape[1], shape[0]
+IndexError: tuple index out of range
+
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/worker.py", line 185, in _worker_loop
+    data = fetcher.fetch(index)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/fetch.py", line 44, in fetch
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/fetch.py", line 44, in <listcomp>
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/home/snowflake/Escritorio/Semi-Sup/code/data/cityscapes_loader.py", line 142, in __getitem__
+    img, lbl = self.augmentations(img, lbl)
+  File "/home/snowflake/Escritorio/Semi-Sup/code/data/augmentations.py", line 16, in __call__
+    img, mask = Image.fromarray(img, mode="RGB"), Image.fromarray(mask, mode="L")
+  File "/home/snowflake/.local/lib/python3.6/site-packages/PIL/Image.py", line 2763, in fromarray
+    size = 1 if ndim == 1 else shape[1], shape[0]
+IndexError: tuple index out of range
+
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/worker.py", line 185, in _worker_loop
+    data = fetcher.fetch(index)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/fetch.py", line 44, in fetch
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/fetch.py", line 44, in <listcomp>
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/home/snowflake/Escritorio/Semi-Sup/code/data/cityscapes_loader.py", line 142, in __getitem__
+    img, lbl = self.augmentations(img, lbl)
+  File "/home/snowflake/Escritorio/Semi-Sup/code/data/augmentations.py", line 16, in __call__
+    img, mask = Image.fromarray(img, mode="RGB"), Image.fromarray(mask, mode="L")
+  File "/home/snowflake/.local/lib/python3.6/site-packages/PIL/Image.py", line 2763, in fromarray
+    size = 1 if ndim == 1 else shape[1], shape[0]
+IndexError: tuple index out of range
+
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/worker.py", line 185, in _worker_loop
+    data = fetcher.fetch(index)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/fetch.py", line 44, in fetch
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/fetch.py", line 44, in <listcomp>
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/home/snowflake/Escritorio/Semi-Sup/code/data/cityscapes_loader.py", line 142, in __getitem__
+    img, lbl = self.augmentations(img, lbl)
+  File "/home/snowflake/Escritorio/Semi-Sup/code/data/augmentations.py", line 16, in __call__
+    img, mask = Image.fromarray(img, mode="RGB"), Image.fromarray(mask, mode="L")
+  File "/home/snowflake/.local/lib/python3.6/site-packages/PIL/Image.py", line 2763, in fromarray
+    size = 1 if ndim == 1 else shape[1], shape[0]
+IndexError: tuple index out of range
+
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/worker.py", line 185, in _worker_loop
+    data = fetcher.fetch(index)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/fetch.py", line 44, in fetch
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/fetch.py", line 44, in <listcomp>
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/home/snowflake/Escritorio/Semi-Sup/code/data/cityscapes_loader.py", line 142, in __getitem__
+    img, lbl = self.augmentations(img, lbl)
+  File "/home/snowflake/Escritorio/Semi-Sup/code/data/augmentations.py", line 16, in __call__
+    img, mask = Image.fromarray(img, mode="RGB"), Image.fromarray(mask, mode="L")
+  File "/home/snowflake/.local/lib/python3.6/site-packages/PIL/Image.py", line 2763, in fromarray
+    size = 1 if ndim == 1 else shape[1], shape[0]
+IndexError: tuple index out of range
+
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/worker.py", line 185, in _worker_loop
+    data = fetcher.fetch(index)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/fetch.py", line 44, in fetch
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/fetch.py", line 44, in <listcomp>
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/home/snowflake/Escritorio/Semi-Sup/code/data/cityscapes_loader.py", line 142, in __getitem__
+    img, lbl = self.augmentations(img, lbl)
+  File "/home/snowflake/Escritorio/Semi-Sup/code/data/augmentations.py", line 16, in __call__
+    img, mask = Image.fromarray(img, mode="RGB"), Image.fromarray(mask, mode="L")
+  File "/home/snowflake/.local/lib/python3.6/site-packages/PIL/Image.py", line 2763, in fromarray
+    size = 1 if ndim == 1 else shape[1], shape[0]
+IndexError: tuple index out of range
+
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/worker.py", line 185, in _worker_loop
+    data = fetcher.fetch(index)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/fetch.py", line 44, in fetch
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/fetch.py", line 44, in <listcomp>
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/home/snowflake/Escritorio/Semi-Sup/code/data/cityscapes_loader.py", line 142, in __getitem__
+    img, lbl = self.augmentations(img, lbl)
+  File "/home/snowflake/Escritorio/Semi-Sup/code/data/augmentations.py", line 16, in __call__
+    img, mask = Image.fromarray(img, mode="RGB"), Image.fromarray(mask, mode="L")
+  File "/home/snowflake/.local/lib/python3.6/site-packages/PIL/Image.py", line 2763, in fromarray
+    size = 1 if ndim == 1 else shape[1], shape[0]
+IndexError: tuple index out of range
+
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/worker.py", line 185, in _worker_loop
+    data = fetcher.fetch(index)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/fetch.py", line 44, in fetch
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/fetch.py", line 44, in <listcomp>
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/home/snowflake/Escritorio/Semi-Sup/code/data/cityscapes_loader.py", line 142, in __getitem__
+    img, lbl = self.augmentations(img, lbl)
+  File "/home/snowflake/Escritorio/Semi-Sup/code/data/augmentations.py", line 16, in __call__
+    img, mask = Image.fromarray(img, mode="RGB"), Image.fromarray(mask, mode="L")
+  File "/home/snowflake/.local/lib/python3.6/site-packages/PIL/Image.py", line 2763, in fromarray
+    size = 1 if ndim == 1 else shape[1], shape[0]
+IndexError: tuple index out of range
+
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/worker.py", line 185, in _worker_loop
+    data = fetcher.fetch(index)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/fetch.py", line 44, in fetch
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/fetch.py", line 44, in <listcomp>
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/home/snowflake/Escritorio/Semi-Sup/code/data/cityscapes_loader.py", line 142, in __getitem__
+    img, lbl = self.augmentations(img, lbl)
+  File "/home/snowflake/Escritorio/Semi-Sup/code/data/augmentations.py", line 16, in __call__
+    img, mask = Image.fromarray(img, mode="RGB"), Image.fromarray(mask, mode="L")
+  File "/home/snowflake/.local/lib/python3.6/site-packages/PIL/Image.py", line 2763, in fromarray
+    size = 1 if ndim == 1 else shape[1], shape[0]
+IndexError: tuple index out of range
+
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/worker.py", line 185, in _worker_loop
+    data = fetcher.fetch(index)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/fetch.py", line 44, in fetch
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/fetch.py", line 44, in <listcomp>
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/home/snowflake/Escritorio/Semi-Sup/code/data/cityscapes_loader.py", line 142, in __getitem__
+    img, lbl = self.augmentations(img, lbl)
+  File "/home/snowflake/Escritorio/Semi-Sup/code/data/augmentations.py", line 16, in __call__
+    img, mask = Image.fromarray(img, mode="RGB"), Image.fromarray(mask, mode="L")
+  File "/home/snowflake/.local/lib/python3.6/site-packages/PIL/Image.py", line 2763, in fromarray
+    size = 1 if ndim == 1 else shape[1], shape[0]
+IndexError: tuple index out of range
+
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/worker.py", line 185, in _worker_loop
+    data = fetcher.fetch(index)
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/fetch.py", line 44, in fetch
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/home/snowflake/.local/lib/python3.6/site-packages/torch/utils/data/_utils/fetch.py", line 44, in <listcomp>
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/home/snowflake/Escritorio/Semi-Sup/code/data/cityscapes_loader.py", line 142, in __getitem__
+    img, lbl = self.augmentations(img, lbl)
+  File "/home/snowflake/Escritorio/Semi-Sup/code/data/augmentations.py", line 16, in __call__
+    img, mask = Image.fromarray(img, mode="RGB"), Image.fromarray(mask, mode="L")
+  File "/home/snowflake/.local/lib/python3.6/site-packages/PIL/Image.py", line 2763, in fromarray
+    size = 1 if ndim == 1 else shape[1], shape[0]
+IndexError: tuple index out of range
+
