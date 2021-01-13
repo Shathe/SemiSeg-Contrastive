@@ -522,6 +522,6 @@ if __name__ == '__main__':
     gpus = (0,1,2,3)[:args.gpus]
     deeplabv2 = "2" in config['version']
 
-    os.environ["CUDA_VISIBLE_DEVICES"] = str(5)
+    os.environ["CUDA_VISIBLE_DEVICES"] = str(0)
 
     main()

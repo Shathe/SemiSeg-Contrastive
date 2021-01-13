@@ -49,15 +49,15 @@ class CurriculumClassBalancing:
 
     def get_weights(self, max_iter, only_labeled=False, reduction_freqs = np.sum):
         if self.iter < self.rampu_up:
-            return np.ones((self.n_classes))
+            return np.ones((self.n_classes)) # in order to get all the statistics from one epoch
         else: # inverse median, frequency
-            ratio_unlabeled = min (1., float(self.iter - self.rampu_up) / float(max_iter - self.rampu_up)) * self.percentage_unlabeled
-            freqs_labeled = reduction_freqs(self.labeled_frequencies, axis = 0)
-            freqs_unlabeled = reduction_freqs(self.unlabeled_frequencies, axis = 0)
+            ratio_unlabeled = min (1., self.iter / max_iter)
+            freqs_labeled = np.sum(self.labeled_frequencies, axis = 0)
+            freqs_unlabeled = np.sum(self.unlabeled_frequencies, axis = 0)
             if only_labeled:
-                freqs = freqs_labeled
-            else:
-                freqs = freqs_labeled * (1 - ratio_unlabeled) + freqs_unlabeled * ratio_unlabeled
+                ratio_unlabeled = 0
+
+            freqs = freqs_labeled + freqs_unlabeled * ratio_unlabeled
 
             median = np.median(freqs)
             weights = median / freqs
