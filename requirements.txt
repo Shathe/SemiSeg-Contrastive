@@ -1,8 +1,13 @@
 torch
 torchvision
 kornia
-tensorboardsklearn
+tensorboard
+sklearn
 tqdm
-opencv-python
+scikit-build
+cmake
+opencv-python==4.2.0.34
+opencv-contrib-python==4.2.0.34
 scipy==1.2
 sklearn
+

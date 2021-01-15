@@ -4,7 +4,7 @@
   "dataset": "cityscapes",
 
   "training": {
-    "batch_size": 4,
+    "batch_size": 5,
     "num_workers": 3,
     "optimizer": "SGD",
     "momentum": 0.9,
@@ -17,24 +17,24 @@
 
     "data": {
       "split_id_list": 0,
-      "labeled_samples": 2975,
+      "labeled_samples": 372,
       "input_size": "768,768"
     },
     "unlabeled": {
-      "train_unlabeled": false,
+      "train_unlabeled": true,
       "consistency_weight": 1,
       "consistency_loss": "CE",
-      "pixel_weight": "threshold_uniform"
+      "pixel_weight": "sigmoid"
     }
 
   },
-  "seed": 7,
+  "seed": 5555,
   "ignore_label": 250,
 
   "utils": {
     "save_checkpoint_every": 10000,
     "checkpoint_dir": "../saved/DeepLab",
-    "val_per_iter": 4000,
+    "val_per_iter": 2000,
     "log_per_iter": 100,
     "save_best_model": true
   }
