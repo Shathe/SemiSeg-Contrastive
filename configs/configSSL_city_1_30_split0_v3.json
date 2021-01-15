@@ -2,6 +2,7 @@
   "model": "DeepLab",
   "version": "3",
   "dataset": "cityscapes",
+
   "training": {
     "batch_size": 5,
     "num_workers": 3,

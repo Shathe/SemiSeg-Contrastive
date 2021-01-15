@@ -397,7 +397,7 @@ def augment_samples_weak(images, labels, probs, do_classmix, batch_size, ignore_
 
     # similar as BYOL, plus, classmix
     params["flip"] = random.random() < 0.5
-    params["ColorJitter"] = random.random() < 0.25
+    params["ColorJitter"] = random.random() < 0.20
     params["GaussianBlur"] = random.random() < 0.
     params["Grayscale"] = random.random() < 0.0
     params["Solarize"] = random.random() < 0.0
@@ -946,6 +946,6 @@ if __name__ == '__main__':
     gpus = (0, 1, 2, 3)[:args.gpus]
     deeplabv2 = "2" in config['version']
 
-    os.environ["CUDA_VISIBLE_DEVICES"] = str(6)
+    os.environ["CUDA_VISIBLE_DEVICES"] = str(0)
 
     main()
