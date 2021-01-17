@@ -44,7 +44,7 @@ import PIL
 from torchvision import transforms
 import json
 from torch.utils import tensorboard
-from evaluateSSL import evaluate
+from evaluateSSL2 import evaluate
 
 import time
 
@@ -255,7 +255,8 @@ def main():
 
     # DATASETS
     if dataset == 'pascal_voc':
-        data_loader = get_loader(dataset)
+        from data.voc_dataset2 import VOCDataSet
+        data_loader = VOCDataSet
         data_path = get_data_path(dataset)
         train_dataset = data_loader(data_path, crop_size=input_size, scale=False, mirror=False)
 
@@ -520,6 +521,6 @@ if __name__ == '__main__':
     gpus = (0,1,2,3)[:args.gpus]
     deeplabv2 = "2" in config['version']
 
-    os.environ["CUDA_VISIBLE_DEVICES"] = str(0)
+    os.environ["CUDA_VISIBLE_DEVICES"] = str(3)
 
     main()

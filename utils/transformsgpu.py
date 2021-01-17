@@ -17,6 +17,7 @@ def normalize(data, dataset):
     return data_norm
 
 
+
 def grayscale(grayscale,  data = None, target = None, probs = None):
     # s is the strength of colorjitter
     if not (data is None):

@@ -899,6 +899,10 @@ if __name__ == '__main__':
         data_list_path = './data/voc_list/train_aug.txt'
         if config['training']['data']['split_id_list'] == 0:
             split_id = './splits/voc/split_0.pkl'
+        elif config['training']['data']['split_id_list'] == 1:
+            split_id = './splits/voc/split_1.pkl'
+        elif config['training']['data']['split_id_list'] == 2:
+            split_id = './splits/voc/split_2.pkl'
         else:
             split_id = None
 

@@ -18,7 +18,7 @@
     "data": {
       "split_id_list": 0,
       "labeled_samples": 10582,
-      "input_size": "321,321"
+      "input_size": "480,480"
     },
     "unlabeled": {
       "train_unlabeled": true,

@@ -44,7 +44,7 @@ import PIL
 from torchvision import transforms
 import json
 from torch.utils import tensorboard
-from evaluateSSL import evaluate
+from evaluateSSL3 import evaluate
 
 import time
 
@@ -360,6 +360,9 @@ def main():
     start_iteration = 0
     best_mIoU = 0 # best metric while training
 
+    model.eval()
+    mIoU, eval_loss = evaluate(model, dataset, ignore_label=ignore_label, save_dir=checkpoint_dir)
+
     # TRAINING
     for i_iter in range(start_iteration, num_iterations):
         model.train() # set mode to training
@@ -381,12 +384,14 @@ def main():
             trainloader_iter = iter(trainloader)
             batch = next(trainloader_iter)
 
-        images, labels, _, _, _ = batch
+        images, labels, _, name, _ = batch
         images = images.cuda()
         labels = labels.cuda()
 
         # Apply weak augmentations to labeled images
         images, labels, _, _ = augment_samples_weak(images, labels, None, random.random()  < 0.20, batch_size, ignore_label)
+
+
 
 
         pred = interp(model(normalize(images, dataset)))
