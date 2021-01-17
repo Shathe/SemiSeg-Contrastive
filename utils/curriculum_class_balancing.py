@@ -45,6 +45,26 @@ class CurriculumClassBalancing:
 
         self.iter += 1
 
+    def add_frequencies_labeled(self, labeled_samples):
+
+        if self.iter < self.labeled_samples:
+            labeled_freqs = self.compute_frequencies(labeled_samples)
+            self.labeled_frequencies[self.iter, :] = labeled_freqs
+
+
+    def add_frequencies_unlabeled(self, unlabeled_samples, unlabeled_confidences=None):
+
+        unl_freqs = self.compute_frequencies(unlabeled_samples, unlabeled_confidences)
+
+        if self.iter < self.unlabeled_samples:
+            self.unlabeled_frequencies[self.iter, :] = unl_freqs
+        else: # remove first, add this one at the bottom (concat)
+            # only for unlabeled because labeled doesnot change
+            self.unlabeled_frequencies = self.unlabeled_frequencies[1:, :]
+            self.unlabeled_frequencies = np.concatenate((self.unlabeled_frequencies, np.expand_dims(unl_freqs, 0)), axis=0)
+
+        self.iter += 1
+
 
 
     def get_weights(self, max_iter, only_labeled=False, reduction_freqs = np.sum):

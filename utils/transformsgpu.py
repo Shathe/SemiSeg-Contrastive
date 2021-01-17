@@ -16,6 +16,16 @@ def normalize(data, dataset):
     data_norm = ((data-mean)/255.0)
     return data_norm
 
+def normalize_inverse(data, dataset):
+    if dataset == 'pascal_voc':
+        mean = (116.66876762, 104.00698793, 122.6789143)
+    elif dataset == 'cityscapes':
+        mean = (73.15835921, 82.90891754, 72.39239876)
+
+    mean = torch.Tensor(mean).unsqueeze(0).unsqueeze(2).unsqueeze(3).cuda()
+    data_norm = ((data-mean)/255.0)
+    return data_norm
+
 
 
 def grayscale(grayscale,  data = None, target = None, probs = None):

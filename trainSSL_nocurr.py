@@ -592,7 +592,8 @@ def main():
             max_probs, pseudo_label = torch.max(softmax_u_w, dim=1)  # Get pseudolabels
 
         model.train()
-        class_weights_curr.add_frequencies(labels.cpu().numpy(), pseudo_label.cpu().numpy(), None)
+        if dataset == 'cityscapes':
+            class_weights_curr.add_frequencies(labels.cpu().numpy(), pseudo_label.cpu().numpy(), None)
 
         images2, labels2, _, _ = augment_samples_weak(images, labels, None, random.random()  < 0.20, batch_size_labeled, ignore_label)
 
@@ -634,8 +635,11 @@ def main():
         labeled_pred, labeled_features = model(normalize(joined_labeled, dataset), return_features=True)
         labeled_pred = interp(labeled_pred)
 
-        class_weights = torch.from_numpy(
+        if dataset == 'cityscapes':
+            class_weights = torch.from_numpy(
                 class_weights_curr.get_weights(num_iterations, reduction_freqs=np.sum, only_labeled=False)).cuda()
+        else:
+            class_weights = torch.from_numpy(np.ones((num_classes))).cuda()
 
         loss = 0
         if supervised_labeled_loss:
@@ -943,6 +947,6 @@ if __name__ == '__main__':
     gpus = (0, 1, 2, 3)[:args.gpus]
     deeplabv2 = "2" in config['version']
 
-    os.environ["CUDA_VISIBLE_DEVICES"] = str(0)
+    os.environ["CUDA_VISIBLE_DEVICES"] = str(5)
 
     main()

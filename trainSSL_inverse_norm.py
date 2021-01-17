@@ -23,11 +23,11 @@ from modeling.deeplab import *
 
 from data import get_loader, get_data_path
 from data.augmentations import *
-from utils.transformsgpu import normalize
+from utils.transformsgpu import normalize_inverse as normalize
 
 from torchvision import transforms
 import json
-from evaluateSSL import evaluate
+from evaluateSSL_inverse_norm import evaluate
 import time
 from utils.curriculum_class_balancing import CurriculumClassBalancing
 from utils.feature_memory import *
@@ -943,6 +943,6 @@ if __name__ == '__main__':
     gpus = (0, 1, 2, 3)[:args.gpus]
     deeplabv2 = "2" in config['version']
 
-    os.environ["CUDA_VISIBLE_DEVICES"] = str(0)
+    os.environ["CUDA_VISIBLE_DEVICES"] = str(6)
 
     main()

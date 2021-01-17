@@ -4,11 +4,11 @@
   "dataset": "pascal_voc",
 
   "training": {
-    "batch_size": 5,
+    "batch_size":  8,
     "num_workers": 3,
     "optimizer": "SGD",
     "momentum": 0.9,
-    "num_iterations": 60000,
+    "num_iterations": 80000,
     "learning_rate": 2e-4,
     "lr_schedule": "Poly",
     "lr_schedule_power": 0.9,
@@ -17,8 +17,8 @@
 
     "data": {
       "split_id_list": 0,
-      "labeled_samples": 10582,
-      "input_size": "480,480"
+      "labeled_samples": 212,
+      "input_size": "321,321"
     },
     "unlabeled": {
       "train_unlabeled": true,
@@ -34,7 +34,7 @@
   "utils": {
     "save_checkpoint_every": 10000,
     "checkpoint_dir": "../saved/DeepLab",
-    "val_per_iter": 4000,
+    "val_per_iter": 2000,
     "log_per_iter": 100,
     "save_best_model": true
   }

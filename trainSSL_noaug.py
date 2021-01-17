@@ -594,7 +594,6 @@ def main():
         model.train()
         class_weights_curr.add_frequencies(labels.cpu().numpy(), pseudo_label.cpu().numpy(), None)
 
-        images2, labels2, _, _ = augment_samples_weak(images, labels, None, random.random()  < 0.20, batch_size_labeled, ignore_label)
 
         '''
         UNLABELED DATA
@@ -629,8 +628,8 @@ def main():
         pred_joined_unlabeled, features_joined_unlabeled = model(normalize(joined_unlabeled, dataset), return_features=True)
         pred_joined_unlabeled = interp(pred_joined_unlabeled)
 
-        joined_labeled = images2
-        joined_labels = labels2
+        joined_labeled = images
+        joined_labels = labels
         labeled_pred, labeled_features = model(normalize(joined_labeled, dataset), return_features=True)
         labeled_pred = interp(labeled_pred)
 
@@ -943,6 +942,6 @@ if __name__ == '__main__':
     gpus = (0, 1, 2, 3)[:args.gpus]
     deeplabv2 = "2" in config['version']
 
-    os.environ["CUDA_VISIBLE_DEVICES"] = str(0)
+    os.environ["CUDA_VISIBLE_DEVICES"] = str(3)
 
     main()
