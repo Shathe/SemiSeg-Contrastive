@@ -51,6 +51,7 @@ class VOCDataSet(data.Dataset):
         datafiles = self.files[index]
         image = cv2.imread(datafiles["img"], cv2.IMREAD_COLOR)
         label = cv2.imread(datafiles["label"], cv2.IMREAD_GRAYSCALE)
+        image = image[:, :, ::-1]  # change to RGB
 
         size = image.shape
         name = datafiles["name"]
@@ -75,7 +76,6 @@ class VOCDataSet(data.Dataset):
             image = np.asarray(img_pad[h_off : h_off+self.crop_h, w_off : w_off+self.crop_w], np.float32)
             label = np.asarray(label_pad[h_off : h_off+self.crop_h, w_off : w_off+self.crop_w], np.int64)
 
-        image = image[:, :, ::-1]  # change to RGB
 
         image = image.transpose((2, 0, 1))
         label = label.astype(int)
