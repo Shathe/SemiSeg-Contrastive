@@ -4,7 +4,7 @@
   "dataset": "pascal_voc",
 
   "training": {
-    "batch_size":  16,
+    "batch_size":  9,
     "num_workers": 3,
     "optimizer": "SGD",
     "momentum": 0.9,
@@ -18,7 +18,7 @@
     "data": {
       "split_id_list": 0,
       "labeled_samples": 212,
-      "input_size": "321,321"
+      "input_size": "432,432"
     },
     "unlabeled": {
       "train_unlabeled": true,

@@ -27,7 +27,7 @@ from utils import transformmasks
 from utils import transformsgpu
 from utils.helpers import colorize_mask
 import utils.palette as palette
-from utils.transformsgpu import normalize
+from utils.transformsgpu import normalize_inverse as normalize
 
 from utils.sync_batchnorm import convert_model
 from utils.sync_batchnorm import DataParallelWithCallback
@@ -521,6 +521,6 @@ if __name__ == '__main__':
     gpus = (0,1,2,3)[:args.gpus]
     deeplabv2 = "2" in config['version']
 
-    os.environ["CUDA_VISIBLE_DEVICES"] = str(3)
+    os.environ["CUDA_VISIBLE_DEVICES"] = str(6)
 
     main()

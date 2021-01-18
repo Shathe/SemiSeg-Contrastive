@@ -51,6 +51,7 @@ class VOCDataSet(data.Dataset):
         datafiles = self.files[index]
         image = cv2.imread(datafiles["img"], cv2.IMREAD_COLOR)
         label = cv2.imread(datafiles["label"], cv2.IMREAD_GRAYSCALE)
+        # image = image[:, :, ::-1]  # change to RGB
 
         size = image.shape
         name = datafiles["name"]
