@@ -23,7 +23,6 @@ from modeling.deeplab import *
 
 from data import get_loader, get_data_path
 from data.augmentations import *
-from utils.transformsgpu import normalize
 
 from torchvision import transforms
 import json
@@ -274,13 +273,8 @@ def CBC_thresholding(max_probs, pseudo_label, num_classes, ignore_label, percent
 
     return max_probs, pseudo_label
 
-def create_ema_model(model):
-    if deeplabv2:
-        from model.deeplabv2 import Res_Deeplab
-    else:
-        from model.deeplabv3 import Res_Deeplab
-
-    ema_model = Res_Deeplab(num_classes=num_classes)
+def create_ema_model(model, net_class):
+    ema_model = net_class(num_classes=num_classes)
 
     for param in ema_model.parameters():
         param.detach_()
@@ -427,6 +421,11 @@ def main():
     supervised_unlabeled_loss = True
     supervised_labeled_loss = True
     contrastive_labeled_loss = True
+    pretraining = 'COCO'
+    if pretraining == 'COCO':
+        from utils.transformsgpu import normalize_bgr as normalize
+    else:
+        from utils.transformsgpu import normalize_rgb as normalize
 
     batch_size_unlabeled = int(batch_size / 2)
     batch_size_labeled = int(batch_size * 1 )
@@ -438,14 +437,14 @@ def main():
     if dataset == 'pascal_voc':
         data_loader = get_loader(dataset)
         data_path = get_data_path(dataset)
-        train_dataset = data_loader(data_path, crop_size=input_size, scale=False, mirror=False)
+        train_dataset = data_loader(data_path, crop_size=input_size, scale=False, mirror=False, pretraining=pretraining)
 
     elif dataset == 'cityscapes':
         data_loader = get_loader('cityscapes')
         data_path = get_data_path('cityscapes')
         data_aug = Compose(
             [RandomCrop_city(input_size)])  # from 1024x2048 to resize 512x1024 to crop input_size (512x512)
-        train_dataset = data_loader(data_path, is_transform=True, augmentations=data_aug, img_size=input_size)
+        train_dataset = data_loader(data_path, is_transform=True, augmentations=data_aug, img_size=input_size, pretraining=pretraining)
 
     train_dataset_size = len(train_dataset)
     print('dataset size: ', train_dataset_size)
@@ -488,18 +487,24 @@ def main():
 
     ''' Deeplab model '''
     # Define network
-
     if deeplabv2:
-        from model.deeplabv2 import Res_Deeplab
+        if pretraining == 'COCO': # coco and iamgenet resnet architectures differ a little, just on how to do the stride
+            from model.deeplabv2 import Res_Deeplab
+        else: # imagenet pretrained (more modern modification)
+            from model.deeplabv2_imagenet import Res_Deeplab
+
     else:
         from model.deeplabv3 import Res_Deeplab
 
     # create network
+
     model = Res_Deeplab(num_classes=num_classes)
 
     # load pretrained parameters
-    saved_state_dict = model_zoo.load_url('http://vllab1.ucmerced.edu/~whung/adv-semi-seg/resnet101COCO-41f33a49.pth') # COCO pretraining
-    # saved_state_dict = model_zoo.load_url(''https://download.pytorch.org/models/resnet101-5d3b4d8f.pth'') # iamgenet pretrainning
+    if pretraining == 'COCO':
+        saved_state_dict = model_zoo.load_url('http://vllab1.ucmerced.edu/~whung/adv-semi-seg/resnet101COCO-41f33a49.pth') # COCO pretraining
+    else:
+        saved_state_dict = model_zoo.load_url('https://download.pytorch.org/models/resnet101-5d3b4d8f.pth') # iamgenet pretrainning
 
     # Copy loaded parameters to model
     new_params = model.state_dict().copy()
@@ -514,7 +519,7 @@ def main():
     optimizer = torch.optim.SGD(model.optim_parameters(learning_rate_object),
                           lr=learning_rate, momentum=momentum, weight_decay=weight_decay)
 
-    ema_model = create_ema_model(model)
+    ema_model = create_ema_model(model, Res_Deeplab)
     ema_model.train()
     ema_model = ema_model.cuda()
 
@@ -592,7 +597,10 @@ def main():
             max_probs, pseudo_label = torch.max(softmax_u_w, dim=1)  # Get pseudolabels
 
         model.train()
-        class_weights_curr.add_frequencies(labels.cpu().numpy(), pseudo_label.cpu().numpy(), None)
+
+        if dataset == 'cityscapes':
+            class_weights_curr.add_frequencies(labels.cpu().numpy(), pseudo_label.cpu().numpy(), None)
+
 
         images2, labels2, _, _ = augment_samples_weak(images, labels, None, random.random()  < 0.20, batch_size_labeled, ignore_label)
 
@@ -634,8 +642,12 @@ def main():
         labeled_pred, labeled_features = model(normalize(joined_labeled, dataset), return_features=True)
         labeled_pred = interp(labeled_pred)
 
-        class_weights = torch.from_numpy(
+        if dataset == 'cityscapes':
+            class_weights = torch.from_numpy(
                 class_weights_curr.get_weights(num_iterations, reduction_freqs=np.sum, only_labeled=False)).cuda()
+        else:
+            class_weights = torch.from_numpy(np.ones((num_classes))).cuda()
+
 
         loss = 0
         if supervised_labeled_loss:
@@ -832,7 +844,7 @@ def main():
             print('iter = {0:6d}/{1:6d}'.format(i_iter, num_iterations))
 
             model.eval()
-            mIoU, eval_loss = evaluate(model, dataset, ignore_label=ignore_label, save_dir=checkpoint_dir)
+            mIoU, eval_loss = evaluate(model, dataset, ignore_label=ignore_label, save_dir=checkpoint_dir, pretraining=pretraining)
             model.train()
             if supervised_labeled_loss:
                 print('last labeled loss')
@@ -849,7 +861,7 @@ def main():
     _save_checkpoint(num_iterations, model, optimizer, config)
 
     model.eval()
-    mIoU, val_loss = evaluate(model, dataset, ignore_label=ignore_label, save_dir=checkpoint_dir)
+    mIoU, val_loss = evaluate(model, dataset, ignore_label=ignore_label, save_dir=checkpoint_dir, pretraining=pretraining)
 
     if mIoU > best_mIoU and save_best_model:
         best_mIoU = mIoU

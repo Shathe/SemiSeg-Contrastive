@@ -8,7 +8,6 @@ from torch.autograd import Variable
 import torchvision.models as models
 import torch.nn.functional as F
 from torch.utils import data, model_zoo
-from utils.transformsgpu import normalize
 from modeling.deeplab import *
 from data.voc_dataset import VOCDataSet
 from data import get_data_path, get_loader
@@ -122,16 +121,19 @@ def get_iou(confM, dataset, save_path=None):
     return aveJ
 
 
-def evaluate(model, dataset, ignore_label=250, save_dir=None):
+def evaluate(model, dataset, ignore_label=250, save_dir=None, pretraining='COCO'):
 
-
+    if pretraining == 'COCO':
+        from utils.transformsgpu import normalize_bgr as normalize
+    else:
+        from utils.transformsgpu import normalize_rgb as normalize
 
     if dataset == 'pascal_voc':
         num_classes = 21
         input_size = (505, 505)
         data_loader = get_loader(dataset)
         data_path = get_data_path(dataset)
-        test_dataset = data_loader(data_path, split="val", crop_size=input_size, scale=False, mirror=False)
+        test_dataset = data_loader(data_path, split="val", crop_size=input_size, scale=False, mirror=False, pretraining=pretraining)
         testloader = data.DataLoader(test_dataset, batch_size=1, shuffle=False, pin_memory=True)
 
     elif dataset == 'cityscapes':
@@ -142,7 +144,7 @@ def evaluate(model, dataset, ignore_label=250, save_dir=None):
         data_path = get_data_path('cityscapes')
         data_aug = Compose([Resize_city(input_size)])
         test_dataset = data_loader(data_path, img_size=input_size, is_transform=True, split='val',
-                                   augmentations=data_aug)
+                                   augmentations=data_aug, pretraining=pretraining)
         testloader = data.DataLoader(test_dataset, batch_size=1, shuffle=False, pin_memory=True)
 
     print('Evaluating, found ' + str(len(testloader)) + ' images.')

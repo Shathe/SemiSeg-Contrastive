@@ -8,7 +8,7 @@ from torch.utils import data
 from data.city_utils import recursive_glob
 from data.augmentations import *
 
-class cityscapesLoader(data.Dataset):
+class gtaLoader(data.Dataset):
     """cityscapesLoader
     https://www.cityscapes-dataset.com
     Data is derived from CityScapes, and can be downloaded from here:
@@ -28,7 +28,7 @@ class cityscapesLoader(data.Dataset):
         [220, 220, 0],
         [107, 142, 35],
         [152, 251, 152],
-        [70, 130, 180],
+        [0, 130, 180],
         [220, 20, 60],
         [255, 0, 0],
         [0, 0, 142],
@@ -50,8 +50,8 @@ class cityscapesLoader(data.Dataset):
         img_norm=False,
         augmentations=None,
         version="cityscapes",
-        return_id=False,
         pretraining='COCO',
+        return_id=False,
     ):
         """__init__
         :param root:
@@ -61,8 +61,8 @@ class cityscapesLoader(data.Dataset):
         :param augmentations
         """
         self.root = root
-        self.pretraining = pretraining
         self.split = split
+        self.pretraining = pretraining
         self.is_transform = is_transform
         self.augmentations = augmentations
         self.img_norm = img_norm
@@ -72,10 +72,10 @@ class cityscapesLoader(data.Dataset):
         )
         self.files = {}
 
-        self.images_base = os.path.join(self.root, "leftImg8bit_trainvaltest","leftImg8bit", self.split)
+        self.images_base = os.path.join(self.root, "images", self.split)
 
         self.annotations_base = os.path.join(
-            self.root, "gtFine_trainvaltest", "gtFine", self.split
+            self.root, "labels", self.split
         )
 
         self.files[split] = recursive_glob(rootdir=self.images_base, suffix=".png")
@@ -125,11 +125,8 @@ class cityscapesLoader(data.Dataset):
         :param index:
         """
         img_path = self.files[self.split][index].rstrip()
-        lbl_path = os.path.join(
-            self.annotations_base,
-            img_path.split(os.sep)[-2], # temporary for cross validation
-            os.path.basename(img_path)[:-15] + "gtFine_labelIds.png",
-        )
+        lbl_path = img_path.replace('images', 'labels')
+
         try:
             img = m.imread(img_path)
             img = np.array(img, dtype=np.uint8)
@@ -138,8 +135,6 @@ class cityscapesLoader(data.Dataset):
 
         lbl = m.imread(lbl_path)
         lbl = np.array(lbl, dtype=np.uint8)
-        lbl = self.encode_segmap(lbl)
-
 
         if self.augmentations is not None:
             img, lbl = self.augmentations(img, lbl)
@@ -159,7 +154,6 @@ class cityscapesLoader(data.Dataset):
         # img = m.imresize(
         #     img, (self.img_size[0], self.img_size[1])
         # )
-        # CURRENTLY IS RGB. IF COCO PRETRAINED, LOAD BGR
         if self.pretraining == 'COCO':
             img = img[:, :, ::-1]
         img = img.astype(np.float64)

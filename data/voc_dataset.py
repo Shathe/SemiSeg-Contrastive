@@ -11,10 +11,11 @@ from torch.utils import data
 from PIL import Image
 
 class VOCDataSet(data.Dataset):
-    def __init__(self, root, split="train", max_iters=None, crop_size=(321, 321), scale=True, mirror=True, ignore_label=255):
+    def __init__(self, root, split="train", max_iters=None, crop_size=(321, 321), scale=True, mirror=True, ignore_label=255, pretraining='COCO'):
         self.root = root
         self.crop_h, self.crop_w = crop_size
         self.scale = scale
+        self.pretraining = pretraining
         self.ignore_label = ignore_label
         self.is_mirror = mirror
         self.split=split
@@ -51,7 +52,10 @@ class VOCDataSet(data.Dataset):
         datafiles = self.files[index]
         image = cv2.imread(datafiles["img"], cv2.IMREAD_COLOR)
         label = cv2.imread(datafiles["label"], cv2.IMREAD_GRAYSCALE)
-        # image = image[:, :, ::-1]  # change to RGB
+        if self.pretraining == 'COCO': # if pratraining is not COCO, change to RGB
+            image = image
+        else:
+            image = image[:, :, ::-1]
 
         size = image.shape
         name = datafiles["name"]

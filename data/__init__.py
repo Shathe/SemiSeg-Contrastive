@@ -19,5 +19,8 @@ def get_data_path(name):
     """
     if name == 'cityscapes':
         return '../data/CityScapes/'
+
+    if name == 'gta5':
+        return '../data/GTA5/'
     if name == 'pascal_voc':
         return '../data/VOC2012/'

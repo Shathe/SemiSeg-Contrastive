@@ -34,7 +34,7 @@
   "utils": {
     "save_checkpoint_every": 10000,
     "checkpoint_dir": "../saved/DeepLab",
-    "val_per_iter": 4000,
+    "val_per_iter": 1000,
     "log_per_iter": 100,
     "save_best_model": true
   }

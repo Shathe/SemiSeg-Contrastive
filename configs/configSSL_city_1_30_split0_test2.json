@@ -5,7 +5,7 @@
 
   "training": {
     "batch_size": 2,
-    "num_workers": 3,
+    "num_workers": 1,
     "optimizer": "SGD",
     "momentum": 0.9,
     "num_iterations": 40000,

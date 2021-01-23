@@ -27,7 +27,6 @@ from utils import transformmasks
 from utils import transformsgpu
 from utils.helpers import colorize_mask
 import utils.palette as palette
-from utils.transformsgpu import normalize
 
 from utils.sync_batchnorm import convert_model
 from utils.sync_batchnorm import DataParallelWithCallback
@@ -252,18 +251,24 @@ def augment_samples_weak(images, labels, probs, do_classmix, batch_size, ignore_
 def main():
     print(config)
     cudnn.enabled = True
+    pretraining = 'COCO'
+    if pretraining == 'COCO':
+        from utils.transformsgpu import normalize_bgr as normalize
+    else:
+        from utils.transformsgpu import normalize_rgb as normalize
+
 
     # DATASETS
     if dataset == 'pascal_voc':
         data_loader = get_loader(dataset)
         data_path = get_data_path(dataset)
-        train_dataset = data_loader(data_path, crop_size=input_size, scale=False, mirror=False)
+        train_dataset = data_loader(data_path, crop_size=input_size, scale=False, mirror=False, pretraining=pretraining)
 
     elif dataset == 'cityscapes':
         data_loader = get_loader('cityscapes')
         data_path = get_data_path('cityscapes')
         data_aug = Compose([RandomCrop_city(input_size)]) # from 1024x2048 to resize 512x1024 to crop input_size (512x512)
-        train_dataset = data_loader(data_path, is_transform=True, augmentations=data_aug, img_size=input_size)
+        train_dataset = data_loader(data_path, is_transform=True, augmentations=data_aug, img_size=input_size, pretraining=pretraining)
 
 
     train_dataset_size = len(train_dataset)
@@ -306,8 +311,13 @@ def main():
         supervised_loss = CrossEntropy2d(ignore_label=ignore_label).cuda()
 
 
+    # Define network
     if deeplabv2:
-        from model.deeplabv2 import Res_Deeplab
+        if pretraining == 'COCO': # coco and iamgenet resnet architectures differ a little, just on how to do the stride
+            from model.deeplabv2 import Res_Deeplab
+        else: # imagenet pretrained (more modern modification)
+            from model.deeplabv2_imagenet import Res_Deeplab
+
     else:
         from model.deeplabv3 import Res_Deeplab
 
@@ -315,7 +325,10 @@ def main():
     model = Res_Deeplab(num_classes=num_classes)
 
     # load pretrained parameters
-    saved_state_dict = model_zoo.load_url('http://vllab1.ucmerced.edu/~whung/adv-semi-seg/resnet101COCO-41f33a49.pth')
+    if pretraining == 'COCO':
+        saved_state_dict = model_zoo.load_url('http://vllab1.ucmerced.edu/~whung/adv-semi-seg/resnet101COCO-41f33a49.pth') # COCO pretraining
+    else:
+        saved_state_dict = model_zoo.load_url('https://download.pytorch.org/models/resnet101-5d3b4d8f.pth') # iamgenet pretrainning
 
     # Copy loaded parameters to model
     new_params = model.state_dict().copy()
@@ -417,7 +430,7 @@ def main():
             print('iter = {0:6d}/{1:6d}'.format(i_iter, num_iterations))
 
             model.eval()
-            mIoU, eval_loss = evaluate(model, dataset, ignore_label=ignore_label, save_dir=checkpoint_dir)
+            mIoU, eval_loss = evaluate(model, dataset, ignore_label=ignore_label, save_dir=checkpoint_dir, pretraining=pretraining)
             model.train()
 
             if mIoU > best_mIoU and save_best_model:
@@ -428,7 +441,7 @@ def main():
     _save_checkpoint(num_iterations, model, optimizer, config)
 
     model.eval()
-    mIoU, val_loss = evaluate(model, dataset, ignore_label=ignore_label, save_dir=checkpoint_dir)
+    mIoU, val_loss = evaluate(model, dataset, ignore_label=ignore_label, save_dir=checkpoint_dir, pretraining=pretraining)
 
     if mIoU > best_mIoU and save_best_model:
         best_mIoU = mIoU

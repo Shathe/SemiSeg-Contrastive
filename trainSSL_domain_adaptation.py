@@ -23,7 +23,6 @@ from modeling.deeplab import *
 
 from data import get_loader, get_data_path
 from data.augmentations import *
-from utils.transformsgpu import normalize
 
 from torchvision import transforms
 import json
@@ -49,10 +48,10 @@ def entropy_loss(v, mask):
     loss_image = torch.sum(loss_image, dim=1)
     loss_image = mask.float() * loss_image
 
-
     percentage_valid_points = torch.mean(mask.float())
 
     return -torch.sum(loss_image) / (n * h * w * np.log2(c) * percentage_valid_points)
+
 
 def get_arguments():
     """Parse all the arguments provided from the CLI.
@@ -143,7 +142,8 @@ def pseudolabel_weighting(probabilities, mul=20, prob_half=0.85):
     return 1 / (1 + torch.exp(-(probabilities - prob_half) * mul))
 
 
-def augmentationTransform(parameters, data=None, target=None, probs=None, jitter_vale=0.4, min_sigma=0.2, max_sigma=2., ignore_label=255):
+def augmentationTransform(parameters, data=None, target=None, probs=None, jitter_vale=0.4, min_sigma=0.2, max_sigma=2.,
+                          ignore_label=255):
     assert ((data is not None) or (target is not None))
     if "Mix" in parameters:
         data, target, probs = transformsgpu.mix(mask=parameters["Mix"], data=data, target=target, probs=probs)
@@ -274,9 +274,10 @@ def CBC_thresholding(max_probs, pseudo_label, num_classes, ignore_label, percent
 
     return max_probs, pseudo_label
 
+
 def create_ema_model(model):
     if deeplabv2:
-        from model.deeplabv2 import Res_Deeplab
+        from model.deeplabv2_imagenet import Res_Deeplab
     else:
         from model.deeplabv3 import Res_Deeplab
 
@@ -289,7 +290,7 @@ def create_ema_model(model):
     n = len(mp)
     for i in range(0, n):
         mcp[i].data[:] = mp[i].data[:].clone()
-    if len(gpus)>1:
+    if len(gpus) > 1:
         if use_sync_batchnorm:
             ema_model = convert_model(ema_model)
             ema_model = DataParallelWithCallback(ema_model, device_ids=gpus)
@@ -297,19 +298,17 @@ def create_ema_model(model):
             ema_model = torch.nn.DataParallel(ema_model, device_ids=gpus)
     return ema_model
 
+
 def update_ema_variables(ema_model, model, alpha_teacher, iteration):
     # Use the "true" average until the exponential average is more correct
     alpha_teacher = min(1 - 1 / (iteration + 1), alpha_teacher)
-    if len(gpus)>1:
+    if len(gpus) > 1:
         for ema_param, param in zip(ema_model.module.parameters(), model.module.parameters()):
             ema_param.data[:] = alpha_teacher * ema_param[:].data[:] + (1 - alpha_teacher) * param[:].data[:]
     else:
         for ema_param, param in zip(ema_model.parameters(), model.parameters()):
             ema_param.data[:] = alpha_teacher * ema_param[:].data[:] + (1 - alpha_teacher) * param[:].data[:]
     return ema_model
-
-
-
 
 
 def augment_samples(images, labels, probs, do_classmix, batch_size, ignore_label):
@@ -340,18 +339,16 @@ def augment_samples(images, labels, probs, do_classmix, batch_size, ignore_label
                 MixMask = torch.cat(
                     (MixMask, transformmasks.generate_class_mask(labels[image_i], classes).unsqueeze(0).cuda()))
 
-
         params = {"Mix": MixMask}
     else:
         params = {}
-
     # similar as BYOL, plus, classmix
     params["flip"] = random.random() < 0.5
     params["ColorJitter"] = random.random() < 0.80
     params["GaussianBlur"] = random.random() < 0.2
     params["Grayscale"] = random.random() < 0.0
     params["Solarize"] = random.random() < 0.0
-    if random.random() < 0.75:
+    if random.random() < 0.80:
         scale = random.uniform(0.75, 1.75)
     else:
         scale = 1
@@ -361,7 +358,7 @@ def augment_samples(images, labels, probs, do_classmix, batch_size, ignore_label
     image_aug, labels_aug, probs_aug = augmentationTransform(params,
                                                              data=images, target=labels,
                                                              probs=probs, jitter_vale=0.25,
-                                                             min_sigma=0.1, max_sigma=1.25,
+                                                             min_sigma=0.1, max_sigma=1.5,
                                                              ignore_label=ignore_label)
 
     return image_aug, labels_aug, probs_aug, params
@@ -395,7 +392,6 @@ def augment_samples_weak(images, labels, probs, do_classmix, batch_size, ignore_
                 MixMask = torch.cat(
                     (MixMask, transformmasks.generate_class_mask(labels[image_i], classes).unsqueeze(0).cuda()))
 
-
         params = {"Mix": MixMask}
     else:
         params = {}
@@ -406,8 +402,8 @@ def augment_samples_weak(images, labels, probs, do_classmix, batch_size, ignore_
     params["GaussianBlur"] = random.random() < 0.
     params["Grayscale"] = random.random() < 0.0
     params["Solarize"] = random.random() < 0.0
-    if random.random() < 0.33:
-        scale = random.uniform(0.85, 1.5)
+    if random.random() < 0.5:
+        scale = random.uniform(0.75, 1.75)
     else:
         scale = 1
     params["RandomScaleCrop"] = scale
@@ -421,6 +417,7 @@ def augment_samples_weak(images, labels, probs, do_classmix, batch_size, ignore_
 
     return image_aug, labels_aug, probs_aug, params
 
+
 def main():
     print(config)
     cudnn.enabled = True
@@ -432,6 +429,11 @@ def main():
     supervised_unlabeled_loss = True
     supervised_labeled_loss = True
     contrastive_labeled_loss = True
+    pretraining = 'imagenet'
+    if pretraining == 'COCO':
+        from utils.transformsgpu import normalize_bgr as normalize
+    else:
+        from utils.transformsgpu import normalize_rgb as normalize
 
     batch_size_unlabeled = int(batch_size / 2)
     batch_size_labeled = int(batch_size * 1 )
@@ -442,14 +444,24 @@ def main():
     if dataset == 'pascal_voc':
         data_loader = get_loader(dataset)
         data_path = get_data_path(dataset)
-        train_dataset = data_loader(data_path, crop_size=input_size, scale=False, mirror=False)
+        train_dataset = data_loader(data_path, crop_size=input_size, scale=False, mirror=False, pretraining=pretraining)
 
     elif dataset == 'cityscapes':
         data_loader = get_loader('cityscapes')
         data_path = get_data_path('cityscapes')
         data_aug = Compose(
             [RandomCrop_city(input_size)])  # from 1024x2048 to resize 512x1024 to crop input_size (512x512)
-        train_dataset = data_loader(data_path, is_transform=True, augmentations=data_aug, img_size=input_size)
+        train_dataset = data_loader(data_path, is_transform=True, augmentations=data_aug, img_size=input_size, pretraining=pretraining)
+
+        from data.gta5_loader import gtaLoader
+        data_loader_gta = gtaLoader
+        data_path_gta = get_data_path('gta5')
+        data_aug_gta = Compose([RandomCrop_city(input_size)])  # from 1024x2048 to resize 512x1024 to crop input_size (512x512)
+        train_dataset_gta = data_loader_gta(data_path_gta, is_transform=True, augmentations=data_aug_gta, img_size=input_size, pretraining=pretraining)
+
+
+
+
 
     train_dataset_size = len(train_dataset)
     print('dataset size: ', train_dataset_size)
@@ -463,7 +475,8 @@ def main():
                                                       (train_dataset_size - labeled_samples) / batch_size_unlabeled),
                                                   n_classes=num_classes)
 
-    feature_memory = FeatureMemory(num_samples=labeled_samples, dataset=dataset, memory_per_class=2048, feature_size=256, n_classes=num_classes)
+    feature_memory = FeatureMemory(num_samples=labeled_samples, dataset=dataset, memory_per_class=2048,
+                                   feature_size=256, n_classes=num_classes)
 
     # select the partition
     if split_id is not None:
@@ -479,6 +492,16 @@ def main():
                                   pin_memory=True)
     trainloader_iter = iter(trainloader)
 
+    # GTA5
+    train_ids_gta = np.arange(len(train_dataset_gta))
+    np.random.shuffle(train_ids_gta)
+    train_sampler_gta = data.sampler.SubsetRandomSampler(train_ids_gta)
+    trainloader_gta = data.DataLoader(train_dataset_gta,
+                                  batch_size=batch_size_labeled, sampler=train_sampler_gta, num_workers=num_workers,
+                                  pin_memory=True)
+    trainloader_iter_gta = iter(trainloader_gta)
+
+
     if train_unlabeled:
         train_remain_sampler = data.sampler.SubsetRandomSampler(train_ids[partial_size:])
         trainloader_remain = data.DataLoader(train_dataset,
@@ -492,9 +515,12 @@ def main():
 
     ''' Deeplab model '''
     # Define network
-
     if deeplabv2:
-        from model.deeplabv2 import Res_Deeplab
+        if pretraining == 'COCO': # coco and iamgenet resnet architectures differ a little, just on how to do the stride
+            from model.deeplabv2 import Res_Deeplab
+        else: # imagenet pretrained (more modern modification)
+            from model.deeplabv2_imagenet import Res_Deeplab
+
     else:
         from model.deeplabv3 import Res_Deeplab
 
@@ -502,23 +528,26 @@ def main():
     model = Res_Deeplab(num_classes=num_classes)
 
     # load pretrained parameters
-    saved_state_dict = model_zoo.load_url('http://vllab1.ucmerced.edu/~whung/adv-semi-seg/resnet101COCO-41f33a49.pth') # COCO pretraining
-    # saved_state_dict = model_zoo.load_url(''https://download.pytorch.org/models/resnet101-5d3b4d8f.pth'') # iamgenet pretrainning
+    if pretraining == 'COCO':
+        saved_state_dict = model_zoo.load_url('http://vllab1.ucmerced.edu/~whung/adv-semi-seg/resnet101COCO-41f33a49.pth') # COCO pretraining
+    else:
+        saved_state_dict = model_zoo.load_url('https://download.pytorch.org/models/resnet101-5d3b4d8f.pth') # iamgenet pretrainning
 
     # Copy loaded parameters to model
     new_params = model.state_dict().copy()
     for name, param in new_params.items():
         if name in saved_state_dict and param.size() == saved_state_dict[name].size():
             new_params[name].copy_(saved_state_dict[name])
+
     model.load_state_dict(new_params)
 
     # Optimizer for segmentation network
     learning_rate_object = Learning_Rate_Object(config['training']['learning_rate'])
 
     optimizer = torch.optim.SGD(model.optim_parameters(learning_rate_object),
-                          lr=learning_rate, momentum=momentum, weight_decay=weight_decay)
+                                lr=learning_rate, momentum=momentum, weight_decay=weight_decay)
 
-    ema_model = create_ema_model(model)
+    ema_model = create_ema_model(model, Res_Deeplab)
     ema_model.train()
     ema_model = ema_model.cuda()
 
@@ -532,7 +561,7 @@ def main():
     model.cuda()
     cudnn.benchmark = True
 
-    # checkpoint = torch.load('/home/snowflake/checkpoint-iter50000.pth')
+    # checkpoint = torch.load('/home/snowflake/Escritorio/Semi-Sup/saved/Deep_cont/best_model.pth')
     # model.load_state_dict(checkpoint['model'])
 
     if args.resume:
@@ -561,19 +590,34 @@ def main():
 
         ''' LABELED SAMPLES '''
         # Get batch
-        try:
-            batch = next(trainloader_iter)
-            if batch[0].shape[0] != batch_size_labeled:
+        is_cityscapes = i_iter % 2 == 0
+        is_gta = not is_cityscapes
+
+        if is_cityscapes:
+            try:
                 batch = next(trainloader_iter)
-        except:  # finish epoch, rebuild the iterator
-            epochs_since_start = epochs_since_start + 1
-            # print('Epochs since start: ',epochs_since_start)
-            trainloader_iter = iter(trainloader)
-            batch = next(trainloader_iter)
+                if batch[0].shape[0] != batch_size_labeled:
+                    batch = next(trainloader_iter)
+            except:  # finish epoch, rebuild the iterator
+                epochs_since_start = epochs_since_start + 1
+                # print('Epochs since start: ',epochs_since_start)
+                trainloader_iter = iter(trainloader)
+                batch = next(trainloader_iter)
+        else:
+            try:
+                batch = next(trainloader_iter_gta)
+                if batch[0].shape[0] != batch_size_labeled:
+                    batch = next(trainloader_iter_gta)
+            except:  # finish epoch, rebuild the iterator
+                # print('Epochs since start: ',epochs_since_start)
+                trainloader_iter = iter(trainloader_gta)
+                batch = next(trainloader_iter_gta)
+
 
         images, labels, _, _, _ = batch
         images = images.cuda()
         labels = labels.cuda()
+
 
         ''' UNLABELED SAMPLES '''
         try:
@@ -596,10 +640,11 @@ def main():
             max_probs, pseudo_label = torch.max(softmax_u_w, dim=1)  # Get pseudolabels
 
         model.train()
+        if dataset == 'cityscapes':
+            class_weights_curr.add_frequencies(labels.cpu().numpy(), pseudo_label.cpu().numpy(), None)
 
-        class_weights_curr.add_frequencies(labels.cpu().numpy(), pseudo_label.cpu().numpy(), None)
-
-        images, labels, _, _ = augment_samples_weak(images, labels, None, random.random()  < 0.15, batch_size_labeled, ignore_label)
+        images2, labels2, _, _ = augment_samples_weak(images, labels, None, random.random() < 0.20, batch_size_labeled,
+                                                      ignore_label)
 
         '''
         UNLABELED DATA
@@ -610,7 +655,7 @@ def main():
         Once you have the speudolabel, perform strong augmetnation to force the netowrk to yield lower confidence scores for pushing them up
         '''
 
-        do_classmix = i_iter > RAMP_UP_ITERS and random.random() < 0.5  # only after rampup perfrom classmix
+        do_classmix = i_iter > RAMP_UP_ITERS and random.random() < 0.75  # only after rampup perfrom classmix
         unlabeled_images_aug1, pseudo_label1, max_probs1, unlabeled_aug1_params = augment_samples(unlabeled_images,
                                                                                                   pseudo_label,
                                                                                                   max_probs,
@@ -618,7 +663,7 @@ def main():
                                                                                                   batch_size_unlabeled,
                                                                                                   ignore_label)
 
-        do_classmix = i_iter > RAMP_UP_ITERS and random.random() < 0.5  # only after rampup perfrom classmix
+        do_classmix = i_iter > RAMP_UP_ITERS and random.random() < 0.75  # only after rampup perfrom classmix
 
         unlabeled_images_aug2, pseudo_label2, max_probs2, unlabeled_aug2_params = augment_samples(unlabeled_images,
                                                                                                   pseudo_label,
@@ -627,37 +672,44 @@ def main():
                                                                                                   batch_size_unlabeled,
                                                                                                   ignore_label)
 
-
         joined_unlabeled = torch.cat((unlabeled_images_aug1, unlabeled_images_aug2), dim=0)
         joined_pseudolabels = torch.cat((pseudo_label1, pseudo_label2), dim=0)
         joined_maxprobs = torch.cat((max_probs1, max_probs2), dim=0)
 
-        pred_joined_unlabeled, features_joined_unlabeled = model(normalize(joined_unlabeled, dataset), return_features=True)
+        pred_joined_unlabeled, features_joined_unlabeled = model(normalize(joined_unlabeled, dataset),
+                                                                 return_features=True)
         pred_joined_unlabeled = interp(pred_joined_unlabeled)
 
-
-        joined_labeled = images
-        joined_labels = labels
+        joined_labeled = images2
+        joined_labels = labels2
         labeled_pred, labeled_features = model(normalize(joined_labeled, dataset), return_features=True)
         labeled_pred = interp(labeled_pred)
 
-        class_weights = torch.from_numpy(
-            class_weights_curr.get_weights(num_iterations, reduction_freqs=np.sum, only_labeled=False)).cuda()
+        if dataset == 'cityscapes':
+            class_weights = torch.from_numpy(
+                class_weights_curr.get_weights(num_iterations, reduction_freqs=np.sum, only_labeled=False)).cuda()
 
         loss = 0
         if supervised_labeled_loss:
-            labeled_loss = supervised_loss(labeled_pred, joined_labels, weight=class_weights.float()) #
+            if dataset == 'cityscapes':
+                labeled_loss = supervised_loss(labeled_pred, joined_labels, weight=class_weights.float())  #
+            else:
+                labeled_loss = supervised_loss(labeled_pred, joined_labels)  # weight=class_weights.float()
+
             loss = loss + labeled_loss
 
         if supervised_unlabeled_loss:
             '''
             Cross entropy loss using pseudolabels. 
             '''
-            unlabeled_loss = CrossEntropyLoss2dPixelWiseWeighted(ignore_index=ignore_label, weight=class_weights.float()).cuda() #
+
+            if dataset == 'cityscapes':
+                unlabeled_loss = CrossEntropyLoss2dPixelWiseWeighted(ignore_index=ignore_label,
+                                                                     weight=class_weights.float()).cuda()  #
 
             # Pseudo-label weighting
             pixelWiseWeight = sigmoid_ramp_up(i_iter, RAMP_UP_ITERS) * torch.ones(joined_maxprobs.shape).cuda()
-            pixelWiseWeight = pixelWiseWeight * torch.pow(joined_maxprobs.detach(), 9)
+            pixelWiseWeight = pixelWiseWeight * torch.pow(joined_maxprobs.detach(), 6)
 
             # Pseudo-label loss
             loss_ce_unlabeled = unlabeled_loss(pred_joined_unlabeled, joined_pseudolabels, pixelWiseWeight)
@@ -671,15 +723,16 @@ def main():
         if contrastive_labeled_loss:
 
             # this is sueprvised contrastive learning
-            #if RAMP_UP_ITERS  - 1000:
-            if i_iter > RAMP_UP_ITERS  - 1000:# RAMP_UP_ITERS  - 1000:
+            # if RAMP_UP_ITERS  - 1000:
+            if i_iter > RAMP_UP_ITERS - 1000:  # RAMP_UP_ITERS  - 1000:
                 # TODO: DEJAS ESTO Y LO DE ABAJO DE EMA PARA PROTOTYPES?
                 # Create prototypes from labeled images with EMA model
                 with torch.no_grad():
-                    labeled_pred_ema, labeled_features_ema = ema_model(normalize(joined_labeled, dataset), return_features=True)
+                    labeled_pred_ema, labeled_features_ema = ema_model(normalize(joined_labeled, dataset),
+                                                                       return_features=True)
                     labeled_pred_ema = interp(labeled_pred_ema)
                     probability_prediction_ema, label_prediction_ema = torch.max(torch.softmax(labeled_pred_ema, dim=1),
-                                                                         dim=1)  # Get pseudolabels
+                                                                                 dim=1)  # Get pseudolabels
 
                 '''
                 We are going to pick only faetures from labeled samples that are predicting correctly the label
@@ -694,11 +747,13 @@ def main():
                     Otherwise, there would be the question about, to save the labeled class distribution or the predicted class dsitribution?
                 '''
                 labels_down = nn.functional.interpolate(joined_labels.float().unsqueeze(1),
-                                                        size=(labeled_features_ema.shape[2], labeled_features_ema.shape[3]),
+                                                        size=(
+                                                        labeled_features_ema.shape[2], labeled_features_ema.shape[3]),
                                                         mode='nearest').squeeze(1)
                 label_prediction_down = nn.functional.interpolate(label_prediction_ema.float().unsqueeze(1),
                                                                   size=(
-                                                                  labeled_features_ema.shape[2], labeled_features_ema.shape[3]),
+                                                                      labeled_features_ema.shape[2],
+                                                                      labeled_features_ema.shape[3]),
                                                                   mode='nearest').squeeze(1)
                 probability_prediction_down = nn.functional.interpolate(probability_prediction_ema.float().unsqueeze(1),
                                                                         size=(labeled_features_ema.shape[2],
@@ -707,7 +762,7 @@ def main():
 
                 # get mask where the labeled predictions are correct
                 mask_prediction_correctly = ((label_prediction_down == labels_down).float() *
-                                (probability_prediction_down > 0.95).float()).bool()
+                                             (probability_prediction_down > 0.95).float()).bool()
 
                 labeled_features_correct = labeled_features_ema.permute(0, 2, 3, 1)
                 labels_down_correct = labels_down[mask_prediction_correctly]
@@ -717,29 +772,28 @@ def main():
                 with torch.no_grad():
                     proj_labeled_features_correct = ema_model.projection_head(labeled_features_correct)
 
-                feature_memory.add_features_from_sample_random(proj_labeled_features_correct, labels_down_correct, batch_size_labeled)
-
+                feature_memory.add_features_from_sample_random(proj_labeled_features_correct, labels_down_correct,
+                                                               batch_size_labeled)
 
             # TODO: this is sueprvised contrastive learning
-            #if i_iter > RAMP_UP_ITERS:
+            # if i_iter > RAMP_UP_ITERS:
             if i_iter > RAMP_UP_ITERS:  # RAMP_UP_ITERS:
                 '''
                 LABELED TO LABELED. Force features from laeled samples, to be similar to other features from the same class (which also leads to good predictions)
-                
+
                 '''
                 # First, get the predicted probability of the expected labeled
                 label_prediction_probs = torch.softmax(labeled_pred, dim=1)
                 joined_labels_aux = joined_labels.clone()
-                joined_labels_aux[joined_labels==ignore_label] = num_classes
+                joined_labels_aux[joined_labels == ignore_label] = num_classes
                 one_hot_labels = F.one_hot(joined_labels_aux, num_classes + 1).permute(0, 3, 1, 2)
                 correct_labeled_probs = label_prediction_probs * one_hot_labels[:, :num_classes, :, :]
                 correct_labeled_probs = correct_labeled_probs.sum(dim=1)
 
                 labeled_pred_probs_down = nn.functional.interpolate(correct_labeled_probs.unsqueeze(1),
-                                                        size=(labeled_features.shape[2], labeled_features.shape[3]),
-                                                        mode='nearest').squeeze(1)
-
-
+                                                                    size=(labeled_features.shape[2],
+                                                                          labeled_features.shape[3]),
+                                                                    mode='nearest').squeeze(1)
 
                 # now we can take all. as they are not the prototypes, here we are gonan force these features to be similar as the correct ones
                 mask_prediction_correctly = (labels_down != ignore_label)
@@ -753,32 +807,36 @@ def main():
                 proj_labeled_features_all = model.projection_head(labeled_features_all)
                 pred_labeled_features_all = model.prediction_head(proj_labeled_features_all)
 
+                loss_contr_labeled = contrastive_class_to_class_learned_memory(model, pred_labeled_features_all,
+                                                                               labels_down_all,
+                                                                               labeled_prediction_probs_all,
+                                                                               batch_size_labeled, num_classes,
+                                                                               feature_memory.memory, None)
 
-                loss_contr_labeled = contrastive_class_to_class_basic_random_selectmemory(model, pred_labeled_features_all, labels_down_all, labeled_prediction_probs_all,
-                                    batch_size_labeled, num_classes, feature_memory.memory, None)
-
-                loss = loss + loss_contr_labeled
-
+                loss = loss + loss_contr_labeled * 0.1
                 '''
                 UNLABELED TO LABELED
                 '''
                 # First, get the predicted probability of the expected labeled
                 unlabel_prediction_probs = torch.softmax(pred_joined_unlabeled, dim=1)
                 joined_pseudolabels_aux = joined_pseudolabels.clone()
-                joined_pseudolabels_aux[joined_pseudolabels==ignore_label] = num_classes
+                joined_pseudolabels_aux[joined_pseudolabels == ignore_label] = num_classes
                 one_hot_pseudolabels = F.one_hot(joined_pseudolabels_aux, num_classes + 1).permute(0, 3, 1, 2)
                 correct_unlabeled_probs = unlabel_prediction_probs * one_hot_pseudolabels[:, :num_classes, :, :]
                 correct_unlabeled_probs = correct_unlabeled_probs.sum(dim=1)
 
-                unlabeled_prediction_probs_down = nn.functional.interpolate(correct_unlabeled_probs.float().unsqueeze(1),
-                                                        size=(features_joined_unlabeled.shape[2], features_joined_unlabeled.shape[3]),
-                                                        mode='nearest').squeeze(1)
+                unlabeled_prediction_probs_down = nn.functional.interpolate(
+                    correct_unlabeled_probs.float().unsqueeze(1),
+                    size=(features_joined_unlabeled.shape[2], features_joined_unlabeled.shape[3]),
+                    mode='nearest').squeeze(1)
                 joined_pseudolabels_down = nn.functional.interpolate(joined_pseudolabels.float().unsqueeze(1),
-                                                        size=(features_joined_unlabeled.shape[2], features_joined_unlabeled.shape[3]),
-                                                        mode='nearest').squeeze(1)
+                                                                     size=(features_joined_unlabeled.shape[2],
+                                                                           features_joined_unlabeled.shape[3]),
+                                                                     mode='nearest').squeeze(1)
                 joined_maxprobs_down = nn.functional.interpolate(joined_maxprobs.float().unsqueeze(1),
-                                                        size=(features_joined_unlabeled.shape[2], features_joined_unlabeled.shape[3]),
-                                                        mode='nearest').squeeze(1)
+                                                                 size=(features_joined_unlabeled.shape[2],
+                                                                       features_joined_unlabeled.shape[3]),
+                                                                 mode='nearest').squeeze(1)
 
                 # take out the features from black pixels from zooms out and augmetnations (ignore labels on pseduoalebl)
                 mask = (joined_pseudolabels_down != ignore_label)
@@ -793,54 +851,32 @@ def main():
                 proj_feat_unlabeled = model.projection_head(features_joined_unlabeled)
                 pred_feat_unlabeled = model.prediction_head(proj_feat_unlabeled)
 
-                loss_contr_unlabeled = contrastive_class_to_class_basic_random_selectmemory(model, pred_feat_unlabeled, joined_pseudolabels_down, unlabeled_prediction_probs_down,
-                                    batch_size_unlabeled, num_classes, feature_memory.memory, joined_maxprobs_down)
+                loss_contr_unlabeled = contrastive_class_to_class_learned_memory(model, pred_feat_unlabeled,
+                                                                                 joined_pseudolabels_down,
+                                                                                 unlabeled_prediction_probs_down,
+                                                                                 batch_size_unlabeled, num_classes,
+                                                                                 feature_memory.memory,
+                                                                                 joined_maxprobs_down)
 
-                loss = loss + loss_contr_unlabeled
+                loss = loss + loss_contr_unlabeled * 0.1
 
                 '''
                 Pasos:
                 - sacar features igual que en labeled. Elegir M por clase y dependiendo del abtch (auqeu ahora segurament elegir mas elementos).
                 - mirar implementacion del otro donde multilpicaba tanto por el suyo como por otros y esoapra cada pixel
-                
+
                 Posibles ablations:
-                
+
                 - minimizar erro de.. todos vs solo los M de menor valor.. con varias opciones. mientas, piensa cosa automaticas como segun venico o cosas
                 - dar peso segun pseudolabels confidence o solo usar pseudoalebls con mayor confianza que 0.95
-                
+
                 - comprar o con N priermos o, csimeplemten comprar con todos los que sean menores qeu X o regla del segundo vecino
-    
+
                  - meter las features seleccionadas mejor en vez de random 
-             
+
                   que la memoria sea solo con los buenos accuracies pero luego eso no tenerlo en cuanta en los 
                   que fuerzas y samples para alinear y forzar mismas features buenas además de la misma clase
                 '''
-
-        # print(time.time() - a)
-
-        # image = unlabeled_images[0, ...].cpu().numpy().copy()
-        # label = pseudo_label[0, ...].cpu().numpy().copy()
-        # image = np.swapaxes(image, 0, 1)
-        # image = np.swapaxes(image, 2, 1)
-        # image = image[:, :, ::-1]
-        #
-        #
-        # cv2.imshow('img', image.astype(np.uint8))
-        # cv2.imshow('label', label.astype(np.uint8)*10)
-
-        # AUGMENTATION
-
-        # image = unlabeled_images_aug_ce[0, ...].cpu().numpy()
-        # label = pseudo_label[0, ...].cpu().numpy().copy()
-        # image = np.swapaxes(image, 0, 1)
-        # image = np.swapaxes(image, 2, 1)
-        # image = image[:, :, ::-1]
-        # cv2.imshow('img2', image.astype(np.uint8))
-        # cv2.imshow('label2', label.astype(np.uint8)*10)
-        #
-        # cv2.waitKey(0)
-        # cv2.destroyAllWindows()
-        #
 
         if len(gpus) > 1:
             loss = loss.mean()
@@ -864,7 +900,7 @@ def main():
             print('iter = {0:6d}/{1:6d}'.format(i_iter, num_iterations))
 
             model.eval()
-            mIoU, eval_loss = evaluate(model, dataset, ignore_label=ignore_label, save_dir=checkpoint_dir)
+            mIoU, eval_loss = evaluate(model, dataset, ignore_label=ignore_label, save_dir=checkpoint_dir, pretraining=pretraining)
             model.train()
             if supervised_labeled_loss:
                 print('last labeled loss')
@@ -872,8 +908,7 @@ def main():
             if contrastive_labeled_loss and i_iter > RAMP_UP_ITERS:
                 print('last loss_pix_to_pix loss')
                 print(loss_contr_unlabeled)
-                print(loss_contr_unlabeled)
-            print('need to rebalance?')
+                print(loss_contr_labeled)
 
             if mIoU > best_mIoU and save_best_model:
                 best_mIoU = mIoU
@@ -882,7 +917,7 @@ def main():
     _save_checkpoint(num_iterations, model, optimizer, config)
 
     model.eval()
-    mIoU, val_loss = evaluate(model, dataset, ignore_label=ignore_label, save_dir=checkpoint_dir)
+    mIoU, val_loss = evaluate(model, dataset, ignore_label=ignore_label, save_dir=checkpoint_dir, pretraining=pretraining)
 
     if mIoU > best_mIoU and save_best_model:
         best_mIoU = mIoU

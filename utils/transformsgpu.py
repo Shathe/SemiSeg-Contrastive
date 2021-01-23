@@ -6,21 +6,22 @@ import torch.nn as nn
 import torchvision
 from PIL import Image
 
-def normalize(data, dataset):
+def normalize_rgb(data, dataset):
     if dataset == 'pascal_voc':
-        mean = (116.66876762, 104.00698793, 122.6789143)
+        mean = (122.6789143, 116.66876762, 104.00698793) # rgb
     elif dataset == 'cityscapes':
-        mean = (73.15835921, 82.90891754, 72.39239876)
+        mean = (73.15835921, 82.90891754, 72.39239876) # rgb
 
     mean = torch.Tensor(mean).unsqueeze(0).unsqueeze(2).unsqueeze(3).cuda()
     data_norm = ((data-mean)/255.0)
     return data_norm
 
-def normalize_inverse(data, dataset):
+
+def normalize_bgr(data, dataset):
     if dataset == 'pascal_voc':
-        mean = (116.66876762, 104.00698793, 122.6789143)
+        mean = (104.00698793, 116.66876762,  122.6789143) # bgr
     elif dataset == 'cityscapes':
-        mean = (73.15835921, 82.90891754, 72.39239876)
+        mean = (72.39239876, 82.90891754, 73.15835921) # bgr
 
     mean = torch.Tensor(mean).unsqueeze(0).unsqueeze(2).unsqueeze(3).cuda()
     data_norm = ((data-mean)/255.0)
