@@ -421,7 +421,7 @@ def main():
     supervised_unlabeled_loss = True
     supervised_labeled_loss = True
     contrastive_labeled_loss = True
-    pretraining = 'COCO'
+    pretraining = 'imagenet'
     if pretraining == 'COCO':
         from utils.transformsgpu import normalize_bgr as normalize
     else:
