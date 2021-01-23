@@ -27,3 +27,16 @@
       "pixel_weight": "sigmoid"
     }
 
+
+  },
+  "seed": 7,
+  "ignore_label": 255,
+
+  "utils": {
+    "save_checkpoint_every": 10000,
+    "checkpoint_dir": "../saved/DeepLab",
+    "val_per_iter": 2000,
+    "log_per_iter": 100,
+    "save_best_model": true
+  }
+}
