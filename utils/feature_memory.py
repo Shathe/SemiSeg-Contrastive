@@ -37,9 +37,9 @@ class FeatureMemory:
         self.memory = [None] * n_classes
         self.n_classes = n_classes
         if dataset == 'cityscapes': # usually all classes in one image
-            self.per_class_samples_per_image = int(round(memory_per_class / num_samples))
+            self.per_class_samples_per_image = max(2, int(round(memory_per_class / num_samples)))
         elif dataset == 'pascal_voc': # usually only 2/4 classes on each image, except background class
-            self.per_class_samples_per_image = int(n_classes / 4 * round(memory_per_class / num_samples))
+            self.per_class_samples_per_image = max(2, int(n_classes / 4 * round(memory_per_class / num_samples)))
 
 
 
