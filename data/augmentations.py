@@ -1,10 +1,10 @@
-# Adapted from https://github.com/ZijunDeng/pytorch-semantic-segmentation/blob/master/utils/joint_transforms.py
+'''
+Code taken from https://github.com/WilhelmT/ClassMix
+Slightly modified
+'''
 
-import math
-import numbers
 import random
 import numpy as np
-
 from PIL import Image, ImageOps
 
 
@@ -49,7 +49,7 @@ class RandomCrop_city(object):  # used for results in the CVPR-19 submission
         )
 
 
-class RandomCrop_city2(object):  # used for results in the CVPR-19 submission
+class RandomCrop_city_highres(object):  # used for results in the CVPR-19 submission
     def __init__(self, size, padding=0):
         self.size = tuple(size)
         self.padding = padding
@@ -63,11 +63,6 @@ class RandomCrop_city2(object):  # used for results in the CVPR-19 submission
         w, h = img.size
         th, tw = self.size
 
-        # # Resize to half size
-        # img = img.resize((int(w/2), int(h/2)), Image.BILINEAR)
-        # mask = mask.resize((int(w/2), int(h/2)), Image.NEAREST)
-
-        # Random crop to input size
         x1 = random.randint(0, int(w) - tw)
         y1 = random.randint(0, int(h) - th)
         return (
@@ -95,7 +90,7 @@ class Resize_city(object):  # used for results in the CVPR-19 submission
         return img, mask
 
 
-class Resize_city2(object):  # used for results in the CVPR-19 submission
+class Resize_city_highres(object):
     def __init__(self, size, padding=0):
         self.size = tuple(size)
         self.padding = padding

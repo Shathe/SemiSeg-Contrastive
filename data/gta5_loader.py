@@ -1,10 +1,13 @@
+'''
+Code taken from https://github.com/WilhelmT/ClassMix
+Slightly modified
+'''
+
+
 import os
 import torch
-import numpy as np
 import scipy.misc as m
-
 from torch.utils import data
-
 from data.city_utils import recursive_glob
 from data.augmentations import *
 
@@ -154,9 +157,6 @@ class gtaLoader(data.Dataset):
         :param img:
         :param lbl:
         """
-        # img = m.imresize(
-        #     img, (self.img_size[0], self.img_size[1])
-        # )
         if self.pretraining == 'COCO':
             img = img[:, :, ::-1]
         img = img.astype(np.float64)

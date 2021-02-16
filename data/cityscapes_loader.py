@@ -1,10 +1,12 @@
+'''
+Code taken from https://github.com/WilhelmT/ClassMix
+Slightly modified
+'''
+
 import os
 import torch
-import numpy as np
 import scipy.misc as m
-
 from torch.utils import data
-
 from data.city_utils import recursive_glob
 from data.augmentations import *
 
@@ -49,7 +51,6 @@ class cityscapesLoader(data.Dataset):
         img_size=(512, 1024),
         img_norm=False,
         augmentations=None,
-        version="cityscapes",
         return_id=False,
         pretraining='COCO',
     ):
@@ -156,10 +157,6 @@ class cityscapesLoader(data.Dataset):
         :param img:
         :param lbl:
         """
-        # img = m.imresize(
-        #     img, (self.img_size[0], self.img_size[1])
-        # )
-        # CURRENTLY IS RGB. IF COCO PRETRAINED, LOAD BGR
         if self.pretraining == 'COCO':
             img = img[:, :, ::-1]
         img = img.astype(np.float64)

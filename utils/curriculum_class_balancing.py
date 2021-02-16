@@ -1,45 +1,72 @@
-import torch
-import torch.nn.functional as F
-import torch.nn as nn
-from torch.autograd import Variable
+"""
+
+This class implements the curriculum class balancing.
+It implements a squared median frequency class balancing but taking both labeled and unlabeled data into account.
+Unlabeled data is taken into account using pseudolabels that are updated at every iteration
+
+"""
+
+
 import numpy as np
-import time
 
 
 class CurriculumClassBalancing:
 
-    def __init__(self, ramp_up = 10000, labeled_samples=0, unlabeled_samples=0,  n_classes=19):
-        self.labeled_samples = labeled_samples
-        self.unlabeled_samples = unlabeled_samples
+    def __init__(self, labeled_iters, unlabeled_iters,  n_classes=19):
+        """
+
+        Args:
+            labeled_iters: Number of iterations to fill up the memory of labeled statistics
+            unlabeled_iters:  Number of iterations to fill up the memory of unlabeled statistics
+            n_classes: number of classes of the dataset
+        """
+        self.labeled_samples = labeled_iters
+        self.unlabeled_samples = unlabeled_iters
         self.n_classes = n_classes
-        self.labeled_frequencies = np.zeros((labeled_samples, n_classes), dtype = np.long)
-        self.unlabeled_frequencies = np.zeros((unlabeled_samples, n_classes), dtype = np.long)
-        self.iter = 0
-        self.percentage_unlabeled = float(unlabeled_samples) / float(labeled_samples + unlabeled_samples)
-        self.rampu_up = max(labeled_samples, unlabeled_samples)
+
+        # build memory to store the statistcs of the labels for labeled and unlabeled data
+        self.labeled_frequencies = np.zeros((labeled_iters, n_classes), dtype = np.long)
+        self.unlabeled_frequencies = np.zeros((unlabeled_iters, n_classes), dtype = np.long)
+
+        self.iter = 0 # iteration counter
+        self.start_computing_iter = max(labeled_iters, unlabeled_iters) # number of iterations to take into account all statistics of the dataset
 
 
-    def compute_frequencies(self, samples, confidences=None, power = 9):
+    def compute_frequencies(self, samples):
+        """
+
+        Args:
+            samples: BxWxH labels or pseudolabels
+
+        Returns: computes per-class frequencies from the input labels
+
+        """
         freqs = np.zeros((self.n_classes))
         for c in range(self.n_classes):
             mask_freq_c = (samples == c).astype(float)
-            if confidences is not None:
-                mask_freq_c = mask_freq_c * (confidences ** power)
             freqs[c] = mask_freq_c.sum()
         return freqs
 
-    def add_frequencies(self, labeled_samples, unlabeled_samples, unlabeled_confidences=None):
+    def add_frequencies(self, labeled_samples, unlabeled_samples):
+        """
+        Given some labels and pseudolabels of an training iteration, add them to the statistics memories
+        Args:
+            labeled_samples: BxWxH labels
+            unlabeled_samples: BxWxH pseudolabels
+
+
+        """
 
         if self.iter < self.labeled_samples:
             labeled_freqs = self.compute_frequencies(labeled_samples)
             self.labeled_frequencies[self.iter, :] = labeled_freqs
 
-        unl_freqs = self.compute_frequencies(unlabeled_samples, unlabeled_confidences)
+        unl_freqs = self.compute_frequencies(unlabeled_samples)
 
         if self.iter < self.unlabeled_samples:
             self.unlabeled_frequencies[self.iter, :] = unl_freqs
         else: # remove first, add this one at the bottom (concat)
-            # only for unlabeled because labeled doesnot change
+            # only for unlabeled because labeled doesnot change once is filled
             self.unlabeled_frequencies = self.unlabeled_frequencies[1:, :]
             self.unlabeled_frequencies = np.concatenate((self.unlabeled_frequencies, np.expand_dims(unl_freqs, 0)), axis=0)
 
@@ -67,11 +94,11 @@ class CurriculumClassBalancing:
 
 
 
-    def get_weights(self, max_iter, only_labeled=False, reduction_freqs = np.sum):
-        if self.iter < self.rampu_up:
-            return np.ones((self.n_classes)) # in order to get all the statistics from one epoch
+    def get_weights(self, max_iter, only_labeled=False):
+        if self.iter < self.start_computing_iter: # do not compute weights until the memories are filled up
+            return np.ones((self.n_classes))
         else: # inverse median, frequency
-            ratio_unlabeled = min (1., self.iter / max_iter)
+            ratio_unlabeled = min (1., self.iter / max_iter) # weigth to give to the pseudolabels statistics
             freqs_labeled = np.sum(self.labeled_frequencies, axis = 0)
             freqs_unlabeled = np.sum(self.unlabeled_frequencies, axis = 0)
             if only_labeled:
@@ -81,9 +108,11 @@ class CurriculumClassBalancing:
 
             median = np.median(freqs)
             weights = median / freqs
-            mask_inf = np.isinf(weights) # not samples on some classes
 
+            # deal with classes with no samples
+            mask_inf = np.isinf(weights)
             weights[mask_inf] = 1
             weights[mask_inf] = max(weights)
+
             return np.power(weights, 0.5)
 

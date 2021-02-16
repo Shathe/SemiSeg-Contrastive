@@ -464,9 +464,8 @@ def main():
     partial_size = labeled_samples
     print('Training on number of samples:', partial_size)
 
-    class_weights_curr = CurriculumClassBalancing(ramp_up=RAMP_UP_ITERS,
-                                                  labeled_samples=int(labeled_samples / batch_size_labeled),
-                                                  unlabeled_samples=int(
+    class_weights_curr = CurriculumClassBalancing(labeled_iters=int(labeled_samples / batch_size_labeled),
+                                                  unlabeled_iters=int(
                                                       (train_dataset_size - labeled_samples) / batch_size_unlabeled),
                                                   n_classes=num_classes)
 
@@ -648,7 +647,7 @@ def main():
         model.train()
         if dataset == 'cityscapes':
             if is_cityscapes:
-                class_weights_curr.add_frequencies(labels.cpu().numpy(), pseudo_label.cpu().numpy(), None)
+                class_weights_curr.add_frequencies(labels.cpu().numpy(), pseudo_label.cpu().numpy())
 
         images2, labels2, _, _ = augment_samples_weak(images, labels, None, random.random() < 0.25, batch_size_labeled,
                                                       ignore_label)
@@ -694,7 +693,7 @@ def main():
 
         if dataset == 'cityscapes':
             class_weights = torch.from_numpy(
-                class_weights_curr.get_weights(num_iterations, reduction_freqs=np.sum, only_labeled=False)).cuda()
+                class_weights_curr.get_weights(num_iterations, only_labeled=False)).cuda()
 
         loss = 0
         if supervised_labeled_loss:

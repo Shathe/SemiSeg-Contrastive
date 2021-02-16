@@ -1,13 +1,14 @@
 """
-This is the implementation of DeepLabv2 without multi-scale inputs. This implementation uses ResNet-101 by default.
+This is the implementation of DeepLabv2 without multi-scale inputs. This implementation uses ResNet-101 as backbone.
 
-This deeplab is used with iamgenet pretraining to match the current pytorch implementation thta provides these weights.
+This deeplab is used with imagenet pretraining to match the current pytorch implementation that provides these weights.
+This implementation follows the new implementation of Resnet bottleneck module where the stride is performed in the 3x3 conv.
+
+Code taken from https://github.com/WilhelmT/ClassMix
+Slightly modified
 """
 
 import torch.nn as nn
-import math
-import torch.utils.model_zoo as model_zoo
-import torch
 import numpy as np
 affine_par = True
 
@@ -25,10 +26,8 @@ def conv3x3(in_planes, out_planes, stride=1):
                      padding=1, bias=False)
 
 
-
 class Bottleneck(nn.Module):
     expansion = 4
-
     def __init__(self, inplanes, planes, stride=1, dilation=1, downsample=None):
         super(Bottleneck, self).__init__()
         self.conv1 = nn.Conv2d(inplanes, planes, kernel_size=1, stride=1, bias=False) # change
@@ -128,8 +127,6 @@ class ResNet(nn.Module):
         for class_c in range(num_classes):
             selector = nn.Sequential(
                 nn.Linear(feat_dim, feat_dim),
-                # TODO: concat  label conf and preidction conf
-                # nn.Linear(feat_dim + 2, feat_dim),
                 nn.BatchNorm1d(feat_dim),
                 nn.LeakyReLU(negative_slope=0.2, inplace=True),
                 nn.Linear(feat_dim, 1)
@@ -139,22 +136,11 @@ class ResNet(nn.Module):
         for class_c in range(num_classes):
             selector = nn.Sequential(
                 nn.Linear(feat_dim, feat_dim),
-                # TODO: concat  label conf and preidction conf
-                # nn.Linear(feat_dim + 2, feat_dim),
                 nn.BatchNorm1d(feat_dim),
                 nn.LeakyReLU(negative_slope=0.2, inplace=True),
                 nn.Linear(feat_dim, 1)
             )
             self.__setattr__('contrastive_class_selector_memory' + str(class_c), selector)
-
-        # self.selector = nn.Sequential(
-        #         nn.Linear(feat_dim, feat_dim),
-        #         # TODO: concat  label conf and preidction conf
-        #         # nn.Linear(feat_dim + 2, feat_dim),
-        #         nn.BatchNorm1d(feat_dim),
-        #         nn.LeakyReLU(negative_slope=0.2, inplace=True),
-        #         nn.Linear(feat_dim, 1)
-        #     )
 
 
         for m in self.modules():
@@ -226,7 +212,6 @@ class ResNet(nn.Module):
         b.append(self.layer5)
         b.append(self.projection_head)
         b.append(self.prediction_head)
-        # b.append(self.selector)
 
         for class_c in range(self.num_classes):
             b.append(self.__getattr__('contrastive_class_selector_' + str(class_c)))

@@ -1,5 +1,11 @@
 """
-This is the implementation of DeepLabv2 without multi-scale inputs. This implementation uses ResNet-101 by default.
+This is the implementation of DeepLabv2 without multi-scale inputs. This implementation uses ResNet-101 as backbone.
+
+Old implementation of Resnet bottleneck module where the stride is performed in the first 1x1 conv.
+Used for the model pretrained in coco from  https://github.com/hfslyc/AdvSemiSeg
+
+Code taken from https://github.com/WilhelmT/ClassMix
+Slightly modified
 """
 
 import torch.nn as nn
@@ -126,8 +132,6 @@ class ResNet(nn.Module):
         for class_c in range(num_classes):
             selector = nn.Sequential(
                 nn.Linear(feat_dim, feat_dim),
-                # TODO: concat  label conf and preidction conf
-                # nn.Linear(feat_dim + 2, feat_dim),
                 nn.BatchNorm1d(feat_dim),
                 nn.LeakyReLU(negative_slope=0.2, inplace=True),
                 nn.Linear(feat_dim, 1)
@@ -137,22 +141,12 @@ class ResNet(nn.Module):
         for class_c in range(num_classes):
             selector = nn.Sequential(
                 nn.Linear(feat_dim, feat_dim),
-                # TODO: concat  label conf and preidction conf
-                # nn.Linear(feat_dim + 2, feat_dim),
                 nn.BatchNorm1d(feat_dim),
                 nn.LeakyReLU(negative_slope=0.2, inplace=True),
                 nn.Linear(feat_dim, 1)
             )
             self.__setattr__('contrastive_class_selector_memory' + str(class_c), selector)
 
-        # self.selector = nn.Sequential(
-        #         nn.Linear(feat_dim, feat_dim),
-        #         # TODO: concat  label conf and preidction conf
-        #         # nn.Linear(feat_dim + 2, feat_dim),
-        #         nn.BatchNorm1d(feat_dim),
-        #         nn.LeakyReLU(negative_slope=0.2, inplace=True),
-        #         nn.Linear(feat_dim, 1)
-        #     )
 
 
         for m in self.modules():
@@ -224,7 +218,6 @@ class ResNet(nn.Module):
         b.append(self.layer5)
         b.append(self.projection_head)
         b.append(self.prediction_head)
-        # b.append(self.selector)
 
         for class_c in range(self.num_classes):
             b.append(self.__getattr__('contrastive_class_selector_' + str(class_c)))

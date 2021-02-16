@@ -2,11 +2,9 @@ import argparse
 import os
 import timeit
 import datetime
-import cv2
 import pickle
 from contrastive_losses import *
 import torch.backends.cudnn as cudnn
-from torch.utils import data
 from torch.utils import data, model_zoo
 
 from utils.loss import CrossEntropy2d
@@ -19,7 +17,6 @@ from utils.helpers import colorize_mask
 from utils.sync_batchnorm import convert_model
 from utils.sync_batchnorm import DataParallelWithCallback
 
-from modeling.deeplab import *
 
 from data import get_loader, get_data_path
 from data.augmentations import *
@@ -27,7 +24,6 @@ from data.augmentations import *
 from torchvision import transforms
 import json
 from evaluateSSL import evaluate
-import time
 from utils.curriculum_class_balancing import CurriculumClassBalancing
 from utils.feature_memory import *
 
@@ -452,9 +448,8 @@ def main():
     partial_size = labeled_samples
     print('Training on number of samples:', partial_size)
 
-    class_weights_curr = CurriculumClassBalancing(ramp_up=RAMP_UP_ITERS,
-                                                  labeled_samples=int(labeled_samples / batch_size_labeled),
-                                                  unlabeled_samples=int(
+    class_weights_curr = CurriculumClassBalancing(labeled_iters=int(labeled_samples / batch_size_labeled),
+                                                  unlabeled_iters=int(
                                                       (train_dataset_size - labeled_samples) / batch_size_unlabeled),
                                                   n_classes=num_classes)
 
@@ -599,7 +594,7 @@ def main():
         model.train()
 
         if dataset == 'cityscapes':
-            class_weights_curr.add_frequencies(labels.cpu().numpy(), pseudo_label.cpu().numpy(), None)
+            class_weights_curr.add_frequencies(labels.cpu().numpy(), pseudo_label.cpu().numpy())
 
 
         images2, labels2, _, _ = augment_samples_weak(images, labels, None, random.random()  < 0.2, batch_size_labeled, ignore_label)
@@ -644,7 +639,7 @@ def main():
 
         if dataset == 'cityscapes':
             class_weights = torch.from_numpy(
-                class_weights_curr.get_weights(num_iterations, reduction_freqs=np.sum, only_labeled=False)).cuda()
+                class_weights_curr.get_weights(num_iterations, only_labeled=False)).cuda()
         else:
             class_weights = torch.from_numpy(np.ones((num_classes))).cuda()
 
