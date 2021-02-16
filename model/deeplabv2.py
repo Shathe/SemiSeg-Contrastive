@@ -221,6 +221,7 @@ class ResNet(nn.Module):
         b.append(self.layer2)
         b.append(self.layer3)
         b.append(self.layer4)
+        b.append(self.layer5)
         b.append(self.projection_head)
         b.append(self.prediction_head)
         # b.append(self.selector)
@@ -237,24 +238,11 @@ class ResNet(nn.Module):
                     if k.requires_grad:
                         yield k
 
-    def get_10x_lr_params(self):
-        """
-        This generator returns all the parameters for the last layer of the net,
-        which does the classification of pixel into classes
-        """
-        b = []
-        b.append(self.layer5.parameters())
-
-        for j in range(len(b)):
-            for i in b[j]:
-                yield i
-
 
 
     def optim_parameters(self, args):
         # TODO: change names
-        return [{'params': self.get_1x_lr_params(), 'lr': args.learning_rate},
-                {'params': self.get_10x_lr_params(), 'lr': 10*args.learning_rate}]
+        return [{'params': self.get_1x_lr_params(), 'lr': args.learning_rate}]
 
 
 def Res_Deeplab(num_classes):

@@ -11,7 +11,7 @@ from torch.utils import data, model_zoo
 from modeling.deeplab import *
 from data.voc_dataset import VOCDataSet
 from data import get_data_path, get_loader
-
+import cv2
 from utils.loss import CrossEntropy2d
 
 
@@ -113,11 +113,7 @@ def get_iou(confM, dataset, save_path=None):
         print('class {:2d} {:12} IU {:.2f}'.format(i, classes[i], j_list[i]))
 
     print('meanIOU: ' + str(aveJ) + '\n')
-    if save_path:
-        with open(save_path, 'w') as f:
-            for i, iou in enumerate(j_list):
-                f.write('class {:2d} {:12} IU {:.2f}'.format(i, classes[i], j_list[i]) + '\n')
-            f.write('meanIOU: ' + str(aveJ) + '\n')
+
     return aveJ
 
 
@@ -175,6 +171,11 @@ def evaluate(model, dataset, ignore_label=250, save_dir=None, pretraining='COCO'
             output = np.asarray(np.argmax(output, axis=0), dtype=np.int)
             data_list.append((np.reshape(gt, (-1)), np.reshape(output, (-1))))
 
+
+            filename = 'output_images/' + name[0].split('/')[-1]
+            cv2.imwrite(filename, output)
+
+
         if (index + 1) % 100 == 0:
             print('%d processed' % (index + 1))
             process_list_evaluation(confM, data_list)
@@ -210,11 +211,20 @@ def main():
 
     gpu0 = args.gpu
 
-    if not os.path.exists(save_dir):
-        os.makedirs(save_dir)
+
     deeplabv2 = "2" in config['version']
-    model = DeepLab(num_classes=num_classes, backbone='resnet',  sync_bn=False,
-                    freeze_bn=False, v2=deeplabv2)
+
+    if deeplabv2:
+        if pretraining == 'COCO': # coco and iamgenet resnet architectures differ a little, just on how to do the stride
+            from model.deeplabv2 import Res_Deeplab
+        else: # imagenet pretrained (more modern modification)
+            from model.deeplabv2_imagenet import Res_Deeplab
+
+    else:
+        from model.deeplabv3 import Res_Deeplab
+
+    model = Res_Deeplab(num_classes=num_classes)
+
     checkpoint = torch.load(args.model_path)
     try:
         model.load_state_dict(checkpoint['model'])
@@ -226,7 +236,7 @@ def main():
     model.cuda()
     model.eval()
 
-    evaluate(model, dataset, ignore_label=ignore_label, save_dir=save_dir)
+    evaluate(model, dataset, ignore_label=ignore_label,   pretraining=pretraining)
 
 
 if __name__ == '__main__':
@@ -243,6 +253,12 @@ if __name__ == '__main__':
         num_classes = 21
 
     ignore_label = config['ignore_label']
-    save_dir = os.path.join(*args.model_path.split('/')[:-1])
+
+    pretraining = 'COCO'
+    if pretraining == 'COCO':
+        from utils.transformsgpu import normalize_bgr as normalize
+    else:
+        from utils.transformsgpu import normalize_rgb as normalize
+
 
     main()

@@ -130,21 +130,24 @@ class gtaLoader(data.Dataset):
         try:
             img = m.imread(img_path)
             img = np.array(img, dtype=np.uint8)
+
+            lbl = m.imread(lbl_path)
+            lbl = np.array(lbl, dtype=np.uint8)
+
+            if self.augmentations is not None:
+                img, lbl = self.augmentations(img, lbl)
+            if self.is_transform:
+                img, lbl = self.transform(img, lbl)
+
+            img_name = img_path.split('/')[-1]
+            if self.return_id:
+                return img, lbl, img_name, img_name, index
+            return img, lbl, img_path, lbl_path, img_name
         except:
             print(img_path)
+            self.files[self.split].pop(index)
+            return self.__getitem__(index - 1)
 
-        lbl = m.imread(lbl_path)
-        lbl = np.array(lbl, dtype=np.uint8)
-
-        if self.augmentations is not None:
-            img, lbl = self.augmentations(img, lbl)
-        if self.is_transform:
-            img, lbl = self.transform(img, lbl)
-
-        img_name = img_path.split('/')[-1]
-        if self.return_id:
-            return img, lbl, img_name, img_name, index
-        return img, lbl, img_path, lbl_path, img_name
 
     def transform(self, img, lbl):
         """transform

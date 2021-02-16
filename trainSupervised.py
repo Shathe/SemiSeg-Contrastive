@@ -79,7 +79,7 @@ def adjust_learning_rate(optimizer, i_iter):
     lr = lr_poly(learning_rate, i_iter, num_iterations, lr_power)
     optimizer.param_groups[0]['lr'] = lr
     if len(optimizer.param_groups) > 1 :
-        optimizer.param_groups[1]['lr'] = lr * 10
+        optimizer.param_groups[1]['lr'] = lr
 
 def sigmoid_ramp_up(iter, max_iter):
     if iter >= max_iter:
@@ -227,7 +227,7 @@ def augment_samples_weak(images, labels, probs, do_classmix, batch_size, ignore_
 
     # similar as BYOL, plus, classmix
     params["flip"] = random.random() < 0.5
-    params["ColorJitter"] = random.random() < 0.20
+    params["ColorJitter"] = random.random() < 0.2
     params["GaussianBlur"] = random.random() < 0.
     params["Grayscale"] = random.random() < 0.0
     params["Solarize"] = random.random() < 0.0
@@ -399,7 +399,7 @@ def main():
         labels = labels.cuda()
 
         # Apply weak augmentations to labeled images
-        images, labels, _, _ = augment_samples_weak(images, labels, None, random.random()  < 0.20, batch_size, ignore_label)
+        images, labels, _, _ = augment_samples_weak(images, labels, None, random.random()  < 0.2, batch_size, ignore_label)
 
 
         pred = interp(model(normalize(images, dataset)))

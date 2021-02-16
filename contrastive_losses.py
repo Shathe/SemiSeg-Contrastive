@@ -324,6 +324,29 @@ def contrastive_class_to_class_learned(model, features, class_labels, prediction
     return loss / num_classes
 
 
+def contrastive_class_to_class_region(features, class_labels, num_classes,memory):
+
+    loss = 0
+
+    for c in range(num_classes):
+        mask_c = class_labels == c
+        features_c = features[mask_c,:]
+        memory_c = memory[c] # N, 256
+        if memory_c is not None and features_c.shape[0] > 1:
+            memory_c = torch.from_numpy(memory_c).cuda()
+            features_c = torch.mean(features_c, dim=0)
+
+            memory_c = F.normalize(memory_c,dim=0)
+            features_c = F.normalize(features_c, dim=0)
+
+            similarity = features_c.dot(memory_c)
+            distances = 1 - similarity # (0, 2) 0 is equal vectors
+            # M (elements), N (memory)
+
+            loss = loss + distances.mean()
+
+    return loss / num_classes
+
 
 def contrastive_class_to_class_learned_memory(model, features, class_labels, prediction_probs, batch_size, num_classes,
                             memory, label_probs, per_class_samples_per_image=256, minimize_top_k_percent=1.):

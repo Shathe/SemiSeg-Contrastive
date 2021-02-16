@@ -81,7 +81,7 @@ def adjust_learning_rate(optimizer, i_iter):
     lr = lr_poly(learning_rate, i_iter, num_iterations, lr_power)
     optimizer.param_groups[0]['lr'] = lr
     if len(optimizer.param_groups) > 1:
-        optimizer.param_groups[1]['lr'] = lr * 10
+        optimizer.param_groups[1]['lr'] = lr
 
 
 def sigmoid_ramp_up(iter, max_iter):
@@ -336,7 +336,7 @@ def augment_samples(images, labels, probs, do_classmix, batch_size, ignore_label
         params = {}
     # similar as BYOL, plus, classmix
     params["flip"] = random.random() < 0.5
-    params["ColorJitter"] = random.random() < 0.80
+    params["ColorJitter"] = random.random() < 0.8
     params["GaussianBlur"] = random.random() < 0.2
     params["Grayscale"] = random.random() < 0.0
     params["Solarize"] = random.random() < 0.0
@@ -391,7 +391,7 @@ def augment_samples_weak(images, labels, probs, do_classmix, batch_size, ignore_
 
     # similar as BYOL, plus, classmix
     params["flip"] = random.random() < 0.5
-    params["ColorJitter"] = random.random() < 0.20
+    params["ColorJitter"] = random.random() < 0.2
     params["GaussianBlur"] = random.random() < 0.
     params["Grayscale"] = random.random() < 0.0
     params["Solarize"] = random.random() < 0.0
@@ -602,7 +602,7 @@ def main():
             class_weights_curr.add_frequencies(labels.cpu().numpy(), pseudo_label.cpu().numpy(), None)
 
 
-        images2, labels2, _, _ = augment_samples_weak(images, labels, None, random.random()  < 0.20, batch_size_labeled, ignore_label)
+        images2, labels2, _, _ = augment_samples_weak(images, labels, None, random.random()  < 0.2, batch_size_labeled, ignore_label)
 
         '''
         UNLABELED DATA
@@ -724,7 +724,7 @@ def main():
                 with torch.no_grad():
                     proj_labeled_features_correct = ema_model.projection_head(labeled_features_correct)
 
-                feature_memory.add_features_from_sample_random(proj_labeled_features_correct, labels_down_correct, batch_size_labeled)
+                feature_memory.add_features_from_sample_learned(ema_model, proj_labeled_features_correct, labels_down_correct, batch_size_labeled)
 
 
             # TODO: this is sueprvised contrastive learning
