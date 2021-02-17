@@ -1,3 +1,6 @@
+'''
+Code taken from https://github.com/WilhelmT/ClassMix
+'''
 
 def get_voc_palette(num_classes):
     n = num_classes
