@@ -3,13 +3,9 @@ import os
 from data.augmentations import *
 from utils.metric import ConfusionMatrix
 from multiprocessing import Pool
-
+import torch
 from torch.autograd import Variable
-import torchvision.models as models
-import torch.nn.functional as F
-from torch.utils import data, model_zoo
-from modeling.deeplab import *
-from data.voc_dataset import VOCDataSet
+from torch.utils import data
 from data import get_data_path, get_loader
 import cv2
 from utils.loss import CrossEntropy2d
@@ -138,7 +134,7 @@ def evaluate(model, dataset, ignore_label=250, save_dir=None, pretraining='COCO'
 
         data_loader = get_loader('cityscapes')
         data_path = get_data_path('cityscapes')
-        data_aug = Compose([Resize_city2(input_size)])
+        data_aug = Compose([Resize_city_highres(input_size)])
         test_dataset = data_loader(data_path, img_size=input_size, is_transform=True, split='val',
                                    augmentations=data_aug, pretraining=pretraining)
         testloader = data.DataLoader(test_dataset, batch_size=1, shuffle=False, pin_memory=True)
@@ -156,7 +152,7 @@ def evaluate(model, dataset, ignore_label=250, save_dir=None, pretraining='COCO'
         image, label, size, name, _ = batch
 
         with torch.no_grad():
-            interp = nn.Upsample(size=(label.shape[1], label.shape[2]), mode='bilinear', align_corners=True)
+            interp = torch.nn.Upsample(size=(label.shape[1], label.shape[2]), mode='bilinear', align_corners=True)
             output = model(normalize(Variable(image).cuda(), dataset))
             output = interp(output)
 
@@ -215,7 +211,7 @@ def main():
     deeplabv2 = "2" in config['version']
 
     if deeplabv2:
-        if pretraining == 'COCO': # coco and iamgenet resnet architectures differ a little, just on how to do the stride
+        if pretraining == 'COCO': # coco and imagenet resnet architectures differ a little, just on how to do the stride
             from model.deeplabv2 import Res_Deeplab
         else: # imagenet pretrained (more modern modification)
             from model.deeplabv2_imagenet import Res_Deeplab
