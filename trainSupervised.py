@@ -31,8 +31,7 @@ import utils.palette as palette
 from utils.sync_batchnorm import convert_model
 from utils.sync_batchnorm import DataParallelWithCallback
 
-from modeling.deeplab import *
-
+import torch.nn as nn
 from data.voc_dataset import VOCDataSet
 
 from data import get_loader, get_data_path

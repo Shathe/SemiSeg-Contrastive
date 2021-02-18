@@ -6,7 +6,7 @@ import pickle
 from contrastive_losses import *
 import torch.backends.cudnn as cudnn
 from torch.utils import data, model_zoo
-
+import torch.nn as nn
 from utils.loss import CrossEntropy2d
 from utils.loss import CrossEntropyLoss2dPixelWiseWeighted
 
@@ -550,7 +550,6 @@ def main():
     for i_iter in range(start_iteration, num_iterations):
         model.train()  # set mode to training
         optimizer.zero_grad()
-        a = time.time()
 
         loss_l_value = 0.
         adjust_learning_rate(optimizer, i_iter)
@@ -755,8 +754,8 @@ def main():
                 proj_labeled_features_all = model.projection_head(labeled_features_all)
                 pred_labeled_features_all = model.prediction_head(proj_labeled_features_all)
 
-                loss_contr_labeled = contrastive_class_to_class_learned_memory(model, pred_labeled_features_all, labels_down_all, labeled_prediction_probs_all,
-                                    batch_size_labeled, num_classes, feature_memory.memory, None)
+                loss_contr_labeled = contrastive_class_to_class_learned_memory(model, pred_labeled_features_all, labels_down_all,
+                                    num_classes, feature_memory.memory)
 
                 loss = loss + loss_contr_labeled * 0.1
                 '''
@@ -793,8 +792,8 @@ def main():
                 proj_feat_unlabeled = model.projection_head(features_joined_unlabeled)
                 pred_feat_unlabeled = model.prediction_head(proj_feat_unlabeled)
 
-                loss_contr_unlabeled = contrastive_class_to_class_learned_memory(model, pred_feat_unlabeled, joined_pseudolabels_down, unlabeled_prediction_probs_down,
-                                    batch_size_unlabeled, num_classes, feature_memory.memory, joined_maxprobs_down)
+                loss_contr_unlabeled = contrastive_class_to_class_learned_memory(model, pred_feat_unlabeled, joined_pseudolabels_down,
+                                    num_classes, feature_memory.memory)
 
                 loss = loss + loss_contr_unlabeled * 0.1
 

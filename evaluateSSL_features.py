@@ -8,7 +8,7 @@ from torch.autograd import Variable
 import torchvision.models as models
 import torch.nn.functional as F
 from torch.utils import data, model_zoo
-from modeling.deeplab import *
+import torch.nn as nn
 from data.voc_dataset import VOCDataSet
 from data import get_data_path, get_loader
 import cv2

@@ -8,8 +8,8 @@ from torch.autograd import Variable
 import torchvision.models as models
 import torch.nn.functional as F
 from torch.utils import data, model_zoo
-from modeling.deeplab import *
-from data.voc_dataset import VOCDataSet
+import torch
+import torch.nn as nn
 from data import get_data_path, get_loader
 import cv2
 from utils.loss import CrossEntropy2d
@@ -156,7 +156,7 @@ def evaluate(model, dataset, ignore_label=250, save_dir=None, pretraining='COCO'
         image, label, size, name, _ = batch
 
         with torch.no_grad():
-            interp = nn.Upsample(size=(label.shape[1], label.shape[2]), mode='bilinear', align_corners=True)
+            interp = torch.nn.Upsample(size=(label.shape[1], label.shape[2]), mode='bilinear', align_corners=True)
             output = model(normalize(Variable(image).cuda(), dataset))
             output = interp(output)
 

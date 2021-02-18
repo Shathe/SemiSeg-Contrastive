@@ -19,8 +19,7 @@ from utils.helpers import colorize_mask
 from utils.sync_batchnorm import convert_model
 from utils.sync_batchnorm import DataParallelWithCallback
 
-from modeling.deeplab import *
-
+import torch.nn as nn
 from data import get_loader, get_data_path
 from data.augmentations import *
 
@@ -816,9 +815,8 @@ def main():
 
                 loss_contr_labeled = contrastive_class_to_class_learned_memory(model, pred_labeled_features_all,
                                                                                labels_down_all,
-                                                                               labeled_prediction_probs_all,
-                                                                               batch_size_labeled, num_classes,
-                                                                               feature_memory.memory, None)
+                                                                               num_classes,
+                                                                               feature_memory.memory)
 
                 loss = loss + loss_contr_labeled * 0.2
                 '''
@@ -860,10 +858,8 @@ def main():
 
                 loss_contr_unlabeled = contrastive_class_to_class_learned_memory(model, pred_feat_unlabeled,
                                                                                  joined_pseudolabels_down,
-                                                                                 unlabeled_prediction_probs_down,
-                                                                                 batch_size_unlabeled, num_classes,
-                                                                                 feature_memory.memory,
-                                                                                 joined_maxprobs_down)
+                                                                                 num_classes,
+                                                                                 feature_memory.memory)
 
                 loss = loss + loss_contr_unlabeled * 0.2
 

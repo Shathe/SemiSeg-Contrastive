@@ -21,7 +21,7 @@ class Compose(object):
 
 
 
-class RandomCrop_city(object):  # used for results in the CVPR-19 submission
+class RandomCrop_city(object):
     def __init__(self, size, padding=0):
         self.size = tuple(size)
         self.padding = padding
@@ -49,7 +49,7 @@ class RandomCrop_city(object):  # used for results in the CVPR-19 submission
         )
 
 
-class RandomCrop_city_highres(object):  # used for results in the CVPR-19 submission
+class RandomCrop_city_highres(object):
     def __init__(self, size, padding=0):
         self.size = tuple(size)
         self.padding = padding
@@ -71,7 +71,7 @@ class RandomCrop_city_highres(object):  # used for results in the CVPR-19 submis
         )
 
 
-class Resize_city(object):  # used for results in the CVPR-19 submission
+class Resize_city(object):
     def __init__(self, size, padding=0):
         self.size = tuple(size)
         self.padding = padding

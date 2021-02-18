@@ -9,7 +9,7 @@ from torch.utils import data
 from data import get_data_path, get_loader
 import cv2
 from utils.loss import CrossEntropy2d
-
+import torch.nn as nn
 
 
 
