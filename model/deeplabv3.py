@@ -32,7 +32,7 @@ class Decoder(nn.Module):
                                        BatchNorm(256),
                                        nn.ReLU())
 
-        self.last_dropout = nn.Dropout(0.15)
+        self.last_dropout = nn.Dropout(0.1)
         self.last_conv = nn.Conv2d(256, num_classes, kernel_size=1, stride=1)
 
         self._init_weight()
@@ -196,10 +196,16 @@ class Bottleneck(nn.Module):
 
 
 class ResNet(nn.Module):
-    def __init__(self, block, layers, num_classes):
+    def __init__(self, block, layers, num_classes, output_stride=16):
         self.inplanes = 64
         super(ResNet, self).__init__()
         self.num_classes= num_classes
+        if output_stride == 16:
+            strides = [2, 2, 1]
+            dilations = [1, 1, 2]
+        elif output_stride == 8:
+            strides = [2, 1, 1]
+            dilations = [ 1, 2, 4]
 
         self.conv1 = nn.Conv2d(3, 64, kernel_size=7, stride=2, padding=3,
                                bias=False)
@@ -209,9 +215,9 @@ class ResNet(nn.Module):
         self.relu = nn.ReLU(inplace=True)
         self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1, ceil_mode=True) # change
         self.layer1 = self._make_layer(block, 64, layers[0])
-        self.layer2 = self._make_layer(block, 128, layers[1], stride=2)
-        self.layer3 = self._make_layer(block, 256, layers[2], stride=2, dilation=1)
-        self.layer4 = self._make_layer(block, 512, layers[3], stride=1, dilation=2)
+        self.layer2 = self._make_layer(block, 128, layers[1], stride=strides[0], dilation=dilations[0])
+        self.layer3 = self._make_layer(block, 256, layers[2], stride=strides[1], dilation=dilations[1])
+        self.layer4 = self._make_layer(block, 512, layers[3], stride=strides[2], dilation=dilations[2])
 
         self.aspp = ASPP()
         self.decoder = Decoder(num_classes)
@@ -340,3 +346,9 @@ class ResNet(nn.Module):
 def Res_Deeplab(num_classes):
     model = ResNet(Bottleneck,[3, 4, 23, 3], num_classes)
     return model
+
+def Res_Deeplab50(num_classes, os=16):
+    model = ResNet(Bottleneck,[3, 4, 6, 3], num_classes, output_stride=os)
+    return model
+
+

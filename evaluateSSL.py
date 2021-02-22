@@ -1,3 +1,8 @@
+'''
+Code taken from https://github.com/WilhelmT/ClassMix
+Slightly modified
+'''
+
 import argparse
 import os
 from data.augmentations import *
@@ -5,9 +10,7 @@ from utils.metric import ConfusionMatrix
 from multiprocessing import Pool
 
 from torch.autograd import Variable
-import torchvision.models as models
-import torch.nn.functional as F
-from torch.utils import data, model_zoo
+from torch.utils import data
 import torch
 import torch.nn as nn
 from data import get_data_path, get_loader
@@ -34,64 +37,7 @@ def get_arguments():
 
 
 
-class VOCColorize(object):
-    def __init__(self, n=22):
-        self.cmap = color_map(22)
-        self.cmap = torch.from_numpy(self.cmap[:n])
-
-    def __call__(self, gray_image):
-        size = gray_image.shape
-        color_image = np.zeros((3, size[0], size[1]), dtype=np.uint8)
-
-        for label in range(0, len(self.cmap)):
-            mask = (label == gray_image)
-            color_image[0][mask] = self.cmap[label][0]
-            color_image[1][mask] = self.cmap[label][1]
-            color_image[2][mask] = self.cmap[label][2]
-
-        # handle void
-        mask = (255 == gray_image)
-        color_image[0][mask] = color_image[1][mask] = color_image[2][mask] = 255
-
-        return color_image
-
-
-def color_map(N=256, normalized=False):
-    def bitget(byteval, idx):
-        return ((byteval & (1 << idx)) != 0)
-
-    dtype = 'float32' if normalized else 'uint8'
-    cmap = np.zeros((N, 3), dtype=dtype)
-    for i in range(N):
-        r = g = b = 0
-        c = i
-        for j in range(8):
-            r = r | (bitget(c, 0) << 7 - j)
-            g = g | (bitget(c, 1) << 7 - j)
-            b = b | (bitget(c, 2) << 7 - j)
-            c = c >> 3
-
-        cmap[i] = np.array([r, g, b])
-
-    cmap = cmap / 255 if normalized else cmap
-    return cmap
-
-
-def get_label_vector(target, nclass):
-    # target is a 3D Variable BxHxW, output is 2D BxnClass
-    hist, _ = np.histogram(target, bins=nclass, range=(0, nclass - 1))
-    vect = hist > 0
-    vect_out = np.zeros((21, 1))
-    for i in range(len(vect)):
-        if vect[i] == True:
-            vect_out[i] = 1
-        else:
-            vect_out[i] = 0
-
-    return vect_out
-
-
-def get_iou(confM, dataset, save_path=None):
+def get_iou(confM, dataset):
     aveJ, j_list, M = confM.jaccard()
 
     if dataset == 'pascal_voc':
@@ -126,20 +72,17 @@ def evaluate(model, dataset, ignore_label=250, save_dir=None, pretraining='COCO'
 
     if dataset == 'pascal_voc':
         num_classes = 21
-        input_size = (505, 505)
         data_loader = get_loader(dataset)
         data_path = get_data_path(dataset)
-        test_dataset = data_loader(data_path, split="val", crop_size=input_size, scale=False, mirror=False, pretraining=pretraining)
+        test_dataset = data_loader(data_path, split="val", scale=False, mirror=False, pretraining=pretraining)
         testloader = data.DataLoader(test_dataset, batch_size=1, shuffle=False, pin_memory=True)
 
     elif dataset == 'cityscapes':
         num_classes = 19
-        input_size = (512, 1024)  # like they are resize while training
-
         data_loader = get_loader('cityscapes')
         data_path = get_data_path('cityscapes')
         data_aug = Compose([Resize_city(input_size)])
-        test_dataset = data_loader(data_path, img_size=input_size, is_transform=True, split='val',
+        test_dataset = data_loader(data_path, is_transform=True, split='val',
                                    augmentations=data_aug, pretraining=pretraining)
         testloader = data.DataLoader(test_dataset, batch_size=1, shuffle=False, pin_memory=True)
 
@@ -147,9 +90,7 @@ def evaluate(model, dataset, ignore_label=250, save_dir=None, pretraining='COCO'
     confM = ConfusionMatrix(num_classes)
 
 
-
     data_list = []
-
     total_loss = []
 
     for index, batch in enumerate(testloader):
@@ -171,10 +112,8 @@ def evaluate(model, dataset, ignore_label=250, save_dir=None, pretraining='COCO'
             output = np.asarray(np.argmax(output, axis=0), dtype=np.int)
             data_list.append((np.reshape(gt, (-1)), np.reshape(output, (-1))))
 
-
-            filename = 'output_images/' + name[0].split('/')[-1]
-            cv2.imwrite(filename, output)
-
+            # filename = 'output_images/' + name[0].split('/')[-1]
+            # cv2.imwrite(filename, output)
 
         if (index + 1) % 100 == 0:
             print('%d processed' % (index + 1))
