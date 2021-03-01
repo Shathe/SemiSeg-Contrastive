@@ -1,0 +1,32 @@
+{
+  "model": "DeepLab",
+  "version": "3",
+  "dataset": "cityscapes",
+
+  "training": {
+    "batch_size": 7,
+    "num_workers": 3,
+    "optimizer": "SGD",
+    "momentum": 0.9,
+    "num_iterations": 80000,
+    "learning_rate": 4e-4,
+    "lr_schedule_power": 0.9,
+    "weight_decay": 5e-4,
+
+    "data": {
+      "split_id_list": 1,
+      "labeled_samples": 100,
+      "input_size": "512,512"
+    }
+
+  },
+  "seed": 5555,
+  "ignore_label": 250,
+
+  "utils": {
+    "save_checkpoint_every": 10000,
+    "checkpoint_dir": "../saved/DeepLab",
+    "val_per_iter": 1000,
+    "save_best_model": true
+  }
+}

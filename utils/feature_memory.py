@@ -4,6 +4,7 @@ Implementation for the Memory Bank for pixel-level feature vectors
 
 import torch
 import numpy as np
+import random
 
 class FeatureMemory:
     def __init__(self, num_samples, dataset,  memory_per_class=2048, feature_size=256, n_classes=19):
@@ -21,12 +22,12 @@ class FeatureMemory:
 
     def add_features_from_sample_learned(self, model, features, class_labels, batch_size):
         """
-
+        Updates the memory bank with some quality feature vectors per class
         Args:
             model: segmentation model containing the self-attention modules (contrastive_class_selectors)
             features: BxFxWxH feature maps containing the feature vectors for the contrastive (already applied the projection head)
-            class_labels:
-            batch_size:
+            class_labels:   BxWxH  corresponding labels to the [features]
+            batch_size: batch size
 
         Returns:
 
@@ -63,3 +64,6 @@ class FeatureMemory:
                 else: # add elements to already existing list
                     # keep only most recent memory_per_class samples
                     self.memory[c] = np.concatenate((new_features, self.memory[c]), axis = 0)[:self.memory_per_class, :]
+
+
+

@@ -72,8 +72,7 @@ class RandomCrop_city_highres(object):
 
 
 class Resize_city(object):
-    def __init__(self, size, padding=0):
-        self.size = tuple(size)
+    def __init__(self, padding=0):
         self.padding = padding
 
     def __call__(self, img, mask):
@@ -91,8 +90,7 @@ class Resize_city(object):
 
 
 class Resize_city_highres(object):
-    def __init__(self, size, padding=0):
-        self.size = tuple(size)
+    def __init__(self, padding=0):
         self.padding = padding
 
     def __call__(self, img, mask):

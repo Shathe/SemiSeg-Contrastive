@@ -13,10 +13,6 @@ from utils.loss import CrossEntropyLoss2dPixelWiseWeighted
 from utils import transformmasks
 from utils import transformsgpu
 
-from utils.sync_batchnorm import convert_model
-from utils.sync_batchnorm import DataParallelWithCallback
-
-
 from data import get_loader, get_data_path
 from data.augmentations import *
 
@@ -57,8 +53,6 @@ def get_arguments():
       A list of parsed arguments.
     """
     parser = argparse.ArgumentParser(description="DeepLab-ResNet Network")
-    parser.add_argument("--gpus", type=int, default=1,
-                        help="choose number of gpu devices to use (default: 1)")
     parser.add_argument("-c", "--config", type=str, default='config.json',
                         help='Path to the config file (default: config.json)')
     parser.add_argument("-r", "--resume", type=str, default=None,
@@ -183,10 +177,7 @@ def _save_checkpoint(iteration, model, optimizer, config, save_best=False, overw
         'optimizer': optimizer.state_dict(),
         'config': config,
     }
-    if len(gpus) > 1:
-        checkpoint['model'] = model.module.state_dict()
-    else:
-        checkpoint['model'] = model.state_dict()
+    checkpoint['model'] = model.state_dict()
 
     if save_best:
         filename = os.path.join(checkpoint_dir, f'best_model.pth')
@@ -223,12 +214,7 @@ def create_ema_model(model, net_class):
     n = len(mp)
     for i in range(0, n):
         mcp[i].data[:] = mp[i].data[:].clone()
-    if len(gpus)>1:
-        if use_sync_batchnorm:
-            ema_model = convert_model(ema_model)
-            ema_model = DataParallelWithCallback(ema_model, device_ids=gpus)
-        else:
-            ema_model = torch.nn.DataParallel(ema_model, device_ids=gpus)
+
     return ema_model
 
 def update_ema_variables(ema_model, model, alpha_teacher, iteration):
@@ -245,12 +231,8 @@ def update_ema_variables(ema_model, model, alpha_teacher, iteration):
     """
     # Use the "true" average until the exponential average is more correct
     alpha_teacher = min(1 - 1 / (iteration + 1), alpha_teacher)
-    if len(gpus)>1:
-        for ema_param, param in zip(ema_model.module.parameters(), model.module.parameters()):
-            ema_param.data[:] = alpha_teacher * ema_param[:].data[:] + (1 - alpha_teacher) * param[:].data[:]
-    else:
-        for ema_param, param in zip(ema_model.parameters(), model.parameters()):
-            ema_param.data[:] = alpha_teacher * ema_param[:].data[:] + (1 - alpha_teacher) * param[:].data[:]
+    for ema_param, param in zip(ema_model.parameters(), model.parameters()):
+        ema_param.data[:] = alpha_teacher * ema_param[:].data[:] + (1 - alpha_teacher) * param[:].data[:]
     return ema_model
 
 def augment_samples(images, labels, probs, do_classmix, batch_size, ignore_label, weak = False):
@@ -360,7 +342,7 @@ def main():
         from utils.transformsgpu import normalize_rgb as normalize
 
     batch_size_unlabeled = int(batch_size / 2)
-    batch_size_labeled = int(batch_size * 1 )
+    batch_size_labeled = int(batch_size * 1)
     assert batch_size_unlabeled >= 2, "batch size should be higher than 2"
     assert batch_size_labeled >= 2, "batch size should be higher than 2"
     RAMP_UP_ITERS = 2000
@@ -374,8 +356,10 @@ def main():
     elif dataset == 'cityscapes':
         data_loader = get_loader('cityscapes')
         data_path = get_data_path('cityscapes')
-        data_aug = Compose(
-            [RandomCrop_city(input_size)])  # from 1024x2048 to resize 512x1024 to crop input_size (512x512)
+        if deeplabv2:
+            data_aug = Compose([RandomCrop_city(input_size)])
+        else: # for deeplabv3 original resolution
+            data_aug = Compose([RandomCrop_city_highres(input_size)])
         train_dataset = data_loader(data_path, is_transform=True, augmentations=data_aug, img_size=input_size, pretraining=pretraining)
 
     train_dataset_size = len(train_dataset)
@@ -405,39 +389,35 @@ def main():
                                   pin_memory=True)
     trainloader_iter = iter(trainloader)
 
-    if train_unlabeled:
-        train_remain_sampler = data.sampler.SubsetRandomSampler(train_ids[partial_size:])
-        trainloader_remain = data.DataLoader(train_dataset,
-                                             batch_size=batch_size_unlabeled, sampler=train_remain_sampler,
-                                             num_workers=num_workers, pin_memory=True)
-        trainloader_remain_iter = iter(trainloader_remain)
+    train_remain_sampler = data.sampler.SubsetRandomSampler(train_ids[partial_size:])
+    trainloader_remain = data.DataLoader(train_dataset,
+                                         batch_size=batch_size_unlabeled, sampler=train_remain_sampler,
+                                         num_workers=num_workers, pin_memory=True)
+    trainloader_remain_iter = iter(trainloader_remain)
 
     # LOSSES
-    unlabeled_loss = CrossEntropyLoss2dPixelWiseWeighted().cuda()
     supervised_loss = CrossEntropy2d(ignore_label=ignore_label).cuda()
 
     ''' Deeplab model '''
     # Define network
     if deeplabv2:
-        if pretraining == 'COCO': # coco and iamgenet resnet architectures differ a little, just on how to do the stride
+        if pretraining == 'COCO': # coco and imagenet resnet architectures differ a little, just on how to do the stride
             from model.deeplabv2 import Res_Deeplab
         else: # imagenet pretrained (more modern modification)
             from model.deeplabv2_imagenet import Res_Deeplab
 
+        # load pretrained parameters
+        if pretraining == 'COCO':
+            saved_state_dict = model_zoo.load_url('http://vllab1.ucmerced.edu/~whung/adv-semi-seg/resnet101COCO-41f33a49.pth') # COCO pretraining
+        else:
+            saved_state_dict = model_zoo.load_url('https://download.pytorch.org/models/resnet101-5d3b4d8f.pth') # iamgenet pretrainning
+
     else:
-        from model.deeplabv3 import Res_Deeplab
-        # from model.deeplabv3 import Res_Deeplab50
+        from model.deeplabv3 import Res_Deeplab50 as Res_Deeplab
+        saved_state_dict = model_zoo.load_url('https://download.pytorch.org/models/resnet50-19c8e357.pth') # iamgenet pretrainning
 
     # create network
-
     model = Res_Deeplab(num_classes=num_classes)
-
-    # load pretrained parameters
-    if pretraining == 'COCO':
-        saved_state_dict = model_zoo.load_url('http://vllab1.ucmerced.edu/~whung/adv-semi-seg/resnet101COCO-41f33a49.pth') # COCO pretraining
-    else:
-        saved_state_dict = model_zoo.load_url('https://download.pytorch.org/models/resnet101-5d3b4d8f.pth') # iamgenet pretrainning
-        # saved_state_dict = model_zoo.load_url('https://download.pytorch.org/models/resnet50-19c8e357.pth') # iamgenet pretrainning
 
     # Copy loaded parameters to model
     new_params = model.state_dict().copy()
@@ -455,20 +435,9 @@ def main():
     ema_model = create_ema_model(model, Res_Deeplab)
     ema_model.train()
     ema_model = ema_model.cuda()
-
-    if len(gpus) > 1:
-        if use_sync_batchnorm:
-            model = convert_model(model)
-            model = DataParallelWithCallback(model, device_ids=gpus)
-        else:
-            model = torch.nn.DataParallel(model, device_ids=gpus)
     model.train()
-    model.cuda()
+    model = model.cuda()
     cudnn.benchmark = True
-
-    # checkpoint = torch.load('/home/snowflake/Escritorio/Semi-Sup/saved/Deep_cont/best_model.pth')
-    # model.load_state_dict(checkpoint['model'])
-
 
     if not os.path.exists(checkpoint_dir):
         os.makedirs(checkpoint_dir)
@@ -689,11 +658,7 @@ def main():
                 loss = loss + loss_contr_unlabeled * 0.1
 
 
-        if len(gpus) > 1:
-            loss = loss.mean()
-            loss_l_value += loss.mean().item()
-        else:
-            loss_l_value += loss.item()
+        loss_l_value += loss.item()
 
         # optimize
         loss.backward()
@@ -710,15 +675,9 @@ def main():
             print('iter = {0:6d}/{1:6d}'.format(i_iter, num_iterations))
 
             model.eval()
-            mIoU, eval_loss = evaluate(model, dataset, ignore_label=ignore_label, save_dir=checkpoint_dir, pretraining=pretraining)
+            mIoU, eval_loss = evaluate(model, dataset, deeplabv2=deeplabv2, ignore_label=ignore_label, save_dir=checkpoint_dir, pretraining=pretraining)
             model.train()
-            if supervised_labeled_loss:
-                print('last labeled loss')
-                print(labeled_loss)
-            if contrastive_labeled_loss and i_iter > RAMP_UP_ITERS:
-                print('last loss_pix_to_pix loss')
-                print(loss_contr_unlabeled)
-                print(loss_contr_labeled)
+
 
             if mIoU > best_mIoU and save_best_model:
                 best_mIoU = mIoU
@@ -727,7 +686,7 @@ def main():
     _save_checkpoint(num_iterations, model, optimizer, config)
 
     model.eval()
-    mIoU, val_loss = evaluate(model, dataset, ignore_label=ignore_label, save_dir=checkpoint_dir, pretraining=pretraining)
+    mIoU, val_loss = evaluate(model, dataset, deeplabv2=deeplabv2, ignore_label=ignore_label, save_dir=checkpoint_dir, pretraining=pretraining)
 
     if mIoU > best_mIoU and save_best_model:
         best_mIoU = mIoU
@@ -790,21 +749,13 @@ if __name__ == '__main__':
     learning_rate = config['training']['learning_rate']
 
     optimizer_type = config['training']['optimizer']
-    lr_schedule = config['training']['lr_schedule']
     lr_power = config['training']['lr_schedule_power']
     weight_decay = config['training']['weight_decay']
     momentum = config['training']['momentum']
     num_workers = config['training']['num_workers']
-    use_sync_batchnorm = config['training']['use_sync_batchnorm']
     random_seed = config['seed']
 
     labeled_samples = config['training']['data']['labeled_samples']
-
-    # unlabeled CONFIGURATIONS
-    train_unlabeled = config['training']['unlabeled']['train_unlabeled']
-    pixel_weight = config['training']['unlabeled']['pixel_weight']
-    consistency_loss = config['training']['unlabeled']['consistency_loss']
-    consistency_weight = config['training']['unlabeled']['consistency_weight']
 
     save_checkpoint_every = config['utils']['save_checkpoint_every']
     if args.resume:
@@ -814,13 +765,10 @@ if __name__ == '__main__':
     log_dir = checkpoint_dir
 
     val_per_iter = config['utils']['val_per_iter']
-    log_per_iter = config['utils']['log_per_iter']
 
     save_best_model = config['utils']['save_best_model']
 
-    gpus = (0, 1, 2, 3)[:args.gpus]
     deeplabv2 = "2" in config['version']
 
-    os.environ["CUDA_VISIBLE_DEVICES"] = str(0)
 
     main()

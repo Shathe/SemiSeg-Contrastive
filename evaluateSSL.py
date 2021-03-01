@@ -63,7 +63,7 @@ def get_iou(confM, dataset):
     return aveJ
 
 
-def evaluate(model, dataset, ignore_label=250, save_dir=None, pretraining='COCO'):
+def evaluate(model, dataset, deeplabv2=True, ignore_label=250, save_dir=None, pretraining='COCO'):
 
     if pretraining == 'COCO':
         from utils.transformsgpu import normalize_bgr as normalize
@@ -81,7 +81,11 @@ def evaluate(model, dataset, ignore_label=250, save_dir=None, pretraining='COCO'
         num_classes = 19
         data_loader = get_loader('cityscapes')
         data_path = get_data_path('cityscapes')
-        data_aug = Compose([Resize_city(input_size)])
+        if deeplabv2:
+            data_aug = Compose([Resize_city()])
+        else: # for deeplabv3 oirginal resolution
+            data_aug = Compose([Resize_city_highres()])
+
         test_dataset = data_loader(data_path, is_transform=True, split='val',
                                    augmentations=data_aug, pretraining=pretraining)
         testloader = data.DataLoader(test_dataset, batch_size=1, shuffle=False, pin_memory=True)
@@ -122,11 +126,7 @@ def evaluate(model, dataset, ignore_label=250, save_dir=None, pretraining='COCO'
 
     process_list_evaluation(confM, data_list)
 
-    if save_dir:
-        filename = os.path.join(save_dir, 'result.txt')
-    else:
-        filename = None
-    mIoU = get_iou(confM, dataset, filename)
+    mIoU = get_iou(confM, dataset)
     loss = np.mean(total_loss)
     return mIoU, loss
 
@@ -147,9 +147,6 @@ def process_list_evaluation(confM, data_list):
 
 def main():
     """Create the model and start the evaluation process."""
-
-    gpu0 = args.gpu
-
 
     deeplabv2 = "2" in config['version']
 
@@ -187,7 +184,6 @@ if __name__ == '__main__':
 
     if dataset == 'cityscapes':
         num_classes = 19
-        input_size = (512, 1024)
     elif dataset == 'pascal_voc':
         num_classes = 21
 

@@ -144,18 +144,19 @@ def conv3x3(in_planes, out_planes, stride=1):
 
 
 
+
+
 class Bottleneck(nn.Module):
     expansion = 4
-
     def __init__(self, inplanes, planes, stride=1, dilation=1, downsample=None):
         super(Bottleneck, self).__init__()
-        self.conv1 = nn.Conv2d(inplanes, planes, kernel_size=1, stride=stride, bias=False) # change
+        self.conv1 = nn.Conv2d(inplanes, planes, kernel_size=1, stride=1, bias=False) # change
         self.bn1 = nn.BatchNorm2d(planes,affine = affine_par)
         for i in self.bn1.parameters():
             i.requires_grad = False
 
         padding = dilation
-        self.conv2 = nn.Conv2d(planes, planes, kernel_size=3, stride=1, # change
+        self.conv2 = nn.Conv2d(planes, planes, kernel_size=3, stride=stride, # change
                                padding=padding, bias=False, dilation = dilation)
         self.bn2 = nn.BatchNorm2d(planes,affine = affine_par)
         for i in self.bn2.parameters():
@@ -167,7 +168,6 @@ class Bottleneck(nn.Module):
         self.relu = nn.ReLU(inplace=True)
         self.downsample = downsample
         self.stride = stride
-
 
     def forward(self, x):
         residual = x
@@ -213,7 +213,7 @@ class ResNet(nn.Module):
         for i in self.bn1.parameters():
             i.requires_grad = False
         self.relu = nn.ReLU(inplace=True)
-        self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1, ceil_mode=True) # change
+        self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1) # change
         self.layer1 = self._make_layer(block, 64, layers[0])
         self.layer2 = self._make_layer(block, 128, layers[1], stride=strides[0], dilation=dilations[0])
         self.layer3 = self._make_layer(block, 256, layers[2], stride=strides[1], dilation=dilations[1])
