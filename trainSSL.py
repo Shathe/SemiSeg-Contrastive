@@ -57,10 +57,6 @@ def get_arguments():
                         help='Path to the config file (default: config.json)')
     parser.add_argument("-r", "--resume", type=str, default=None,
                         help='Path to the .pth file to resume from (default: None)')
-    parser.add_argument("-n", "--name", type=str, default=None, required=True,
-                        help='Name of the run (default: None)')
-    parser.add_argument("--save-images", type=str, default=None,
-                        help='Include to save images (default: None)')
     return parser.parse_args()
 
 
@@ -332,10 +328,7 @@ def main():
     np.random.seed(random_seed)
     random.seed(random_seed)
     torch.backends.cudnn.deterministic = True
-    supervised_unlabeled_loss = True
-    supervised_labeled_loss = True
-    contrastive_labeled_loss = True
-    pretraining = 'COCO'
+
     if pretraining == 'COCO':
         from utils.transformsgpu import normalize_bgr as normalize
     else:
@@ -549,113 +542,111 @@ def main():
 
 
         loss = 0
-        if supervised_labeled_loss:
-            labeled_loss = supervised_loss(labeled_pred, joined_labels, weight=class_weights.float())
+        # SUPERVISED SEGMENTATION
+        labeled_loss = supervised_loss(labeled_pred, joined_labels, weight=class_weights.float())
+        loss = loss + labeled_loss
 
-            loss = loss + labeled_loss
+        # SELF-SUPERVISED SEGMENTATION
+        '''
+        Cross entropy loss using pseudolabels. 
+        '''
 
-        if supervised_unlabeled_loss:
+        unlabeled_loss = CrossEntropyLoss2dPixelWiseWeighted(ignore_index=ignore_label, weight=class_weights.float()).cuda() #
+
+        # Pseudo-label weighting
+        pixelWiseWeight = sigmoid_ramp_up(i_iter, RAMP_UP_ITERS) * torch.ones(joined_maxprobs.shape).cuda()
+        pixelWiseWeight = pixelWiseWeight * torch.pow(joined_maxprobs.detach(), 6)
+
+        # Pseudo-label loss
+        loss_ce_unlabeled = unlabeled_loss(pred_joined_unlabeled, joined_pseudolabels, pixelWiseWeight)
+
+        loss = loss + loss_ce_unlabeled
+
+        # entropy loss
+        valid_mask = (joined_pseudolabels != ignore_label).unsqueeze(1)
+        loss = loss + entropy_loss(torch.nn.functional.softmax(pred_joined_unlabeled, dim=1), valid_mask) * 0.01
+
+        # CONTRASTIVE LEARNING
+        if i_iter >  RAMP_UP_ITERS  - 1000:
+            # Build Memory Bank 1000 iters before starting to do contrsative
+
+            with torch.no_grad():
+                # Get feature vectors from labeled images with EMA model
+                labeled_pred_ema, labeled_features_ema = ema_model(normalize(joined_labeled, dataset), return_features=True)
+                labeled_pred_ema = interp(labeled_pred_ema)
+                probability_prediction_ema, label_prediction_ema = torch.max(torch.softmax(labeled_pred_ema, dim=1),dim=1)  # Get pseudolabels
+
+            # Resize labels, predictions and probabilities,  to feature map resolution
+            labels_down = nn.functional.interpolate(joined_labels.float().unsqueeze(1), size=(labeled_features_ema.shape[2], labeled_features_ema.shape[3]),
+                                                    mode='nearest').squeeze(1)
+            label_prediction_down = nn.functional.interpolate(label_prediction_ema.float().unsqueeze(1), size=(labeled_features_ema.shape[2], labeled_features_ema.shape[3]),
+                                                    mode='nearest').squeeze(1)
+            probability_prediction_down = nn.functional.interpolate(probability_prediction_ema.float().unsqueeze(1), size=(labeled_features_ema.shape[2], labeled_features_ema.shape[3]),
+                                                    mode='nearest').squeeze(1)
+
+
+            # get mask where the labeled predictions are correct and have a confidence higher than 0.95
+            mask_prediction_correctly = ((label_prediction_down == labels_down).float() * (probability_prediction_down > 0.95).float()).bool()
+
+            # Apply the filter mask to the features and its labels
+            labeled_features_correct = labeled_features_ema.permute(0, 2, 3, 1)
+            labels_down_correct = labels_down[mask_prediction_correctly]
+            labeled_features_correct = labeled_features_correct[mask_prediction_correctly, ...]
+
+            # get projected features
+            with torch.no_grad():
+                proj_labeled_features_correct = ema_model.projection_head(labeled_features_correct)
+
+            # updated memory bank
+            feature_memory.add_features_from_sample_learned(ema_model, proj_labeled_features_correct, labels_down_correct, batch_size_labeled)
+
+
+
+        if i_iter > RAMP_UP_ITERS:
             '''
-            Cross entropy loss using pseudolabels. 
+            CONTRASTIVE LEARNING ON LABELED DATA. Force features from labeled samples, to be similar to other features from the same class (which also leads to good predictions
             '''
+            # mask features that do not have ignore label in the labels (zero-padding because of data augmentation like resize/crop)
+            mask_prediction_correctly = (labels_down != ignore_label)
 
-            unlabeled_loss = CrossEntropyLoss2dPixelWiseWeighted(ignore_index=ignore_label, weight=class_weights.float()).cuda() #
+            labeled_features_all = labeled_features.permute(0, 2, 3, 1)
+            labels_down_all = labels_down[mask_prediction_correctly]
+            labeled_features_all = labeled_features_all[mask_prediction_correctly, ...]
 
-            # Pseudo-label weighting
-            pixelWiseWeight = sigmoid_ramp_up(i_iter, RAMP_UP_ITERS) * torch.ones(joined_maxprobs.shape).cuda()
-            pixelWiseWeight = pixelWiseWeight * torch.pow(joined_maxprobs.detach(), 6)
+            # get predicted features
+            proj_labeled_features_all = model.projection_head(labeled_features_all)
+            pred_labeled_features_all = model.prediction_head(proj_labeled_features_all)
 
-            # Pseudo-label loss
-            loss_ce_unlabeled = unlabeled_loss(pred_joined_unlabeled, joined_pseudolabels, pixelWiseWeight)
+            # Apply contrastive learning loss
+            loss_contr_labeled = contrastive_class_to_class_learned_memory(model, pred_labeled_features_all, labels_down_all,
+                                num_classes, feature_memory.memory)
 
-            loss = loss + loss_ce_unlabeled
-
-            # entropy loss
-            valid_mask = (joined_pseudolabels != ignore_label).unsqueeze(1)
-            loss = loss + entropy_loss(torch.nn.functional.softmax(pred_joined_unlabeled, dim=1), valid_mask) * 0.01
-
-        if contrastive_labeled_loss:
-
-            if i_iter >  RAMP_UP_ITERS  - 1000:
-                # Build Memory Bank 1000 iters before starting to do contrsative
-
-                with torch.no_grad():
-                    # Get feature vectors from labeled images with EMA model
-                    labeled_pred_ema, labeled_features_ema = ema_model(normalize(joined_labeled, dataset), return_features=True)
-                    labeled_pred_ema = interp(labeled_pred_ema)
-                    probability_prediction_ema, label_prediction_ema = torch.max(torch.softmax(labeled_pred_ema, dim=1),dim=1)  # Get pseudolabels
-
-                # Resize labels, predictions and probabilities,  to feature map resolution
-                labels_down = nn.functional.interpolate(joined_labels.float().unsqueeze(1), size=(labeled_features_ema.shape[2], labeled_features_ema.shape[3]),
-                                                        mode='nearest').squeeze(1)
-                label_prediction_down = nn.functional.interpolate(label_prediction_ema.float().unsqueeze(1), size=(labeled_features_ema.shape[2], labeled_features_ema.shape[3]),
-                                                        mode='nearest').squeeze(1)
-                probability_prediction_down = nn.functional.interpolate(probability_prediction_ema.float().unsqueeze(1), size=(labeled_features_ema.shape[2], labeled_features_ema.shape[3]),
-                                                        mode='nearest').squeeze(1)
+            loss = loss + loss_contr_labeled * 0.1
 
 
-                # get mask where the labeled predictions are correct and have a confidence higher than 0.95
-                mask_prediction_correctly = ((label_prediction_down == labels_down).float() * (probability_prediction_down > 0.95).float()).bool()
+            '''
+            CONTRASTIVE LEARNING ON UNLABELED DATA. align unlabeled features to labeled features
+            '''
+            joined_pseudolabels_down = nn.functional.interpolate(joined_pseudolabels.float().unsqueeze(1),
+                                                    size=(features_joined_unlabeled.shape[2], features_joined_unlabeled.shape[3]),
+                                                    mode='nearest').squeeze(1)
 
-                # Apply the filter mask to the features and its labels
-                labeled_features_correct = labeled_features_ema.permute(0, 2, 3, 1)
-                labels_down_correct = labels_down[mask_prediction_correctly]
-                labeled_features_correct = labeled_features_correct[mask_prediction_correctly, ...]
+            # mask features that do not have ignore label in the labels (zero-padding because of data augmentation like resize/crop)
+            mask = (joined_pseudolabels_down != ignore_label)
 
-                # get projected features
-                with torch.no_grad():
-                    proj_labeled_features_correct = ema_model.projection_head(labeled_features_correct)
+            features_joined_unlabeled = features_joined_unlabeled.permute(0, 2, 3, 1)
+            features_joined_unlabeled = features_joined_unlabeled[mask, ...]
+            joined_pseudolabels_down = joined_pseudolabels_down[mask]
 
-                # updated memory bank
-                feature_memory.add_features_from_sample_learned(ema_model, proj_labeled_features_correct, labels_down_correct, batch_size_labeled)
+            # get predicted features
+            proj_feat_unlabeled = model.projection_head(features_joined_unlabeled)
+            pred_feat_unlabeled = model.prediction_head(proj_feat_unlabeled)
 
+            # Apply contrastive learning loss
+            loss_contr_unlabeled = contrastive_class_to_class_learned_memory(model, pred_feat_unlabeled, joined_pseudolabels_down,
+                                num_classes, feature_memory.memory)
 
-
-            if i_iter > RAMP_UP_ITERS:
-                '''
-                CONTRASTIVE LEARNING ON LABELED DATA. Force features from labeled samples, to be similar to other features from the same class (which also leads to good predictions
-                '''
-                # mask features that do not have ignore label in the labels (zero-padding because of data augmentation like resize/crop)
-                mask_prediction_correctly = (labels_down != ignore_label)
-
-                labeled_features_all = labeled_features.permute(0, 2, 3, 1)
-                labels_down_all = labels_down[mask_prediction_correctly]
-                labeled_features_all = labeled_features_all[mask_prediction_correctly, ...]
-
-                # get predicted features
-                proj_labeled_features_all = model.projection_head(labeled_features_all)
-                pred_labeled_features_all = model.prediction_head(proj_labeled_features_all)
-
-                # Apply contrastive learning loss
-                loss_contr_labeled = contrastive_class_to_class_learned_memory(model, pred_labeled_features_all, labels_down_all,
-                                    num_classes, feature_memory.memory)
-
-                loss = loss + loss_contr_labeled * 0.1
-
-
-                '''
-                CONTRASTIVE LEARNING ON UNLABELED DATA. align unlabeled features to labeled features
-                '''
-                joined_pseudolabels_down = nn.functional.interpolate(joined_pseudolabels.float().unsqueeze(1),
-                                                        size=(features_joined_unlabeled.shape[2], features_joined_unlabeled.shape[3]),
-                                                        mode='nearest').squeeze(1)
-
-                # mask features that do not have ignore label in the labels (zero-padding because of data augmentation like resize/crop)
-                mask = (joined_pseudolabels_down != ignore_label)
-
-                features_joined_unlabeled = features_joined_unlabeled.permute(0, 2, 3, 1)
-                features_joined_unlabeled = features_joined_unlabeled[mask, ...]
-                joined_pseudolabels_down = joined_pseudolabels_down[mask]
-
-                # get predicted features
-                proj_feat_unlabeled = model.projection_head(features_joined_unlabeled)
-                pred_feat_unlabeled = model.prediction_head(proj_feat_unlabeled)
-
-                # Apply contrastive learning loss
-                loss_contr_unlabeled = contrastive_class_to_class_learned_memory(model, pred_feat_unlabeled, joined_pseudolabels_down,
-                                    num_classes, feature_memory.memory)
-
-                loss = loss + loss_contr_unlabeled * 0.1
+            loss = loss + loss_contr_unlabeled * 0.1
 
 
         loss_l_value += loss.item()
@@ -754,7 +745,7 @@ if __name__ == '__main__':
     momentum = config['training']['momentum']
     num_workers = config['training']['num_workers']
     random_seed = config['seed']
-
+    pretraining = config['training']['pretraining']
     labeled_samples = config['training']['data']['labeled_samples']
 
     save_checkpoint_every = config['utils']['save_checkpoint_every']

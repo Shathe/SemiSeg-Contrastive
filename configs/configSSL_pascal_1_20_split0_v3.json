@@ -13,6 +13,7 @@
     "lr_schedule": "Poly",
     "lr_schedule_power": 0.9,
     "weight_decay": 5e-4,
+    "pretraining": "imagenet",
     "data": {
       "split_id_list": 0,
       "labeled_samples": 530,

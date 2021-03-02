@@ -4,7 +4,6 @@ Slightly modified
 '''
 
 import argparse
-import os
 from data.augmentations import *
 from utils.metric import ConfusionMatrix
 from multiprocessing import Pool
@@ -12,12 +11,8 @@ from multiprocessing import Pool
 from torch.autograd import Variable
 from torch.utils import data
 import torch
-import torch.nn as nn
 from data import get_data_path, get_loader
-import cv2
 from utils.loss import CrossEntropy2d
-
-
 
 
 def get_arguments():
@@ -162,17 +157,12 @@ def main():
     model = Res_Deeplab(num_classes=num_classes)
 
     checkpoint = torch.load(args.model_path)
-    try:
-        model.load_state_dict(checkpoint['model'])
-    except:
-        model = torch.nn.DataParallel(model, device_ids=args.gpu)
-        model.load_state_dict(checkpoint['model'])
+    model.load_state_dict(checkpoint['model'])
 
-
-    model.cuda()
+    model = model.cuda()
     model.eval()
 
-    evaluate(model, dataset, ignore_label=ignore_label,   pretraining=pretraining)
+    evaluate(model, dataset, deeplabv2=deeplabv2, ignore_label=ignore_label,   pretraining=pretraining)
 
 
 if __name__ == '__main__':
@@ -190,10 +180,6 @@ if __name__ == '__main__':
     ignore_label = config['ignore_label']
 
     pretraining = 'COCO'
-    if pretraining == 'COCO':
-        from utils.transformsgpu import normalize_bgr as normalize
-    else:
-        from utils.transformsgpu import normalize_rgb as normalize
 
 
     main()

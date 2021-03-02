@@ -12,6 +12,7 @@
     "learning_rate": 4e-4,
     "lr_schedule_power": 0.9,
     "weight_decay": 5e-4,
+    "pretraining": "imagenet",
 
     "data": {
       "split_id_list": 2,

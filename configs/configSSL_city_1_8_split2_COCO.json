@@ -1,27 +1,28 @@
 {
   "model": "DeepLab",
-  "version": "3",
-  "dataset": "pascal_voc",
+  "version": "2",
+  "dataset": "cityscapes",
 
   "training": {
-    "batch_size":  20,
+    "batch_size": 5,
     "num_workers": 3,
     "optimizer": "SGD",
     "momentum": 0.9,
-    "num_iterations": 30000,
+    "num_iterations": 80000,
     "learning_rate": 2e-4,
     "lr_schedule": "Poly",
+    "pretraining": "COCO",
     "lr_schedule_power": 0.9,
     "weight_decay": 5e-4,
-    "pretraining": "imagenet",
+
     "data": {
       "split_id_list": 2,
-      "labeled_samples": 212,
-      "input_size": "321,321"
+      "labeled_samples": 372,
+      "input_size": "512,512"
     }
   },
-  "seed": 7,
-  "ignore_label": 255,
+  "seed": 5555,
+  "ignore_label": 250,
 
   "utils": {
     "save_checkpoint_every": 10000,
@@ -30,4 +31,3 @@
     "save_best_model": true
   }
 }
-

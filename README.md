@@ -19,13 +19,5 @@ Arguments related to the algoritms are specified in the configuration files. The
 
 ### Example of training a model with semi-supervised learning on CityScapes with 12.5% the labels on a single gpu
 
-python3 trainSSL.py --config ./configs/configSSL.json --name SSL
-
-### Example of resuming training of a model with semi-supervised learning
-
-python3 trainSSL.py --resume-path *checkpoint.pth*
-
-
-# other
-CUDA_LAUNCH_BLOCKING=1 nohup python3 trainSupervised.py --config ./configs/configSSL_city_1_30_split0_supervised.json --name SSL --gpus 1  > output_nohup/experiment_onlysup_deeplav2_noaug.txt &
-CUDA_LAUNCH_BLOCKING=1 nohup sh trainSSL_sup.sh  > output_nohup/experiment_.txt &
+python3 trainSSL.py --config ./configs/configSSL.json 
+ 

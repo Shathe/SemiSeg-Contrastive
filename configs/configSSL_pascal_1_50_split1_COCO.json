@@ -1,21 +1,21 @@
 {
   "model": "DeepLab",
-  "version": "3",
+  "version": "2",
   "dataset": "pascal_voc",
 
   "training": {
-    "batch_size":  20,
+    "batch_size":  14,
     "num_workers": 3,
     "optimizer": "SGD",
     "momentum": 0.9,
     "num_iterations": 30000,
     "learning_rate": 2e-4,
     "lr_schedule": "Poly",
+    "pretraining": "COCO",
     "lr_schedule_power": 0.9,
     "weight_decay": 5e-4,
-    "pretraining": "imagenet",
     "data": {
-      "split_id_list": 2,
+      "split_id_list": 1,
       "labeled_samples": 212,
       "input_size": "321,321"
     }
