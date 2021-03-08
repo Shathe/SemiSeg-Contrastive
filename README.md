@@ -129,6 +129,7 @@ For example, for configuration:
 * % of labels:  1/30  
 * Pretrain: Imagenet
 * Split: 0
+
 Execute:
 ```
 python3 trainSSL.py --config ./configs/configSSL_city_1_30_split0_imagenet.json 

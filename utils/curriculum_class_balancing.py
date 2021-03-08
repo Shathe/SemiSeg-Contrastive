@@ -79,9 +79,9 @@ class CurriculumClassBalancing:
             self.labeled_frequencies[self.iter, :] = labeled_freqs
 
 
-    def add_frequencies_unlabeled(self, unlabeled_samples, unlabeled_confidences=None):
+    def add_frequencies_unlabeled(self, unlabeled_samples):
 
-        unl_freqs = self.compute_frequencies(unlabeled_samples, unlabeled_confidences)
+        unl_freqs = self.compute_frequencies(unlabeled_samples)
 
         if self.iter < self.unlabeled_samples:
             self.unlabeled_frequencies[self.iter, :] = unl_freqs

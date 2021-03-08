@@ -488,7 +488,7 @@ def main():
             model.train()
 
             if dataset == 'cityscapes':
-                class_weights_curr.add_frequencies(labels.cpu().numpy(), pseudo_label.cpu().numpy())
+                class_weights_curr.add_frequencies_labeled(labels.cpu().numpy())
 
             images_aug, labels_aug, _, _ = augment_samples(images, labels, None, random.random() < 0.2,
                                                            batch_size_labeled,
@@ -599,7 +599,7 @@ def main():
             model.train()
 
             if dataset == 'cityscapes':
-                class_weights_curr.add_frequencies(labels.cpu().numpy(), pseudo_label.cpu().numpy())
+                class_weights_curr.add_frequencies_unlabeled(pseudo_label.cpu().numpy())
 
             '''
             UNLABELED DATA
