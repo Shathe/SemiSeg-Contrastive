@@ -4,7 +4,7 @@
   "dataset": "cityscapes",
 
   "training": {
-    "batch_size": 5,
+    "batch_size": 6,
     "num_workers": 3,
     "optimizer": "SGD",
     "momentum": 0.9,

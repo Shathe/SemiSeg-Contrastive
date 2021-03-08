@@ -322,6 +322,7 @@ def augment_samples(images, labels, probs, do_classmix, batch_size, ignore_label
 
 def main():
     print(config)
+
     cudnn.enabled = True
     torch.manual_seed(random_seed)
     torch.cuda.manual_seed(random_seed)
@@ -329,18 +330,18 @@ def main():
     random.seed(random_seed)
     torch.backends.cudnn.deterministic = True
 
-    if pretraining == 'COCO':
+    if pretraining == 'COCO': # depending the pretraining, normalize with bgr or rgb
         from utils.transformsgpu import normalize_bgr as normalize
     else:
         from utils.transformsgpu import normalize_rgb as normalize
 
-    batch_size_unlabeled = int(batch_size / 2)
+    batch_size_unlabeled = int(batch_size / 2) # because of augmentation anchoring, 2 augmentations per sample
     batch_size_labeled = int(batch_size * 1)
     assert batch_size_unlabeled >= 2, "batch size should be higher than 2"
     assert batch_size_labeled >= 2, "batch size should be higher than 2"
-    RAMP_UP_ITERS = 2000
+    RAMP_UP_ITERS = 2000 # iterations until contrastive and self-training are taken into account
 
-    # DATASETS
+    # DATASETS / LOADERS
     if dataset == 'pascal_voc':
         data_loader = get_loader(dataset)
         data_path = get_data_path(dataset)
@@ -361,12 +362,13 @@ def main():
     partial_size = labeled_samples
     print('Training on number of samples:', partial_size)
 
+    # class weighting  taken unlabeled data into acount in an incremental fashion.
     class_weights_curr = CurriculumClassBalancing(labeled_iters=int(labeled_samples / batch_size_labeled),
                                                   unlabeled_iters=int(
                                                       (train_dataset_size - labeled_samples) / batch_size_unlabeled),
                                                   n_classes=num_classes)
-
-    feature_memory = FeatureMemory(num_samples=labeled_samples, dataset=dataset, memory_per_class=2048, feature_size=256, n_classes=num_classes)
+    # Memory Bank
+    feature_memory = FeatureMemory(num_samples=labeled_samples, dataset=dataset, memory_per_class=256, feature_size=256, n_classes=num_classes)
 
     # select the partition
     if split_id is not None:
@@ -376,19 +378,21 @@ def main():
         train_ids = np.arange(train_dataset_size)
         np.random.shuffle(train_ids)
 
+    # Samplers for labeled data
     train_sampler = data.sampler.SubsetRandomSampler(train_ids[:partial_size])
     trainloader = data.DataLoader(train_dataset,
                                   batch_size=batch_size_labeled, sampler=train_sampler, num_workers=num_workers,
                                   pin_memory=True)
     trainloader_iter = iter(trainloader)
 
+    # Samplers for unlabeled data
     train_remain_sampler = data.sampler.SubsetRandomSampler(train_ids[partial_size:])
     trainloader_remain = data.DataLoader(train_dataset,
                                          batch_size=batch_size_unlabeled, sampler=train_remain_sampler,
                                          num_workers=num_workers, pin_memory=True)
     trainloader_remain_iter = iter(trainloader_remain)
 
-    # LOSSES
+    # supervised loss
     supervised_loss = CrossEntropy2d(ignore_label=ignore_label).cuda()
 
     ''' Deeplab model '''
@@ -418,6 +422,7 @@ def main():
         if name in saved_state_dict and param.size() == saved_state_dict[name].size():
             new_params[name].copy_(saved_state_dict[name])
     model.load_state_dict(new_params)
+
 
     # Optimizer for segmentation network
     learning_rate_object = Learning_Rate_Object(config['training']['learning_rate'])
@@ -494,34 +499,26 @@ def main():
             class_weights_curr.add_frequencies(labels.cpu().numpy(), pseudo_label.cpu().numpy())
 
 
-        images2, labels2, _, _ = augment_samples(images, labels, None, random.random()  < 0.2, batch_size_labeled, ignore_label, weak=True)
+        images_aug, labels_aug, _, _ = augment_samples(images, labels, None, random.random()  < 0.2, batch_size_labeled, ignore_label, weak=True)
 
         '''
         UNLABELED DATA
         '''
-
-        '''
-        CROSS ENTROPY FOR UNLABELED USING PSEUDOLABELS
-        Once you have the speudolabel, perform strong augmetnation to force the netowrk to yield lower confidence scores for pushing them up
-        '''
-
-        do_classmix = i_iter > RAMP_UP_ITERS and random.random() < 0.75  # only after rampup perfrom classmix
         unlabeled_images_aug1, pseudo_label1, max_probs1, unlabeled_aug1_params = augment_samples(unlabeled_images,
                                                                                                   pseudo_label,
                                                                                                   max_probs,
-                                                                                                  do_classmix,
+                                                                                                  i_iter > RAMP_UP_ITERS and random.random() < 0.75,
                                                                                                   batch_size_unlabeled,
                                                                                                   ignore_label)
 
-        do_classmix = i_iter > RAMP_UP_ITERS and random.random() < 0.75  # only after rampup perfrom classmix
 
         unlabeled_images_aug2, pseudo_label2, max_probs2, unlabeled_aug2_params = augment_samples(unlabeled_images,
                                                                                                   pseudo_label,
                                                                                                   max_probs,
-                                                                                                  do_classmix,
+                                                                                                  i_iter > RAMP_UP_ITERS and random.random() < 0.75,
                                                                                                   batch_size_unlabeled,
                                                                                                   ignore_label)
-
+        # concatenate two augmentations of unlabeled data
         joined_unlabeled = torch.cat((unlabeled_images_aug1, unlabeled_images_aug2), dim=0)
         joined_pseudolabels = torch.cat((pseudo_label1, pseudo_label2), dim=0)
         joined_maxprobs = torch.cat((max_probs1, max_probs2), dim=0)
@@ -529,11 +526,11 @@ def main():
         pred_joined_unlabeled, features_joined_unlabeled = model(normalize(joined_unlabeled, dataset), return_features=True)
         pred_joined_unlabeled = interp(pred_joined_unlabeled)
 
-        joined_labeled = images2
-        joined_labels = labels2
-        labeled_pred, labeled_features = model(normalize(joined_labeled, dataset), return_features=True)
+        # labeled data
+        labeled_pred, labeled_features = model(normalize(images_aug, dataset), return_features=True)
         labeled_pred = interp(labeled_pred)
 
+        # apply clas balance for cityspcaes dataset
         if dataset == 'cityscapes':
             class_weights = torch.from_numpy(
                 class_weights_curr.get_weights(num_iterations, only_labeled=False)).cuda()
@@ -542,15 +539,12 @@ def main():
 
 
         loss = 0
+
         # SUPERVISED SEGMENTATION
-        labeled_loss = supervised_loss(labeled_pred, joined_labels, weight=class_weights.float())
+        labeled_loss = supervised_loss(labeled_pred, labels_aug, weight=class_weights.float())
         loss = loss + labeled_loss
 
         # SELF-SUPERVISED SEGMENTATION
-        '''
-        Cross entropy loss using pseudolabels. 
-        '''
-
         unlabeled_loss = CrossEntropyLoss2dPixelWiseWeighted(ignore_index=ignore_label, weight=class_weights.float()).cuda() #
 
         # Pseudo-label weighting
@@ -572,12 +566,12 @@ def main():
 
             with torch.no_grad():
                 # Get feature vectors from labeled images with EMA model
-                labeled_pred_ema, labeled_features_ema = ema_model(normalize(joined_labeled, dataset), return_features=True)
+                labeled_pred_ema, labeled_features_ema = ema_model(normalize(images_aug, dataset), return_features=True)
                 labeled_pred_ema = interp(labeled_pred_ema)
                 probability_prediction_ema, label_prediction_ema = torch.max(torch.softmax(labeled_pred_ema, dim=1),dim=1)  # Get pseudolabels
 
             # Resize labels, predictions and probabilities,  to feature map resolution
-            labels_down = nn.functional.interpolate(joined_labels.float().unsqueeze(1), size=(labeled_features_ema.shape[2], labeled_features_ema.shape[3]),
+            labels_down = nn.functional.interpolate(labels_aug.float().unsqueeze(1), size=(labeled_features_ema.shape[2], labeled_features_ema.shape[3]),
                                                     mode='nearest').squeeze(1)
             label_prediction_down = nn.functional.interpolate(label_prediction_ema.float().unsqueeze(1), size=(labeled_features_ema.shape[2], labeled_features_ema.shape[3]),
                                                     mode='nearest').squeeze(1)

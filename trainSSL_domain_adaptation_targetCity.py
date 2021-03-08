@@ -366,7 +366,7 @@ def main():
                                                       (train_dataset_size - labeled_samples) / batch_size_unlabeled),
                                                   n_classes=num_classes)
 
-    feature_memory = FeatureMemory(num_samples=labeled_samples, dataset=dataset, memory_per_class=2048,
+    feature_memory = FeatureMemory(num_samples=labeled_samples, dataset=dataset, memory_per_class=256,
                                    feature_size=256, n_classes=num_classes)
 
     # select the partition
