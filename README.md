@@ -135,6 +135,43 @@ Execute:
 python3 trainSSL.py --config ./configs/configSSL_city_1_30_split0_imagenet.json 
 ```
 
+### Configuration File Description
+```
+{
+  "model": "DeepLab", # Options: Deeplab
+  "version": "2", # Options: {2, 3} for deeplabv2 and deeplabv3+
+  "dataset": "cityscapes", # Options: {"cityscapes", "pascal"}
+
+  "training": {
+    "batch_size": 5, # Options: any integer
+    "num_workers": 3, # Options: any integer
+    "optimizer": "SGD", # Options: {"SGD"}
+    "momentum": 0.9, # momentum for SGD optimizer, Options: any float 
+    "num_iterations": 80000, # Options: any integer
+    "learning_rate": 2e-4, # Options: any float
+    "lr_schedule": "Poly", # Options: {"Poly"}
+    "lr_schedule_power": 0.9, # power value for the Poly scheduler. Options: any float
+    "pretraining": "COCO", # Options: {"COCO", "imagenet"}
+    "weight_decay": 5e-4, # Options: any float
+
+    "data": {
+      "split_id_list": 0, # Options: {0,1,2} for pre-computed splits. N >2 for random splits
+      "labeled_samples": 744, # Options: any integer
+      "input_size": "512,512" # Options: any integer tuple
+    }
+
+  },
+  "seed": 5555, # seed for randomization. Options: any integer
+  "ignore_label": 250, # ignore label value. Options: any integer
+
+  "utils": {
+    "save_checkpoint_every": 10000,  # Options: any integer
+    "checkpoint_dir": "../saved/DeepLab", # Options: any path
+    "val_per_iter": 1000, # Options: any integer
+    "save_best_model": true # Options: boolean
+  }
+}
+```
 
 ### Citation
 Soon
