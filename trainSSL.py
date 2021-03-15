@@ -18,7 +18,7 @@ from data.augmentations import *
 
 import json
 from evaluateSSL import evaluate
-from utils.curriculum_class_balancing import CurriculumClassBalancing
+from utils.class_balancing import ClassBalancing
 from utils.feature_memory import *
 
 start = timeit.default_timer()
@@ -363,7 +363,7 @@ def main():
     print('Training on number of samples:', partial_size)
 
     # class weighting  taken unlabeled data into acount in an incremental fashion.
-    class_weights_curr = CurriculumClassBalancing(labeled_iters=int(labeled_samples / batch_size_labeled),
+    class_weights_curr = ClassBalancing(labeled_iters=int(labeled_samples / batch_size_labeled),
                                                   unlabeled_iters=int(
                                                       (train_dataset_size - labeled_samples) / batch_size_unlabeled),
                                                   n_classes=num_classes)

@@ -10,7 +10,7 @@ Unlabeled data is taken into account using pseudolabels that are updated at ever
 import numpy as np
 
 
-class CurriculumClassBalancing:
+class ClassBalancing:
 
     def __init__(self, labeled_iters, unlabeled_iters,  n_classes=19):
         """
@@ -98,7 +98,7 @@ class CurriculumClassBalancing:
         if self.iter < self.start_computing_iter: # do not compute weights until the memories are filled up
             return np.ones((self.n_classes))
         else: # inverse median, frequency
-            ratio_unlabeled = min (1., self.iter / max_iter) # weigth to give to the pseudolabels statistics
+            ratio_unlabeled = 1 # min (1., self.iter / max_iter) # weigth to give to the pseudolabels statistics
             freqs_labeled = np.sum(self.labeled_frequencies, axis = 0)
             freqs_unlabeled = np.sum(self.unlabeled_frequencies, axis = 0)
             if only_labeled:
