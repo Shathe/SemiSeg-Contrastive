@@ -231,7 +231,7 @@ def update_ema_variables(ema_model, model, alpha_teacher, iteration):
         ema_param.data[:] = alpha_teacher * ema_param[:].data[:] + (1 - alpha_teacher) * param[:].data[:]
 
     modules_cnn = model.get_modules()
-    modules_cnn_ema = ema_param.get_modules()
+    modules_cnn_ema = ema_model.get_modules()
     for m, ema_m in zip(modules_cnn, modules_cnn_ema):
         if isinstance(m, nn.BatchNorm2d):
             ema_m.running_var = m.running_var
