@@ -183,6 +183,17 @@ class ResNet(nn.Module):
     def forward_prediction_head(self, features):
         return self.prediction_head(features)
 
+    def get_modules(self):
+        b = []
+        b.append(self.conv1)
+        b.append(self.bn1)
+        b.append(self.layer1)
+        b.append(self.layer2)
+        b.append(self.layer3)
+        b.append(self.layer4)
+        b.append(self.layer5)
+        return b
+
     def forward(self, x, return_features=False):
         x = self.conv1(x)
         x = self.bn1(x)
