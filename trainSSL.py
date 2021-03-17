@@ -657,7 +657,7 @@ def main():
         loss.backward()
         optimizer.step()
 
-        ema_model = update_ema_variables(ema_model=ema_model, model=model, alpha_teacher=0.998, iteration=i_iter)
+        ema_model = update_ema_variables(ema_model=ema_model, model=model, alpha_teacher=0.996, iteration=i_iter)
 
 
         if i_iter % save_checkpoint_every == 0 and i_iter != 0:
