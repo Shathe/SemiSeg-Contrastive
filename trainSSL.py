@@ -226,16 +226,16 @@ def update_ema_variables(ema_model, model, alpha_teacher, iteration):
 
     """
     # Use the "true" average until the exponential average is more correct
-    alpha_teacher = min(1 - 1 / (iteration + 1), alpha_teacher)
+    alpha_teacher = min(1 - 1 / (iteration*10 + 1), alpha_teacher)
     for ema_param, param in zip(ema_model.parameters(), model.parameters()):
         ema_param.data[:] = alpha_teacher * ema_param[:].data[:] + (1 - alpha_teacher) * param[:].data[:]
 
-    modules_cnn = model.get_modules()
-    modules_cnn_ema = ema_model.get_modules()
+    modules_cnn = [module for module in model.modules() if not isinstance(module, nn.Sequential)]
+    modules_cnn_ema = [module for module in ema_model.modules() if not isinstance(module, nn.Sequential)]
     for m, ema_m in zip(modules_cnn, modules_cnn_ema):
         if isinstance(m, nn.BatchNorm2d):
-            ema_m.running_var = m.running_var
-            ema_m.running_mean = m.running_mean
+            ema_m.running_var = alpha_teacher * ema_m.running_var + (1 - alpha_teacher) * m.running_var
+            ema_m.running_mean = alpha_teacher * ema_m.running_var + (1 - alpha_teacher) * m.running_mean
 
     return ema_model
 
@@ -570,7 +570,7 @@ def main():
 
         # CONTRASTIVE LEARNING
         if i_iter >  RAMP_UP_ITERS  - 1000:
-            # Build Memory Bank 1000 iters before starting to do contrsative
+            # Build Memory Bank 1000 iters before starting to do contrastive
 
             with torch.no_grad():
                 # Get feature vectors from labeled images with EMA model
@@ -657,33 +657,32 @@ def main():
         loss.backward()
         optimizer.step()
 
-        ema_model = update_ema_variables(ema_model=ema_model, model=model, alpha_teacher=0.99,
-                                         iteration=i_iter)
+        ema_model = update_ema_variables(ema_model=ema_model, model=model, alpha_teacher=0.998, iteration=i_iter)
 
 
         if i_iter % save_checkpoint_every == 0 and i_iter != 0:
-            _save_checkpoint(i_iter, ema_model, optimizer, config)
+            _save_checkpoint(i_iter, model, optimizer, config)
 
         if i_iter % val_per_iter == 0 and i_iter != 0:
             print('iter = {0:6d}/{1:6d}'.format(i_iter, num_iterations))
 
             model.eval()
-            mIoU, eval_loss = evaluate(ema_model, dataset, deeplabv2=deeplabv2, ignore_label=ignore_label, save_dir=checkpoint_dir, pretraining=pretraining)
+            mIoU, eval_loss = evaluate(model, dataset, deeplabv2=deeplabv2, ignore_label=ignore_label, save_dir=checkpoint_dir, pretraining=pretraining)
             model.train()
 
 
             if mIoU > best_mIoU and save_best_model:
                 best_mIoU = mIoU
-                _save_checkpoint(i_iter, ema_model, optimizer, config, save_best=True)
+                _save_checkpoint(i_iter, model, optimizer, config, save_best=True)
 
-    _save_checkpoint(num_iterations, ema_model, optimizer, config)
+    _save_checkpoint(num_iterations, model, optimizer, config)
 
     model.eval()
-    mIoU, val_loss = evaluate(ema_model, dataset, deeplabv2=deeplabv2, ignore_label=ignore_label, save_dir=checkpoint_dir, pretraining=pretraining)
+    mIoU, val_loss = evaluate(model, dataset, deeplabv2=deeplabv2, ignore_label=ignore_label, save_dir=checkpoint_dir, pretraining=pretraining)
 
     if mIoU > best_mIoU and save_best_model:
         best_mIoU = mIoU
-        _save_checkpoint(i_iter, ema_model, optimizer, config, save_best=True)
+        _save_checkpoint(i_iter, model, optimizer, config, save_best=True)
 
     print('BEST MIOU')
     print(best_mIoU)

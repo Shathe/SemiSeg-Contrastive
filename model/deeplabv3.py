@@ -307,18 +307,6 @@ class ResNet(nn.Module):
         else:
             x = self.decoder(x, low_level_feat, False)
             return x
-    def get_modules(self):
-        b = []
-
-        b.append(self.conv1)
-        b.append(self.bn1)
-        b.append(self.layer1)
-        b.append(self.layer2)
-        b.append(self.layer3)
-        b.append(self.layer4)
-        b.append(self.aspp)
-        b.append(self.decoder)
-        return b
 
 
     def get_1x_lr_params(self):
