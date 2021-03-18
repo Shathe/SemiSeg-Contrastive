@@ -153,7 +153,8 @@ python3 trainSSL.py --config ./configs/configSSL_city_1_30_split0_imagenet.json
     "lr_schedule_power": 0.9, # power value for the Poly scheduler. Options: any float
     "pretraining": "COCO", # Options: {"COCO", "imagenet"}
     "weight_decay": 5e-4, # Options: any float
-
+    "use_teacher": true, # Whether to use the teacher network to generate pseudolabels. Use student otherwise. Options: boolean. 
+    
     "data": {
       "split_id_list": 0, # Options: {0,1,2} for pre-computed splits. N >2 for random splits
       "labeled_samples": 744, # Options: any integer

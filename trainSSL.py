@@ -230,13 +230,6 @@ def update_ema_variables(ema_model, model, alpha_teacher, iteration):
     for ema_param, param in zip(ema_model.parameters(), model.parameters()):
         ema_param.data[:] = alpha_teacher * ema_param[:].data[:] + (1 - alpha_teacher) * param[:].data[:]
 
-    modules_cnn = [module for module in model.modules() if not isinstance(module, nn.Sequential)]
-    modules_cnn_ema = [module for module in ema_model.modules() if not isinstance(module, nn.Sequential)]
-    for m, ema_m in zip(modules_cnn, modules_cnn_ema):
-        if isinstance(m, nn.BatchNorm2d):
-            ema_m.running_var = alpha_teacher * ema_m.running_var + (1 - alpha_teacher) * m.running_var
-            ema_m.running_mean = alpha_teacher * ema_m.running_var + (1 - alpha_teacher) * m.running_mean
-
     return ema_model
 
 def augment_samples(images, labels, probs, do_classmix, batch_size, ignore_label, weak = False):
@@ -496,7 +489,13 @@ def main():
 
         # Create pseudolabels
         with torch.no_grad():
-            logits_u_w, features_weak_unlabeled = ema_model(normalize(unlabeled_images, dataset), return_features=True)
+            if use_teacher:
+                logits_u_w, features_weak_unlabeled = ema_model(normalize(unlabeled_images, dataset), return_features=True)
+            else:
+                model.eval()
+                logits_u_w, features_weak_unlabeled = model(normalize(unlabeled_images, dataset), return_features=True)
+                model.train()
+
             logits_u_w = interp(logits_u_w).detach()  # prediction unlabeled
             softmax_u_w = torch.softmax(logits_u_w, dim=1)
             max_probs, pseudo_label = torch.max(softmax_u_w, dim=1)  # Get pseudolabels
@@ -574,7 +573,13 @@ def main():
 
             with torch.no_grad():
                 # Get feature vectors from labeled images with EMA model
-                labeled_pred_ema, labeled_features_ema = ema_model(normalize(images_aug, dataset), return_features=True)
+                if use_teacher:
+                    labeled_pred_ema, labeled_features_ema = ema_model(normalize(images_aug, dataset), return_features=True)
+                else:
+                    model.eval()
+                    labeled_pred_ema, labeled_features_ema = model(normalize(images_aug, dataset), return_features=True)
+                    model.train()
+
                 labeled_pred_ema = interp(labeled_pred_ema)
                 probability_prediction_ema, label_prediction_ema = torch.max(torch.softmax(labeled_pred_ema, dim=1),dim=1)  # Get pseudolabels
 
@@ -597,8 +602,12 @@ def main():
 
             # get projected features
             with torch.no_grad():
-                proj_labeled_features_correct = ema_model.projection_head(labeled_features_correct)
-
+                if use_teacher:
+                    proj_labeled_features_correct = ema_model.projection_head(labeled_features_correct)
+                else:
+                    model.eval()
+                    proj_labeled_features_correct = model.projection_head(labeled_features_correct)
+                    model.train()
             # updated memory bank
             feature_memory.add_features_from_sample_learned(ema_model, proj_labeled_features_correct, labels_down_correct, batch_size_labeled)
 
@@ -762,5 +771,8 @@ if __name__ == '__main__':
 
     deeplabv2 = "2" in config['version']
 
+    use_teacher = True # by default
+    if 'use_teacher' in config['training']:
+        use_teacher = config['training']['use_teacher']
 
     main()
