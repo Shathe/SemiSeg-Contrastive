@@ -96,6 +96,47 @@ Execute:
 python3 trainSSL.py --config ./configs/configSSL_pascal_1_50_split0_COCO.json 
 ```
 
+For replicating paper experiments, just execute the training of the specific set-up to replicate. We already provide all the configuration files used in the paper. For modifying them and a detail description of all the parameters in the configuration files, check this example:
+
+#### Configuration File Description
+```
+{
+  "model": "DeepLab", # Network architecture. Options: Deeplab
+  "version": "2", # Version of the network architecture. Options: {2, 3} for deeplabv2 and deeplabv3+
+  "dataset": "cityscapes", # Dataset to use. Options: {"cityscapes", "pascal"}
+
+  "training": { 
+    "batch_size": 5, # Batch size to use. Options: any integer
+    "num_workers": 3, # Number of cpu workers (threads) to use for laoding the dataset. Options: any integer
+    "optimizer": "SGD", # Optimizer to use. Options: {"SGD"}
+    "momentum": 0.9, # momentum for SGD optimizer, Options: any float 
+    "num_iterations": 80000, # Number of iterations to train. Options: any integer
+    "learning_rate": 2e-4, # Learning rate. Options: any float
+    "lr_schedule": "Poly", # decay scheduler for the learning rate. Options: {"Poly"}
+    "lr_schedule_power": 0.9, # Power value for the Poly scheduler. Options: any float
+    "pretraining": "COCO", # Pretraining to use. Options: {"COCO", "imagenet"}
+    "weight_decay": 5e-4, # Weight decay. Options: any float
+    "use_teacher": true, # Whether to use the teacher network to generate pseudolabels. Use student otherwise. Options: boolean. 
+    
+    "data": {
+      "split_id_list": 0, # Data splits to use. Options: {0, 1, 2} for pre-computed splits. N >2 for random splits
+      "labeled_samples": 744, # Number of labeled samples to use for supervised learning. The rest will be use without labels. Options: any integer
+      "input_size": "512,512" # Image crop size  Options: any integer tuple
+    }
+
+  },
+  "seed": 5555, # seed for randomization. Options: any integer
+  "ignore_label": 250, # ignore label value. Options: any integer
+
+  "utils": {
+    "save_checkpoint_every": 10000,  # The model will be saved every this number of iterations. Options: any integer
+    "checkpoint_dir": "../saved/DeepLab", # Path to save the models. Options: any path
+    "val_per_iter": 1000, # The model will be evaluated every this number of iterations. Options: any integer
+    "save_best_model": true # Whether to use teacher model for generating the psuedolabels. The student model wil obe used otherwise. Options: boolean
+  }
+}
+```
+
 
 ### Memory Restrictions
 
@@ -135,44 +176,6 @@ Execute:
 python3 trainSSL_domain_adaptation_targetCity.py --config ./configs/configSSL_city_1_30_split0_imagenet.json 
 ```
 
-### Configuration File Description
-```
-{
-  "model": "DeepLab", # Options: Deeplab
-  "version": "2", # Options: {2, 3} for deeplabv2 and deeplabv3+
-  "dataset": "cityscapes", # Options: {"cityscapes", "pascal"}
-
-  "training": {
-    "batch_size": 5, # Options: any integer
-    "num_workers": 3, # Options: any integer
-    "optimizer": "SGD", # Options: {"SGD"}
-    "momentum": 0.9, # momentum for SGD optimizer, Options: any float 
-    "num_iterations": 80000, # Options: any integer
-    "learning_rate": 2e-4, # Options: any float
-    "lr_schedule": "Poly", # Options: {"Poly"}
-    "lr_schedule_power": 0.9, # power value for the Poly scheduler. Options: any float
-    "pretraining": "COCO", # Options: {"COCO", "imagenet"}
-    "weight_decay": 5e-4, # Options: any float
-    "use_teacher": true, # Whether to use the teacher network to generate pseudolabels. Use student otherwise. Options: boolean. 
-    
-    "data": {
-      "split_id_list": 0, # Options: {0,1,2} for pre-computed splits. N >2 for random splits
-      "labeled_samples": 744, # Options: any integer
-      "input_size": "512,512" # Options: any integer tuple
-    }
-
-  },
-  "seed": 5555, # seed for randomization. Options: any integer
-  "ignore_label": 250, # ignore label value. Options: any integer
-
-  "utils": {
-    "save_checkpoint_every": 10000,  # Options: any integer
-    "checkpoint_dir": "../saved/DeepLab", # Options: any path
-    "val_per_iter": 1000, # Options: any integer
-    "save_best_model": true # Options: boolean
-  }
-}
-```
 ### Evaluation
 The training code will evaluate the training model every some specific number of iterations (modify the parameter val_per_iter in the configuration file).
 
