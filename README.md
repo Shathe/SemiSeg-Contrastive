@@ -1,4 +1,4 @@
-Official code for replicating experiments from the paper:
+This repositori provides the official code for replicating experiments from the paper:
 **Improving Semi-Supervised Semantic Segmentation with Class-Wise and Pixel-Level Contrastive Learning**
 
 This code is based on [ClassMix code](https://github.com/WilhelmT/ClassMix)
@@ -132,7 +132,7 @@ For example, for configuration:
 
 Execute:
 ```
-python3 trainSSL.py --config ./configs/configSSL_city_1_30_split0_imagenet.json 
+python3 trainSSL_domain_adaptation_targetCity.py --config ./configs/configSSL_city_1_30_split0_imagenet.json 
 ```
 
 ### Configuration File Description
@@ -173,6 +173,22 @@ python3 trainSSL.py --config ./configs/configSSL_city_1_30_split0_imagenet.json
   }
 }
 ```
+### Evaluation
+The training code will evaluate the training model every some specific number of iterations (modify the parameter val_per_iter in the configuration file).
+
+Best evaluated model will be printed at the end of the training.
+
+For every training, several weights will be saved under the path specified in the parameter checkpoint_dir of the configuration file.
+
+One model every save_checkpoint_every (see configuration file) will be saved, plus the best evaluated model.
+
+So, the model has trained we can already know the performance.
+
+For a later evaluation, just execute the next command specifying the model to evaluate in the model-path argument:
+```
+python3 evaluateSSL.py --model-path ../saved/DeepLab/best.pth
+```
+
 
 ### Citation
 Soon
