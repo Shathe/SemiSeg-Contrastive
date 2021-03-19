@@ -535,6 +535,7 @@ def main():
             max_probs, pseudo_label = torch.max(softmax_u_w, dim=1)  # Get pseudolabels
 
         model.train()
+
         if is_cityscapes:
                 class_weights_curr.add_frequencies(labels.cpu().numpy(), pseudo_label.cpu().numpy())
 
@@ -580,8 +581,10 @@ def main():
         labeled_pred, labeled_features = model(normalize(joined_labeled, dataset), return_features=True)
         labeled_pred = interp(labeled_pred)
 
-        class_weights = torch.from_numpy(
-            class_weights_curr.get_weights(num_iterations, only_labeled=False)).cuda()
+        class_weights = torch.from_numpy(np.ones((num_classes))).cuda()
+        if i_iter > RAMP_UP_ITERS:
+            class_weights = torch.from_numpy(
+                class_weights_curr.get_weights(num_iterations, only_labeled=False)).cuda()
 
         loss = 0
         # SUPERVISED SEGMENTATION

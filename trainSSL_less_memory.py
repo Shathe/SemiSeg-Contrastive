@@ -498,12 +498,11 @@ def main():
             labeled_pred, labeled_features = model(normalize(images_aug, dataset), return_features=True)
             labeled_pred = interp(labeled_pred)
 
-            # apply clas balance for cityspcaes dataset
-            if dataset == 'cityscapes':
+            # apply class balance for cityspcaes dataset
+            class_weights = torch.from_numpy(np.ones((num_classes))).cuda()
+            if i_iter > RAMP_UP_ITERS and dataset == 'cityscapes':
                 class_weights = torch.from_numpy(
                     class_weights_curr.get_weights(num_iterations, only_labeled=False)).cuda()
-            else:
-                class_weights = torch.from_numpy(np.ones((num_classes))).cuda()
 
             loss = 0
 
