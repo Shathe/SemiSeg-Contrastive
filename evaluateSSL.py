@@ -51,7 +51,7 @@ def get_iou(confM, dataset):
                             "train", "motorcycle", "bicycle"))
 
     for i, iou in enumerate(j_list):
-        print('class {:2d} {:12} IU {:.2f}'.format(i, classes[i], j_list[i]))
+        print('class {:2d} {:12} IU {:.4f}'.format(i, classes[i], j_list[i]))
 
     print('meanIOU: ' + str(aveJ) + '\n')
 
