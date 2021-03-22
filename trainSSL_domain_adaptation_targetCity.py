@@ -714,7 +714,7 @@ def main():
         loss.backward()
         optimizer.step()
 
-        ema_model = update_ema_variables(ema_model=ema_model, model=model, alpha_teacher=0.996,
+        ema_model = update_ema_variables(ema_model=ema_model, model=model, alpha_teacher=0.9975,
                                          iteration=i_iter)
 
         # print('iter = {0:6d}/{1:6d}, loss_l = {2:.3f}'.format(i_iter, num_iterations, loss_l_value))
