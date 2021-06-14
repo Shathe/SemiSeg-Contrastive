@@ -18,7 +18,7 @@ mkdir ../data/
 
 ### Cityscapes
 ```
-mkdir ../data/Cityscapes/
+mkdir ../data/CityScapes/
 ```
 Download the dataset from ([Link](https://www.cityscapes-dataset.com/)).
 
