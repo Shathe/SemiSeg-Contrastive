@@ -110,7 +110,7 @@ For replicating paper experiments, just execute the training of the specific set
     "num_workers": 3, # Number of cpu workers (threads) to use for laoding the dataset. Options: any integer
     "optimizer": "SGD", # Optimizer to use. Options: {"SGD"}
     "momentum": 0.9, # momentum for SGD optimizer, Options: any float 
-    "num_iterations": 80000, # Number of iterations to train. Options: any integer
+    "num_iterations": 100000, # Number of iterations to train. Options: any integer
     "learning_rate": 2e-4, # Learning rate. Options: any float
     "lr_schedule": "Poly", # decay scheduler for the learning rate. Options: {"Poly"}
     "lr_schedule_power": 0.9, # Power value for the Poly scheduler. Options: any float

@@ -9,7 +9,7 @@ from torch.utils import data, model_zoo
 import torch.nn as nn
 from utils.loss import CrossEntropy2d
 from utils.loss import CrossEntropyLoss2dPixelWiseWeighted
-
+import math
 from utils import transformmasks
 from utils import transformsgpu
 
@@ -706,8 +706,9 @@ def main():
         loss.backward()
         optimizer.step()
 
-        ema_model = update_ema_variables(ema_model=ema_model, model=model, alpha_teacher=0.9975,
-                                         iteration=i_iter)
+        m = 1 - (1 - 0.995) * (math.cos(math.pi * i_iter / num_iterations) + 1) / 2
+        ema_model = update_ema_variables(ema_model=ema_model, model=model, alpha_teacher=m, iteration=i_iter)
+
 
         if i_iter % save_checkpoint_every == 0 and i_iter != 0:
             _save_checkpoint(i_iter, model, optimizer, config)

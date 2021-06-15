@@ -6,6 +6,7 @@ import pickle
 from contrastive_losses import *
 import torch.backends.cudnn as cudnn
 from torch.utils import data, model_zoo
+import math
 
 from utils.loss import CrossEntropy2d
 from utils.loss import CrossEntropyLoss2dPixelWiseWeighted
@@ -714,8 +715,9 @@ def main():
         loss.backward()
         optimizer.step()
 
-        ema_model = update_ema_variables(ema_model=ema_model, model=model, alpha_teacher=0.9975,
-                                         iteration=i_iter)
+        m = 1 - (1 - 0.995) * (math.cos(math.pi * i_iter / num_iterations) + 1) / 2
+        ema_model = update_ema_variables(ema_model=ema_model, model=model, alpha_teacher=m, iteration=i_iter)
+
 
         # print('iter = {0:6d}/{1:6d}, loss_l = {2:.3f}'.format(i_iter, num_iterations, loss_l_value))
 
