@@ -59,7 +59,7 @@ def get_iou(confM, dataset):
 
 
 def evaluate(model, dataset, deeplabv2=True, ignore_label=250, save_dir=None, pretraining='COCO'):
-
+    model.eval()
     if pretraining == 'COCO':
         from utils.transformsgpu import normalize_bgr as normalize
     else:

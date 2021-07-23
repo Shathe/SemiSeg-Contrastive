@@ -8,7 +8,7 @@
     "num_workers": 3,
     "optimizer": "SGD",
     "momentum": 0.9,
-    "num_iterations": 100000,
+    "num_iterations": 150000,
     "learning_rate": 2e-4,
     "pretraining": "imagenet",
     "lr_schedule": "Poly",

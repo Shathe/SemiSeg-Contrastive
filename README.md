@@ -116,7 +116,8 @@ For replicating paper experiments, just execute the training of the specific set
     "lr_schedule_power": 0.9, # Power value for the Poly scheduler. Options: any float
     "pretraining": "COCO", # Pretraining to use. Options: {"COCO", "imagenet"}
     "weight_decay": 5e-4, # Weight decay. Options: any float
-    "use_teacher": true, # Whether to use the teacher network to generate pseudolabels. Use student otherwise. Options: boolean. 
+    "use_teacher_train": true, # Whether to use the teacher network to generate pseudolabels. Use student otherwise. Options: boolean. 
+    "save_teacher_test": false, # Whether to save the teacher network as the model for testing. Use student otherwise. Options: boolean. 
     
     "data": {
       "split_id_list": 0, # Data splits to use. Options: {0, 1, 2} for pre-computed splits. N >2 for random splits
