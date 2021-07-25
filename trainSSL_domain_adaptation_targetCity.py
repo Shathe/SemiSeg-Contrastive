@@ -480,7 +480,7 @@ def main():
     epochs_since_start = 0
     start_iteration = 0
     best_mIoU = 0  # best metric while training
-    best_mIoU_improved = 0
+    iters_without_improve = 0
 
     # TRAINING
     for i_iter in range(start_iteration, num_iterations):
@@ -753,51 +753,58 @@ def main():
             mIoU, eval_loss = evaluate(model, dataset, ignore_label=ignore_label, save_dir=checkpoint_dir, pretraining=pretraining)
             model.train()
 
-            if mIoU > best_mIoU and save_best_model:
+
+            if mIoU > best_mIoU:
                 best_mIoU = mIoU
-                _save_checkpoint(i_iter, model, optimizer, config, save_best=True)
+                if save_teacher:
+                    _save_checkpoint(i_iter, ema_model, optimizer, config, save_best=True)
+                else:
+                    _save_checkpoint(i_iter, model, optimizer, config, save_best=True)
+                iters_without_improve = 0
+            else:
+                iters_without_improve += val_per_iter
 
-                if save_teacher:  # save exponential moving average model (after updating BN stats)
-                    ema_model = update_BN_weak_unlabeled_data(ema_model, normalize, batch_size_unlabeled, trainloader_remain)
-                    ema_model.eval()
-                    mIoU, eval_loss = evaluate(ema_model, dataset, deeplabv2=deeplabv2, ignore_label=ignore_label,
-                                               save_dir=checkpoint_dir, pretraining=pretraining)
-                    ema_model.train()
-                    if mIoU > best_mIoU and save_best_model:
-                        best_mIoU_improved = mIoU
-                        _save_checkpoint(i_iter, ema_model, optimizer, config, save_best=True)
+            # if the performance has not improve in N iterations, try to reload best model to optimize again with a lower LR
+            if iters_without_improve > num_iterations/4.:
+                print('Re-loading a previous best model')
+                checkpoint = torch.load(os.path.join(checkpoint_dir, f'best_model.pth'))
+                model.load_state_dict(checkpoint['model'])
+                ema_model = create_ema_model(model, Res_Deeplab)
+                ema_model.train()
+                ema_model = ema_model.cuda()
+                model.train()
+                model = model.cuda()
+                iters_without_improve = 0 # reset timer
 
-                else:  # try to get a little better performance updating the BN
-                    model = update_BN_weak_unlabeled_data(model, normalize, batch_size_unlabeled, trainloader_remain)
-                    model.eval()
-                    mIoU, eval_loss = evaluate(model, dataset, deeplabv2=deeplabv2, ignore_label=ignore_label,
-                                               save_dir=checkpoint_dir, pretraining=pretraining)
-                    model.train()
-                    if mIoU > best_mIoU and save_best_model:
-                        best_mIoU_improved = mIoU
-                        _save_checkpoint(i_iter, model, optimizer, config, save_best=True)
 
 
     _save_checkpoint(num_iterations, model, optimizer, config)
 
     # FINISH TRAINING, evaluate again
-    if save_teacher:  # save exponential moving average model (after updating BN stats)
-        ema_model = update_BN_weak_unlabeled_data(ema_model, normalize, batch_size_unlabeled, trainloader_remain)
-        ema_model.eval()
-        mIoU, eval_loss = evaluate(ema_model, dataset, deeplabv2=deeplabv2, ignore_label=ignore_label, save_dir=checkpoint_dir, pretraining=pretraining)
-        ema_model.train()
-        if mIoU > best_mIoU and save_best_model:
-            best_mIoU_improved = mIoU
-            _save_checkpoint(i_iter, ema_model, optimizer, config, save_best=True)
+    model.eval()
+    mIoU, eval_loss = evaluate(model, dataset, deeplabv2=deeplabv2, ignore_label=ignore_label, save_dir=checkpoint_dir,
+                               pretraining=pretraining)
+    model.train()
 
-    else:  # try to get a little better performance updating the BN
-        model = update_BN_weak_unlabeled_data(model, normalize, batch_size_unlabeled, trainloader_remain)
-        model.eval()
-        mIoU, eval_loss = evaluate(model, dataset, deeplabv2=deeplabv2, ignore_label=ignore_label, save_dir=checkpoint_dir, pretraining=pretraining)
-        model.train()
-        if mIoU > best_mIoU and save_best_model:
-            best_mIoU_improved = mIoU
-            _save_checkpoint(i_iter, model, optimizer, config, save_best=True)
+    if mIoU > best_mIoU and save_best_model:
+        best_mIoU = mIoU
+        _save_checkpoint(i_iter, model, optimizer, config, save_best=True)
+
+    # TRY IMPROVING BEST MODEL WITH EMA MODEL OR UPDATING BN STATS
+
+    # Load best model
+    checkpoint = torch.load(os.path.join(checkpoint_dir, f'best_model.pth'))
+    model.load_state_dict(checkpoint['model'])
+    model = model.cuda()
+
+    model = update_BN_weak_unlabeled_data(model, normalize, batch_size_unlabeled, trainloader_remain)
+    model.eval()
+    mIoU, eval_loss = evaluate(model, dataset, deeplabv2=deeplabv2, ignore_label=ignore_label, save_dir=checkpoint_dir,
+                               pretraining=pretraining)
+    model.train()
+    if mIoU > best_mIoU and save_best_model:
+        best_mIoU = mIoU
+        _save_checkpoint(i_iter, model, optimizer, config, save_best=True)
 
     print('BEST MIOU')
     print(max(best_mIoU_improved, best_mIoU))
@@ -860,7 +867,7 @@ if __name__ == '__main__':
 
     val_per_iter = config['utils']['val_per_iter']
 
-    save_best_model = config['utils']['save_best_model']
+    save_best_model = True
 
     deeplabv2 = "2" in config['version']
     use_teacher = True # by default
