@@ -694,7 +694,10 @@ def main():
 
 
         if i_iter % save_checkpoint_every == 0 and i_iter != 0:
-            _save_checkpoint(i_iter, model, optimizer, config)
+            if save_teacher:
+                _save_checkpoint(i_iter, ema_model, optimizer, config)
+            else:
+                _save_checkpoint(i_iter, model, optimizer, config)
 
         if i_iter % val_per_iter == 0 and i_iter != 0:
             print('iter = {0:6d}/{1:6d}'.format(i_iter, num_iterations))
@@ -702,7 +705,6 @@ def main():
             model.eval()
             mIoU, eval_loss = evaluate(model, dataset, deeplabv2=deeplabv2, ignore_label=ignore_label, save_dir=checkpoint_dir, pretraining=pretraining)
             model.train()
-
 
             if mIoU > best_mIoU:
                 best_mIoU = mIoU
@@ -714,8 +716,10 @@ def main():
             else:
                 iters_without_improve += val_per_iter
 
-            # if the performance has not improve in N iterations, try to reload best model to optimize again with a lower LR
-            if iters_without_improve > num_iterations/4.:
+            '''
+            if the performance has not improve in N iterations, try to reload best model to optimize again with a lower LR
+            Simulating an iterative training'''
+            if iters_without_improve > num_iterations/5.:
                 print('Re-loading a previous best model')
                 checkpoint = torch.load(os.path.join(checkpoint_dir, f'best_model.pth'))
                 model.load_state_dict(checkpoint['model'])

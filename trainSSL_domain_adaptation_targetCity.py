@@ -764,8 +764,10 @@ def main():
             else:
                 iters_without_improve += val_per_iter
 
-            # if the performance has not improve in N iterations, try to reload best model to optimize again with a lower LR
-            if iters_without_improve > num_iterations/4.:
+            '''
+            if the performance has not improve in N iterations, try to reload best model to optimize again with a lower LR
+            Simulating an iterative training'''
+            if iters_without_improve > num_iterations/5.:
                 print('Re-loading a previous best model')
                 checkpoint = torch.load(os.path.join(checkpoint_dir, f'best_model.pth'))
                 model.load_state_dict(checkpoint['model'])
@@ -775,7 +777,6 @@ def main():
                 model.train()
                 model = model.cuda()
                 iters_without_improve = 0 # reset timer
-
 
 
     _save_checkpoint(num_iterations, model, optimizer, config)
