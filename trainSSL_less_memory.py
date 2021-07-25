@@ -765,7 +765,7 @@ def main():
                 model.train()
                 model = model.cuda()
                 iters_without_improve = 0 # reset timer
-                
+
     _save_checkpoint(num_iterations, model, optimizer, config)
 
     # FINISH TRAINING, evaluate again

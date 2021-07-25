@@ -1,9 +1,10 @@
-This repositori provides the official code for replicating experiments from the paper:
-**Improving Semi-Supervised Semantic Segmentation with Class-Wise and Pixel-Level Contrastive Learning**
+This repository provides the official code for replicating experiments from the paper:
+**Semi-Supervised Semantic Segmentation with Pixel-Level Contrastive Learning from a Class-wise Memory Bank** which as been accepted as an **oral** paper in the IEEE International Conference on Computer Vision (**ICCV**) 2021.
 
 This code is based on [ClassMix code](https://github.com/WilhelmT/ClassMix)
 
-# Getting started
+# Semi-Supervised Semantic Segmentation with Pixel-Level Contrastive Learning from a Class-wise Memory Bank
+
 ## Prerequisites
 *  CUDA/CUDNN 
 *  Python3
@@ -195,4 +196,12 @@ python3 evaluateSSL.py --model-path ../saved/DeepLab/best.pth
 
 
 ### Citation
-Soon
+If you find this work useful, please consider citing:
+```
+@inproceedings{alonso2021semi,
+  title={Semi-Supervised Semantic Segmentation with Pixel-Level Contrastive Learning from a Class-wise Memory Bank},
+  author={Alonso, I{\~n}igo and Sabater, Alberto and Ferstl, David and Montesano, Luis and Murillo, Ana C},
+  booktitle={Proceedings of the IEEE International Conference on Computer Vision},
+  year={2021}
+}
+```
