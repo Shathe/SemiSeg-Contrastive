@@ -10,6 +10,10 @@ This code is based on [ClassMix code](https://github.com/WilhelmT/ClassMix)
 *  Python3
 *  Packages found in requirements.txt
 
+
+## Contact
+If any question, please either open a github issue or contact via email to: <inigoalonsoruiz@gmail.com>
+
 ## Datasets
 
 Create a folder outsite the code folder:
@@ -53,6 +57,11 @@ python3 utils/translate_labels.py
 ```
 
 ## Experiments
+
+Here there are some examples for replicating the experiments from the paper.
+Implementation details are specified in the paper (section 4.2) **any modification** could potentially affect to the final result.
+
+
 ### Semi-Supervised
 Search here for the desired configuration:
 ```
