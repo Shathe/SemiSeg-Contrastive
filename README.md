@@ -214,3 +214,6 @@ If you find this work useful, please consider citing:
   year={2021}
 }
 ```
+
+# License
+UP-DETR is released under the Apache 2.0 license. Please see the [LICENSE](LICENSE) file for more information.
