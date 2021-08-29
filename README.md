@@ -206,7 +206,7 @@ python3 evaluateSSL.py --model-path ../saved/DeepLab/best.pth
 
 ### Citation
 If you find this work useful, please consider citing:
-```
+```BibTeX
 @inproceedings{alonso2021semi,
   title={Semi-Supervised Semantic Segmentation with Pixel-Level Contrastive Learning from a Class-wise Memory Bank},
   author={Alonso, I{\~n}igo and Sabater, Alberto and Ferstl, David and Montesano, Luis and Murillo, Ana C},
