@@ -11,7 +11,9 @@ This code is based on [ClassMix code](https://github.com/WilhelmT/ClassMix)
 *  Packages found in requirements.txt
 
 
-## Contact
+## Contact
+
+
 If any question, please either open a github issue or contact via email to: <inigoalonsoruiz@gmail.com>
 
 ## Datasets
