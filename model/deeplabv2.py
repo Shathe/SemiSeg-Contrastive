@@ -224,13 +224,9 @@ class ResNet(nn.Module):
             b.append(self.__getattr__('contrastive_class_selector_memory' + str(class_c)))
 
         for i in range(len(b)):
-            for j in b[i].modules():
-                jj = 0
-                for k in j.parameters():
-                    jj+=1
-                    if k.requires_grad:
-                        yield k
-
+            for k in b[i].parameters():
+                if k.requires_grad:
+                    yield k
 
 
     def optim_parameters(self, args):
