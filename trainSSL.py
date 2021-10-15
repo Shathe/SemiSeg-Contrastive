@@ -40,7 +40,7 @@ def entropy_loss(v, mask):
 
     loss_image = torch.mul(v, torch.log2(v + 1e-30))
     loss_image = torch.sum(loss_image, dim=1)
-    loss_image = mask.float() * loss_image
+    loss_image = mask.float().squeeze(1) * loss_image
 
 
     percentage_valid_points = torch.mean(mask.float())
